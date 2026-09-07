@@ -135,6 +135,13 @@
   .check.cert{border-color:var(--burgundy); background:var(--burgundy);}
   .hymn-title{font-size:16px;flex:1;}
   .hymn-tag{font-size:12px;color:var(--muted);}
+  .lang-chips{display:flex; gap:4px; flex:none;}
+  .lang-chip{
+    width:24px; height:22px; border-radius:5px; border:1px solid var(--line);
+    font-size:10px; font-weight:700; color:var(--muted);
+    display:flex; align-items:center; justify-content:center; background:#fff;
+  }
+  .lang-chip.done{background:var(--gold); color:var(--midnight); border-color:var(--gold);}
 
   /* Hymn detail */
   .lang-tabs{display:flex; gap:8px; margin:18px 0 20px;}
@@ -286,7 +293,7 @@ const TOTAL_HYMNS = STATIONS.reduce((n,s)=>n+s.hymns.length,0);
 /* Platzhalter-Passwort für den Prüfer-Bereich.
    In der echten App sollte jeder Prüfer einen eigenen Zugang haben,
    statt sich ein gemeinsames Passwort zu teilen. */
-const PRUEFER_PASSWORD = "dienst2026";
+const PRUEFER_PASSWORD = "Diakonenkurs2026";
 
 /* ---------------- Supabase-Verbindung ---------------- */
 const SUPABASE_URL = "https://jyznqbklhmetwezcwwnu.supabase.co";
@@ -313,7 +320,6 @@ let state = {
   prueferAuthenticated: false,
   prueferPasswordInput: "",
   prueferError: "",
-  prueferName: "",
 };
 
 /* ---------------- Datenbank (Supabase) ---------------- */
@@ -357,16 +363,20 @@ async function logoutAccount(){
 
 async function loadProgress(){
   if(!state.profile) return;
-  const { data, error } = await sb.from("progress").select("hymn_id, learned").eq("user_id", state.profile.id);
+  const { data, error } = await sb.from("progress").select("hymn_id, lang, learned").eq("user_id", state.profile.id);
   state.progress = {};
   if(!error && data){
-    data.forEach(row => { state.progress[row.hymn_id] = row.learned; });
+    data.forEach(row => {
+      if(!state.progress[row.hymn_id]) state.progress[row.hymn_id] = {};
+      state.progress[row.hymn_id][row.lang] = row.learned;
+    });
   }
 }
 
-async function setProgress(hymnId, learned){
-  state.progress[hymnId] = learned;
-  await sb.from("progress").upsert({ user_id: state.profile.id, hymn_id: hymnId, learned });
+async function setProgress(hymnId, lang, learned){
+  if(!state.progress[hymnId]) state.progress[hymnId] = {};
+  state.progress[hymnId][lang] = learned;
+  await sb.from("progress").upsert({ user_id: state.profile.id, hymn_id: hymnId, lang, learned });
 }
 
 async function loadCertified(userId){
@@ -390,7 +400,14 @@ async function loadAllDiakone(){
 /* ---------------- Hilfsfunktionen ---------------- */
 function findStation(id){ return STATIONS.find(s=>s.id===id); }
 function findHymn(id){ for(const s of STATIONS){ const h=s.hymns.find(h=>h.id===id); if(h) return {hymn:h, station:s}; } }
-function stationSelfDoneCount(station){ return station.hymns.filter(h=>state.progress[h.id]).length; }
+function langsLearnedFor(progressObj, hymnId){
+  const rec = (progressObj||{})[hymnId] || {};
+  return LANGS.filter(l => rec[l.code]).map(l=>l.code);
+}
+function stationSelfDoneCount(station){
+  // Anzahl Antworten, die in mindestens einer Sprache als geübt markiert sind
+  return station.hymns.filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
+}
 function isStationCertified(stationId){ return !!state.certified[stationId]; }
 function isStationUnlocked(index){
   if(index===0) return true;
@@ -504,29 +521,19 @@ function renderPrueferGate(){
   wrap.className = "profile-gate";
   wrap.innerHTML = `
     <h2 class="serif" style="font-size:26px;">Prüfer-Bereich</h2>
-    <p>Dieser Bereich ist nur für Verantwortliche, die Stationen bestätigen dürfen. Bitte Namen und Passwort eingeben.</p>
-    <div class="field">
-      <label>Ihr Name</label>
-      <input type="text" id="prueferNameInput" placeholder="z. B. Abouna Marcos" />
-    </div>
+    <p>Dieser Bereich ist nur für Verantwortliche, die Stationen bestätigen dürfen. Bitte Passwort eingeben.</p>
     <div class="field">
       <label>Passwort</label>
       <input type="password" id="prueferPw" placeholder="Passwort" />
     </div>
     <button class="btn" id="prueferGoBtn">Anmelden</button>
     ${state.prueferError ? `<div class="error-text">${state.prueferError}</div>` : ""}
-    <div class="footnote">Hinweis: Im Prototyp teilen sich alle Prüfer ein gemeinsames Passwort. In der echten App sollte jeder Prüfer einen eigenen Zugang haben.</div>
+    <div class="footnote">Hinweis: Alle Prüfer teilen sich aktuell ein gemeinsames Passwort. Für mehr Sicherheit könnt ihr später jedem Prüfer einen eigenen, persönlichen Zugang geben.</div>
   `;
-  const nameInput = wrap.querySelector("#prueferNameInput");
   const pwInput = wrap.querySelector("#prueferPw");
-  nameInput.value = state.prueferName;
   pwInput.value = state.prueferPasswordInput;
   const submit = async ()=>{
-    if(!nameInput.value.trim()){
-      state.prueferError = "Bitte Namen eingeben."; render(); return;
-    }
     if(pwInput.value === PRUEFER_PASSWORD){
-      state.prueferName = nameInput.value.trim();
       state.prueferAuthenticated = true;
       state.prueferError = "";
       state.view = "pruefer-home";
@@ -631,7 +638,7 @@ function renderDiakonAuthGate(){
 
   const note = document.createElement("div");
   note.className = "footnote";
-  note.textContent = "Hinweis: Dies ist ein Prototyp. Passwörter werden hier nur zu Demozwecken gespeichert — für den echten Einsatz braucht es ein richtiges Login-System.";
+  note.textContent = "Deine Anmeldedaten werden sicher über Supabase verwaltet.";
   wrap.appendChild(note);
 
   return wrap;
@@ -702,16 +709,25 @@ function renderStation(){
   title.textContent = s.title;
   wrap.appendChild(title);
 
+  const hint = document.createElement("p");
+  hint.style.cssText = "color:var(--muted); font-size:13px; margin-top:4px;";
+  hint.textContent = "Die Kürzel zeigen, in welcher Sprache du eine Antwort schon geübt hast.";
+  wrap.appendChild(hint);
+
   const list = document.createElement("div");
   list.style.marginTop = "14px";
   s.hymns.forEach(h=>{
-    const self = !!state.progress[h.id];
+    const learnedLangs = langsLearnedFor(state.progress, h.id);
     const row = document.createElement("div");
     row.className = "hymn-row";
+    const chips = LANGS.map(l=>{
+      const done = learnedLangs.includes(l.code);
+      const abbr = l.code==="de"?"DE":(l.code==="cop"?"KO":"AR");
+      return `<div class="lang-chip ${done?'done':''}" title="${l.label}">${abbr}</div>`;
+    }).join("");
     row.innerHTML = `
-      <div class="check ${self?'self':''}">${self? '✓' : ''}</div>
       <div class="hymn-title">${h.title}</div>
-      <div class="hymn-tag">${self? 'geübt' : 'noch offen'}</div>
+      <div class="lang-chips">${chips}</div>
     `;
     row.addEventListener("click", ()=>{
       state.currentHymnId = h.id;
@@ -761,7 +777,7 @@ function renderHymn(){
     <button class="play-btn" id="playBtn">▶</button>
     <div>
       <div style="font-weight:600;">Aufnahme anhören</div>
-      <div class="audio-note">Platzhalter-Ton — hier kommt später die echte Audioaufnahme rein</div>
+      <div class="audio-note">Noch keine echte Aufnahme hinterlegt — hier fehlt noch die tatsächliche Audiodatei</div>
     </div>
     <div class="speed-row" id="speedRow">
       <button data-s="0.75">0.75x</button>
@@ -793,16 +809,17 @@ function renderHymn(){
 
   const selfRow = document.createElement("div");
   selfRow.className = "self-learn-row";
-  const learned = !!state.progress[hymn.id];
+  const currentLangLabel = LANGS.find(l=>l.code===state.currentLang).label;
+  const learned = !!(state.progress[hymn.id] && state.progress[hymn.id][state.currentLang]);
   selfRow.innerHTML = `
     <div>
-      <div style="font-weight:600; font-size:15px;">Ich habe das geübt</div>
-      <div style="font-size:12px; color:var(--muted); margin-top:2px;">Nur dein persönlicher Fortschritt — die offizielle Bestätigung gibt der Prüfer.</div>
+      <div style="font-weight:600; font-size:15px;">Ich habe das auf ${currentLangLabel} geübt</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">Nur dein persönlicher Fortschritt für diese Sprache — die offizielle Bestätigung gibt der Prüfer.</div>
     </div>
     <div class="toggle ${learned?'on':''}" id="selfToggle"><div class="knob"></div></div>
   `;
   selfRow.querySelector("#selfToggle").addEventListener("click", async ()=>{
-    await setProgress(hymn.id, !state.progress[hymn.id]);
+    await setProgress(hymn.id, state.currentLang, !learned);
     render();
   });
   wrap.appendChild(selfRow);
@@ -863,9 +880,12 @@ function renderPrueferHome(){
     row.addEventListener("click", async ()=>{
       state.pruefer_selectedDiakon = {name: fullName, id: u.id};
       state.certified = await loadCertified(u.id);
-      const { data } = await sb.from("progress").select("hymn_id, learned").eq("user_id", u.id);
+      const { data } = await sb.from("progress").select("hymn_id, lang, learned").eq("user_id", u.id);
       state.pruefer_progress = {};
-      (data||[]).forEach(row=>{ state.pruefer_progress[row.hymn_id] = row.learned; });
+      (data||[]).forEach(row=>{
+        if(!state.pruefer_progress[row.hymn_id]) state.pruefer_progress[row.hymn_id] = {};
+        state.pruefer_progress[row.hymn_id][row.lang] = row.learned;
+      });
       state.view = "pruefer-station";
       render();
     });
@@ -899,14 +919,17 @@ function renderPrueferStation(){
   list.style.marginTop = "14px";
   STATIONS.forEach((s,i)=>{
     const unlocked = i===0 || isStationCertified(STATIONS[i-1].id);
-    const selfDone = s.hymns.filter(h=> (state.pruefer_progress||{})[h.id]).length;
     const certified = isStationCertified(s.id);
+    const perLang = LANGS.map(l=>{
+      const n = s.hymns.filter(h => (state.pruefer_progress[h.id]||{})[l.code]).length;
+      return `${l.label}: ${n}/${s.hymns.length}`;
+    }).join(" · ");
     const row = document.createElement("div");
     row.className = "approve-row";
     row.innerHTML = `
       <div class="info">
         <b>${i+1}. ${s.title}</b>
-        <span>${selfDone}/${s.hymns.length} vom Diakon selbst als geübt markiert</span>
+        <span>Vom Diakon selbst als geübt markiert — ${perLang}</span>
       </div>
     `;
     const btn = document.createElement("button");
@@ -921,8 +944,8 @@ function renderPrueferStation(){
       btn.textContent = "Als bestanden bestätigen";
       btn.addEventListener("click", async ()=>{
         btn.disabled = true; btn.textContent = "Speichere …";
-        await certifyStation(u.id, s.id, state.prueferName);
-        state.certified[s.id] = {by: state.prueferName, date: new Date().toLocaleDateString("de-CH")};
+        await certifyStation(u.id, s.id, "Prüfer");
+        state.certified[s.id] = {by: "Prüfer", date: new Date().toLocaleDateString("de-CH")};
         render();
       });
     }
@@ -933,7 +956,7 @@ function renderPrueferStation(){
 
   const note = document.createElement("div");
   note.className = "footnote";
-  note.textContent = "Bestätigt von: " + state.prueferName + ". In der echten App hätte jeder Prüfer einen eigenen, persönlichen Zugang statt eines gemeinsamen Passworts.";
+  note.textContent = "Alle Prüfer teilen sich aktuell ein gemeinsames Passwort. Für mehr Sicherheit könnt ihr später jedem Prüfer einen eigenen, persönlichen Zugang geben.";
   wrap.appendChild(note);
 
   return wrap;
