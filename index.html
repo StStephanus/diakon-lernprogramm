@@ -261,9 +261,9 @@ const STATIONS = [
         ar:{text:"Sallo", translit:null},
       }},
       {id:"s1h3", title:"Tob hina", difficulty:"schwer", content:{
-        de:{text:"Bittet, dass Gott sich unser erbarme, gnädig mit uns sei, uns erhöre, uns helfe, die Gebete und Bitten seiner Heiligen annehme, für unser Wohlergehen zu allen Zeiten (und nach der Lammprozession: und uns würdig mache, die Teilhabe an seinen heiligen, gesegneten Sakramenten zu erlangen) zur Vergebung unserer Sünden", translit:null},
-        cop:{text:null, translit:"Tob hina ente efnouti nai nan entef shenhit charon entef sotem eron entef er-voythin eron entef-etshi enni tiho nem nitobh enteni ethouab entaf entotou e-ehri egon epi aghathon enseyo niven (nach der Lammprozession: entef ayten en emepsha ethren etshi evolchen ti kinonia ente nef mestirjon ethouab) etesmaro-out epiko evol ente nennovi."},
-        ar:{text:"Etlobo lekaj jar7amana allah ua yatara2af 3alyna wayasm3na wa yo3inana wa yakbal eleh so2alat wa telbati keddisieh. Menhom belsala7y 3anna fi kolla hienen (nach der Lammprozession: wa an yag3lana mosta7ekin an nanal men sharikat asrarihi almokkadasa almobaraka) lemaghferat 5atayana", translit:null},
+        de:{text:"Bittet, dass Gott sich unser erbarme, gnädig mit uns sei, uns erhöre, uns helfe, die Gebete und Bitten seiner Heiligen annehme, für unser Wohlergehen zu allen Zeiten<br><br><strong><em>und nach der Lammprozession:</em></strong> und uns würdig mache, die Teilhabe an seinen heiligen, gesegneten Sakramenten zu erlangen<br><br>zur Vergebung unserer Sünden", translit:null, html:true},
+        cop:{text:null, translit:"Tob hina ente efnouti nai nan entef shenhit charon entef sotem eron entef er-voythin eron entef-etshi enni tiho nem nitobh enteni ethouab entaf entotou e-ehri egon epi aghathon enseyo niven<br><br><strong><em>nach der Lammprozession:</em></strong> entef ayten en emepsha ethren etshi evolchen ti kinonia ente nef mestirjon ethouab<br><br>etesmaro-out epiko evol ente nennovi.", html:true},
+        ar:{text:"Etlobo lekaj jar7amana allah ua yatara2af 3alyna wayasm3na wa yo3inana wa yakbal eleh so2alat wa telbati keddisieh. Menhom belsala7y 3anna fi kolla hienen<br><br><strong><em>nach der Lammprozession:</em></strong> wa an yag3lana mosta7ekin an nanal men sharikat asrarihi almokkadasa almobaraka<br><br>lemaghferat 5atayana", translit:null, html:true},
       }},
       {id:"s1h4", title:"Evangeliumsgebet", difficulty:"leicht", content:{
         de:{text:"Betet um des Heiligen Evangeliums Willen", translit:null},
@@ -441,7 +441,7 @@ function isStationUnlocked(index){
 }
 function allStationsCertified(){ return STATIONS.every(s=>isStationCertified(s.id)); }
 
-/* placeholder "audio": kurzer Ton per Web Audio API, nur zu Demozwecken */
+/* placeholder "audio": kurzer Ton per Web Audio API, nur falls keine echte Aufnahme existiert */
 let audioCtx = null;
 function playPlaceholderTone(speed){
   try{
@@ -458,6 +458,31 @@ function playPlaceholderTone(speed){
     osc.connect(gain).connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime+dur+0.05);
   }catch(e){}
+}
+
+/* Echte Aufnahme aus Supabase Storage (Bucket "audio").
+   Erwartetes Dateischema: {hymnId}-{lang}.mp3, z. B. s1h2-de.mp3 */
+let currentAudioEl = null;
+function getAudioUrl(hymnId, lang){
+  return `${SUPABASE_URL}/storage/v1/object/public/audio/${hymnId}-${lang}.mp3`;
+}
+function playHymnAudio(hymnId, lang, speed, onStatus){
+  if(currentAudioEl){ currentAudioEl.pause(); currentAudioEl = null; }
+  const url = getAudioUrl(hymnId, lang);
+  const audioEl = new Audio(url);
+  currentAudioEl = audioEl;
+  audioEl.playbackRate = speed || 1;
+  onStatus("loading");
+  audioEl.addEventListener("canplay", ()=> onStatus("playing"));
+  audioEl.addEventListener("ended", ()=> onStatus("idle"));
+  audioEl.addEventListener("error", ()=>{
+    onStatus("missing");
+    playPlaceholderTone(speed);
+  });
+  audioEl.play().catch(()=>{
+    onStatus("missing");
+    playPlaceholderTone(speed);
+  });
 }
 
 /* ---------------- Rendering ---------------- */
@@ -821,7 +846,7 @@ function renderHymn(){
     <button class="play-btn" id="playBtn">▶</button>
     <div>
       <div style="font-weight:600;">Aufnahme anhören</div>
-      <div class="audio-note">Noch keine echte Aufnahme hinterlegt — hier fehlt noch die tatsächliche Audiodatei</div>
+      <div class="audio-note" id="audioStatus">Bereit</div>
     </div>
     <div class="speed-row" id="speedRow">
       <button data-s="0.75">0.75x</button>
@@ -829,18 +854,29 @@ function renderHymn(){
       <button data-s="1.25">1.25x</button>
     </div>
   `;
-  player.querySelector("#playBtn").addEventListener("click", ()=> playPlaceholderTone(state.speed));
+  const statusEl = player.querySelector("#audioStatus");
+  const setStatus = (s)=>{
+    if(s==="loading") statusEl.textContent = "Lädt …";
+    else if(s==="playing") statusEl.textContent = "Spielt ab …";
+    else if(s==="missing") statusEl.textContent = "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)";
+    else statusEl.textContent = "Bereit";
+  };
+  player.querySelector("#playBtn").addEventListener("click", ()=>{
+    playHymnAudio(hymn.id, state.currentLang, state.speed, setStatus);
+  });
   player.querySelector("#speedRow").addEventListener("click",(e)=>{
     const b = e.target.closest("button"); if(!b) return;
     state.speed = parseFloat(b.dataset.s);
     player.querySelectorAll("#speedRow button").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
+    if(currentAudioEl) currentAudioEl.playbackRate = state.speed;
   });
   wrap.appendChild(player);
 
   const textBlock = document.createElement("div");
   textBlock.className = "text-block";
-  textBlock.textContent = content.text || content.translit || "";
+  const mainText = content.text || content.translit || "";
+  if(content.html){ textBlock.innerHTML = mainText; } else { textBlock.textContent = mainText; }
   wrap.appendChild(textBlock);
 
   const selfRow = document.createElement("div");
