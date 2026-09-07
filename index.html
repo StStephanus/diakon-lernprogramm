@@ -219,6 +219,7 @@
 <body>
 <div class="app" id="app"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ---------------- Daten (Platzhalter-Inhalte) ---------------- */
 const LANGS = [
@@ -287,10 +288,15 @@ const TOTAL_HYMNS = STATIONS.reduce((n,s)=>n+s.hymns.length,0);
    statt sich ein gemeinsames Passwort zu teilen. */
 const PRUEFER_PASSWORD = "dienst2026";
 
+/* ---------------- Supabase-Verbindung ---------------- */
+const SUPABASE_URL = "https://jyznqbklhmetwezcwwnu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5em5xYmtsaG1ldHdlemN3d251Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3NDQ5MTIsImV4cCI6MjEwNDMyMDkxMn0.SPgZpY3MnFaiHi0NVYMAxUN-Opl95NDgu6ohXO-F-ow";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 /* ---------------- App-Zustand ---------------- */
 let state = {
   role: "diakon", // "diakon" | "pruefer"
-  profile: null,  // {name, slug, email}
+  profile: null,  // {id, name, vorname, nachname, email}
   view: "home",   // home | station | hymn | pruefer-home | pruefer-station | zertifikat
   currentStationId: null,
   currentHymnId: null,
@@ -298,10 +304,11 @@ let state = {
   showTranslit: false,
   speed: 1,
   pruefer_selectedDiakon: null,
+  pruefer_progress: {},
   progress: {},      // {hymnId: bool}  -- personal
   certified: {},      // {stationId: {by, date}} -- shared
-  accounts: [],       // shared list of {vorname, nachname, email, password, slug}
-  authTab: "login",   // "login" | "register" -- welcher Tab im Diakon-Login aktiv ist
+  allDiakone: [],      // list of {id, vorname, nachname} from profiles table
+  authTab: "login",   // "login" | "register"
   authError: "",
   prueferAuthenticated: false,
   prueferPasswordInput: "",
@@ -309,62 +316,75 @@ let state = {
   prueferName: "",
 };
 
-function slugify(name){
-  return name.trim().toLowerCase().replace(/[^a-z0-9äöüß]+/gi,"-").replace(/^-+|-+$/g,"");
+/* ---------------- Datenbank (Supabase) ---------------- */
+async function loadProfile(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) { state.profile = null; return; }
+  const user = session.user;
+  const { data, error } = await sb.from("profiles").select("*").eq("id", user.id).single();
+  if(error || !data){ state.profile = null; return; }
+  state.profile = {
+    id: user.id,
+    email: user.email,
+    vorname: data.vorname,
+    nachname: data.nachname,
+    name: data.vorname + " " + data.nachname,
+  };
 }
 
-/* ---------------- Storage ---------------- */
-async function loadProfile(){
-  try{
-    const r = await window.storage.get("profile", false);
-    if(r) state.profile = JSON.parse(r.value);
-  }catch(e){ /* kein Profil vorhanden */ }
+async function registerAccount(vorname, nachname, email, password){
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if(error) return { error: error.message };
+  const user = data.user;
+  if(!user) return { error: "Registrierung fehlgeschlagen. Bitte erneut versuchen." };
+  const { error: profileError } = await sb.from("profiles").insert({ id: user.id, vorname, nachname });
+  if(profileError) return { error: profileError.message };
+  return { error: null };
 }
-async function saveProfile(){
-  await window.storage.set("profile", JSON.stringify(state.profile), false);
+
+async function loginAccount(email, password){
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error) return { error: error.message };
+  return { error: null };
 }
-async function clearProfile(){
-  try{ await window.storage.delete("profile", false); }catch(e){}
+
+async function logoutAccount(){
+  await sb.auth.signOut();
   state.profile = null;
   state.progress = {};
   state.certified = {};
 }
+
 async function loadProgress(){
   if(!state.profile) return;
-  try{
-    const r = await window.storage.get("progress:"+state.profile.slug, false);
-    if(r) state.progress = JSON.parse(r.value);
-  }catch(e){ state.progress = {}; }
-}
-async function saveProgress(){
-  await window.storage.set("progress:"+state.profile.slug, JSON.stringify(state.progress), false);
-}
-async function loadCertified(slug){
-  try{
-    const r = await window.storage.get("certified:"+slug, true);
-    return r ? JSON.parse(r.value) : {};
-  }catch(e){ return {}; }
-}
-async function saveCertified(slug, data){
-  await window.storage.set("certified:"+slug, JSON.stringify(data), true);
+  const { data, error } = await sb.from("progress").select("hymn_id, learned").eq("user_id", state.profile.id);
+  state.progress = {};
+  if(!error && data){
+    data.forEach(row => { state.progress[row.hymn_id] = row.learned; });
+  }
 }
 
-/* Konten (Vorname, Nachname, E-Mail, Passwort) — für den Prototyp in
-   gemeinsamem Speicher als Klartext. In der echten App gehört das in ein
-   richtiges Backend mit gehashten Passwörtern (z. B. Supabase Auth). */
-async function loadAccounts(){
-  try{
-    const r = await window.storage.get("accounts", true);
-    return r ? JSON.parse(r.value) : [];
-  }catch(e){ return []; }
+async function setProgress(hymnId, learned){
+  state.progress[hymnId] = learned;
+  await sb.from("progress").upsert({ user_id: state.profile.id, hymn_id: hymnId, learned });
 }
-async function saveAccounts(list){
-  await window.storage.set("accounts", JSON.stringify(list), true);
+
+async function loadCertified(userId){
+  const { data, error } = await sb.from("certifications").select("station_id, approved_by, approved_at").eq("user_id", userId);
+  const result = {};
+  if(!error && data){
+    data.forEach(row => { result[row.station_id] = { by: row.approved_by, date: new Date(row.approved_at).toLocaleDateString("de-CH") }; });
+  }
+  return result;
 }
-function uniqueSlug(base, accounts){
-  let slug = base, n = 2;
-  while(accounts.find(a=>a.slug===slug)){ slug = base+"-"+n; n++; }
-  return slug;
+
+async function certifyStation(userId, stationId, approvedByName){
+  await sb.from("certifications").upsert({ user_id: userId, station_id: stationId, approved_by: approvedByName, approved_at: new Date().toISOString() });
+}
+
+async function loadAllDiakone(){
+  const { data, error } = await sb.from("profiles").select("id, vorname, nachname").order("nachname");
+  return (!error && data) ? data : [];
 }
 
 /* ---------------- Hilfsfunktionen ---------------- */
@@ -443,7 +463,7 @@ function renderHeader(){
     state.role = btn.dataset.role;
     state.authError = "";
     state.view = state.role==="pruefer" ? "pruefer-home" : "home";
-    if(state.role==="pruefer") state.accounts = await loadAccounts();
+    if(state.role==="pruefer" && state.prueferAuthenticated) state.allDiakone = await loadAllDiakone();
     render();
   });
 
@@ -451,7 +471,7 @@ function renderHeader(){
     const out = document.createElement("div");
     out.className = "logout-link";
     out.textContent = "Abmelden (" + state.profile.name + ")";
-    out.addEventListener("click", async ()=>{ await clearProfile(); render(); });
+    out.addEventListener("click", async ()=>{ await logoutAccount(); render(); });
     h.appendChild(out);
   }
   if(state.role==="pruefer" && state.prueferAuthenticated){
@@ -501,7 +521,7 @@ function renderPrueferGate(){
   const pwInput = wrap.querySelector("#prueferPw");
   nameInput.value = state.prueferName;
   pwInput.value = state.prueferPasswordInput;
-  const submit = ()=>{
+  const submit = async ()=>{
     if(!nameInput.value.trim()){
       state.prueferError = "Bitte Namen eingeben."; render(); return;
     }
@@ -510,6 +530,7 @@ function renderPrueferGate(){
       state.prueferAuthenticated = true;
       state.prueferError = "";
       state.view = "pruefer-home";
+      state.allDiakone = await loadAllDiakone();
     } else {
       state.prueferError = "Falsches Passwort.";
       state.prueferPasswordInput = pwInput.value;
@@ -557,7 +578,8 @@ function renderDiakonAuthGate(){
       ${state.authError ? `<div class="error-text">${state.authError}</div>` : ""}
     `;
     wrap.appendChild(form);
-    wrap.querySelector("#regBtn").addEventListener("click", async ()=>{
+    const regBtn = wrap.querySelector("#regBtn");
+    regBtn.addEventListener("click", async ()=>{
       const vorname = wrap.querySelector("#regVorname").value.trim();
       const nachname = wrap.querySelector("#regNachname").value.trim();
       const email = wrap.querySelector("#regEmail").value.trim().toLowerCase();
@@ -565,19 +587,17 @@ function renderDiakonAuthGate(){
       if(!vorname || !nachname || !email || !password){
         state.authError = "Bitte alle Felder ausfüllen."; render(); return;
       }
-      const accounts = await loadAccounts();
-      if(accounts.find(a=>a.email===email)){
-        state.authError = "Für diese E-Mail existiert bereits ein Konto."; render(); return;
+      if(password.length < 6){
+        state.authError = "Das Passwort muss mindestens 6 Zeichen haben."; render(); return;
       }
-      const slug = uniqueSlug(slugify(vorname+"-"+nachname), accounts);
-      const account = {vorname, nachname, email, password, slug};
-      accounts.push(account);
-      await saveAccounts(accounts);
-      state.accounts = accounts;
-      state.profile = {name: vorname+" "+nachname, slug, email};
-      await saveProfile();
+      regBtn.disabled = true; regBtn.textContent = "Registriere …";
+      const result = await registerAccount(vorname, nachname, email, password);
+      if(result.error){
+        state.authError = result.error; render(); return;
+      }
+      await loadProfile();
       await loadProgress();
-      state.certified = await loadCertified(slug);
+      state.certified = await loadCertified(state.profile.id);
       state.authError = "";
       render();
     });
@@ -589,19 +609,21 @@ function renderDiakonAuthGate(){
       ${state.authError ? `<div class="error-text">${state.authError}</div>` : ""}
     `;
     wrap.appendChild(form);
-    wrap.querySelector("#loginBtn").addEventListener("click", async ()=>{
+    const loginBtn = wrap.querySelector("#loginBtn");
+    loginBtn.addEventListener("click", async ()=>{
       const email = wrap.querySelector("#loginEmail").value.trim().toLowerCase();
       const password = wrap.querySelector("#loginPassword").value;
-      const accounts = await loadAccounts();
-      const account = accounts.find(a=>a.email===email && a.password===password);
-      if(!account){
+      if(!email || !password){
+        state.authError = "Bitte E-Mail und Passwort eingeben."; render(); return;
+      }
+      loginBtn.disabled = true; loginBtn.textContent = "Melde an …";
+      const result = await loginAccount(email, password);
+      if(result.error){
         state.authError = "E-Mail oder Passwort ist falsch."; render(); return;
       }
-      state.accounts = accounts;
-      state.profile = {name: account.vorname+" "+account.nachname, slug: account.slug, email: account.email};
-      await saveProfile();
+      await loadProfile();
       await loadProgress();
-      state.certified = await loadCertified(account.slug);
+      state.certified = await loadCertified(state.profile.id);
       state.authError = "";
       render();
     });
@@ -780,8 +802,7 @@ function renderHymn(){
     <div class="toggle ${learned?'on':''}" id="selfToggle"><div class="knob"></div></div>
   `;
   selfRow.querySelector("#selfToggle").addEventListener("click", async ()=>{
-    state.progress[hymn.id] = !state.progress[hymn.id];
-    await saveProgress();
+    await setProgress(hymn.id, !state.progress[hymn.id]);
     render();
   });
   wrap.appendChild(selfRow);
@@ -828,22 +849,23 @@ function renderPrueferHome(){
     <p style="color:var(--muted); font-size:14px; margin-top:6px;">Wähle einen Diakon aus, um Stationen zu bestätigen.</p>`;
   const list = document.createElement("div");
   list.style.marginTop = "16px";
-  if(state.accounts.length===0){
+  if(state.allDiakone.length===0){
     const empty = document.createElement("div");
     empty.className = "empty";
     empty.innerHTML = `<h3>Noch keine Diakone registriert</h3><p>Sobald sich jemand im Diakon-Bereich registriert, erscheint er hier.</p>`;
     list.appendChild(empty);
   }
-  state.accounts.forEach(u=>{
+  state.allDiakone.forEach(u=>{
     const fullName = u.vorname+" "+u.nachname;
     const row = document.createElement("div");
     row.className = "diakon-pick";
     row.innerHTML = `<span>${fullName}</span><span style="color:var(--muted); font-size:13px;">öffnen →</span>`;
     row.addEventListener("click", async ()=>{
-      state.pruefer_selectedDiakon = {name: fullName, slug: u.slug};
-      state.certified = await loadCertified(u.slug);
-      const pr = await window.storage.get("progress:"+u.slug, false).catch(()=>null);
-      state.pruefer_progress = pr ? JSON.parse(pr.value) : {};
+      state.pruefer_selectedDiakon = {name: fullName, id: u.id};
+      state.certified = await loadCertified(u.id);
+      const { data } = await sb.from("progress").select("hymn_id, learned").eq("user_id", u.id);
+      state.pruefer_progress = {};
+      (data||[]).forEach(row=>{ state.pruefer_progress[row.hymn_id] = row.learned; });
       state.view = "pruefer-station";
       render();
     });
@@ -898,8 +920,9 @@ function renderPrueferStation(){
       btn.className = "btn";
       btn.textContent = "Als bestanden bestätigen";
       btn.addEventListener("click", async ()=>{
+        btn.disabled = true; btn.textContent = "Speichere …";
+        await certifyStation(u.id, s.id, state.prueferName);
         state.certified[s.id] = {by: state.prueferName, date: new Date().toLocaleDateString("de-CH")};
-        await saveCertified(u.slug, state.certified);
         render();
       });
     }
@@ -918,12 +941,12 @@ function renderPrueferStation(){
 
 /* ---------------- Start ---------------- */
 async function init(){
+  root.innerHTML = `<div style="padding:60px 20px; text-align:center; color:var(--muted);">Lädt …</div>`;
   await loadProfile();
   if(state.profile){
     await loadProgress();
-    state.certified = await loadCertified(state.profile.slug);
+    state.certified = await loadCertified(state.profile.id);
   }
-  state.accounts = await loadAccounts();
   render();
 }
 init();
