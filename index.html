@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lernprogramm für Diakone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241C15;
+    --parchment:#F3ECDA;
+    --parchment-2:#EAE1C8;
+    --midnight:#1C2B44;
+    --midnight-2:#28395A;
+    --gold:#AD7F35;
+    --gold-light:#D9BD84;
+    --burgundy:#7A2333;
+    --sage:#5E6E52;
+    --line:#C9BC98;
+    --muted:#6B6153;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--parchment);
+    color:var(--ink);
+    font-family:"Source Sans 3", sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{
+    font-family:"Cormorant Garamond", serif;
+    font-weight:600;
+    margin:0;
+  }
+  .app{max-width:720px;margin:0 auto;min-height:100vh;background:var(--parchment);border-left:1px solid var(--line);border-right:1px solid var(--line);}
+
+  /* Header */
+  header.top{
+    background:var(--midnight);
+    color:var(--parchment);
+    padding:22px 20px 18px;
+    position:relative;
+    border-bottom:3px solid var(--gold);
+  }
+  header.top .crest{
+    width:32px;height:32px;flex:none;
+  }
+  header.top .titles{display:flex;align-items:flex-start;gap:14px; max-width:78%;}
+  header.top h1{font-size:23px;letter-spacing:.2px;color:var(--parchment); line-height:1.15;}
+  header.top .sub{font-size:12.5px;color:var(--gold-light);margin-top:5px; line-height:1.4;}
+  .role-switch{
+    display:flex; border:1px solid var(--gold); border-radius:999px; overflow:hidden; flex:none;
+  }
+  .role-switch button{
+    background:transparent;border:none;color:var(--parchment);
+    font-family:"Source Sans 3",sans-serif; font-size:13px; padding:6px 14px; cursor:pointer;
+  }
+  .role-switch button.active{background:var(--gold); color:var(--midnight); font-weight:600;}
+  header.top .top-row{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .logout-link{
+    display:block; margin-top:10px; font-size:12px; color:var(--gold-light);
+    text-decoration:underline; cursor:pointer; text-align:right;
+  }
+
+  main{padding:22px 20px 60px;}
+
+  .crumb{
+    font-size:13px; color:var(--muted); margin-bottom:14px; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .crumb:hover{color:var(--burgundy);}
+
+  /* Profile gate */
+  .profile-gate{padding:40px 4px;}
+  .profile-gate p{color:var(--muted); line-height:1.55; max-width:46ch;}
+  .auth-tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:6px;}
+  .auth-tab{
+    background:transparent; border:none; padding:10px 4px; margin-right:18px; cursor:pointer;
+    font-family:"Source Sans 3",sans-serif; font-size:15px; color:var(--muted);
+    border-bottom:2px solid transparent;
+  }
+  .auth-tab.active{color:var(--ink); border-bottom-color:var(--burgundy); font-weight:600;}
+  .field-row{display:flex; gap:12px;}
+  .field-row .field{flex:1;}
+  .error-text{color:var(--burgundy); font-size:13px; margin-top:10px;}
+  .field{margin-top:22px;}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
+  .field input, .field select{
+    width:100%; padding:11px 12px; border:1px solid var(--line); background:#fff;
+    font-family:"Source Sans 3",sans-serif; font-size:15px; border-radius:4px; color:var(--ink);
+  }
+  .btn{
+    margin-top:22px; background:var(--burgundy); color:#fff; border:none;
+    padding:11px 22px; font-size:15px; border-radius:4px; cursor:pointer;
+    font-family:"Source Sans 3",sans-serif; font-weight:600;
+  }
+  .btn:hover{background:#631B28;}
+  .btn.secondary{background:transparent; color:var(--midnight); border:1px solid var(--midnight);}
+  .btn.secondary:hover{background:var(--midnight); color:#fff;}
+  .btn[disabled]{opacity:.4; cursor:not-allowed;}
+
+  /* Station list */
+  .station-row{
+    display:flex; align-items:center; gap:16px;
+    padding:18px 4px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .station-row:hover .station-title{color:var(--burgundy);}
+  .station-row.locked{cursor:default; opacity:.55;}
+  .station-num{
+    font-family:"Cormorant Garamond",serif; font-size:28px; color:var(--gold);
+    width:38px; text-align:center; flex:none;
+  }
+  .station-body{flex:1;}
+  .station-title{font-size:19px; font-weight:600;}
+  .station-meta{font-size:13px; color:var(--muted); margin-top:3px;}
+  .badge{
+    font-size:11px; padding:3px 9px; border-radius:999px; border:1px solid var(--sage);
+    color:var(--sage); white-space:nowrap;
+  }
+  .badge.done{border-color:var(--burgundy); color:var(--burgundy); background:#F3E4E4;}
+  .badge.locked{border-color:var(--muted); color:var(--muted);}
+
+  /* Hymn list */
+  .hymn-row{
+    display:flex; align-items:center; gap:14px;
+    padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .hymn-row:hover .hymn-title{color:var(--burgundy);}
+  .check{
+    width:22px;height:22px;border-radius:50%;border:1.5px solid var(--muted); flex:none;
+    display:flex;align-items:center;justify-content:center; font-size:13px; color:#fff;
+  }
+  .check.self{border-color:var(--gold); background:var(--gold);}
+  .check.cert{border-color:var(--burgundy); background:var(--burgundy);}
+  .hymn-title{font-size:16px;flex:1;}
+  .hymn-tag{font-size:12px;color:var(--muted);}
+
+  /* Hymn detail */
+  .lang-tabs{display:flex; gap:8px; margin:18px 0 20px;}
+  .lang-tab{
+    padding:7px 16px; border:1px solid var(--line); border-radius:999px;
+    font-size:14px; cursor:pointer; background:#fff;
+  }
+  .lang-tab.active{background:var(--midnight); color:#fff; border-color:var(--midnight);}
+
+  .player{
+    background:var(--midnight); color:var(--parchment); border-radius:8px;
+    padding:18px; display:flex; align-items:center; gap:16px;
+  }
+  .play-btn{
+    width:46px;height:46px;border-radius:50%;background:var(--gold); border:none;
+    color:var(--midnight); font-size:18px; cursor:pointer; flex:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .speed-row{display:flex; gap:6px; margin-left:auto;}
+  .speed-row button{
+    background:transparent;border:1px solid var(--gold-light); color:var(--parchment);
+    font-size:12px; padding:4px 8px; border-radius:4px; cursor:pointer;
+  }
+  .speed-row button.active{background:var(--gold-light); color:var(--midnight);}
+  .audio-note{font-size:11px; color:var(--gold-light); margin-top:8px;}
+
+  .text-block{
+    margin-top:22px; background:var(--parchment-2); border:1px solid var(--line);
+    border-radius:6px; padding:20px; font-size:19px; line-height:1.7;
+    font-family:"Cormorant Garamond", serif;
+  }
+  .translit-toggle{
+    display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; color:var(--muted); cursor:pointer;
+  }
+  .self-learn-row{
+    margin-top:24px; display:flex; align-items:center; justify-content:space-between;
+    padding-top:18px; border-top:1px dashed var(--line);
+  }
+  .toggle{
+    width:46px; height:26px; border-radius:999px; background:var(--line); position:relative; cursor:pointer; flex:none;
+  }
+  .toggle .knob{
+    width:20px;height:20px;border-radius:50%;background:#fff; position:absolute; top:3px; left:3px;
+    transition:left .15s ease;
+  }
+  .toggle.on{background:var(--gold);}
+  .toggle.on .knob{left:23px;}
+
+  /* Prüfer */
+  .diakon-pick{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .diakon-pick:hover{color:var(--burgundy);}
+  .approve-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 4px; border-bottom:1px solid var(--line);
+  }
+  .approve-row .info{flex:1;}
+  .approve-row .info b{font-size:16px;}
+  .approve-row .info span{display:block; font-size:12px; color:var(--muted); margin-top:2px;}
+
+  /* Certificate */
+  .certificate{
+    border:2px solid var(--gold); border-radius:8px; padding:36px 28px; text-align:center;
+    background:#fff; margin-top:20px; position:relative;
+  }
+  .certificate:before{
+    content:""; position:absolute; inset:8px; border:1px solid var(--gold-light); border-radius:4px; pointer-events:none;
+  }
+  .certificate .kicker{font-size:12px; letter-spacing:.5px; color:var(--muted);}
+  .certificate h2{font-size:32px; color:var(--midnight); margin-top:8px;}
+  .certificate .name{font-size:24px; color:var(--burgundy); margin-top:16px; font-family:"Cormorant Garamond",serif;}
+  .certificate .desc{font-size:14px; color:var(--muted); margin-top:14px; line-height:1.6;}
+  .certificate .date{margin-top:20px; font-size:13px; color:var(--muted);}
+
+  .empty{padding:40px 4px; text-align:center; color:var(--muted);}
+  .empty h3{color:var(--ink); margin-bottom:8px;}
+  .footnote{margin-top:40px; font-size:12px; color:var(--muted); line-height:1.6; border-top:1px solid var(--line); padding-top:14px;}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* ---------------- Daten (Platzhalter-Inhalte) ---------------- */
+const LANGS = [
+  {code:"de", label:"Deutsch"},
+  {code:"cop", label:"Koptisch"},
+  {code:"ar", label:"Arabisch"},
+];
+
+const STATIONS = [
+  {
+    id:"s1", title:"Grundantworten der Liturgie",
+    hymns:[
+      {id:"h1", title:"Kyrie eleison", content:{
+        de:{text:"Herr, erbarme dich.", translit:null},
+        cop:{text:"Ⲕⲩⲣⲓⲉ ⲉⲗⲉⲏⲥⲟⲛ", translit:"Kyrie eleison"},
+        ar:{text:"يا رب ارحم", translit:null},
+      }},
+      {id:"h2", title:"Amen", content:{
+        de:{text:"Amen.", translit:null},
+        cop:{text:"Ⲁⲙⲏⲛ", translit:"Amen"},
+        ar:{text:"آمين", translit:null},
+      }},
+      {id:"h3", title:"Und mit deinem Geiste", content:{
+        de:{text:"Und mit deinem Geiste.", translit:null},
+        cop:{text:"Ⲛⲉⲙ ⲡⲉⲕⲡ͞ⲛⲁ̅", translit:"Nem pek-pnevma"},
+        ar:{text:"ولروحك أيضاً", translit:null},
+      }},
+    ]
+  },
+  {
+    id:"s2", title:"Weihrauchgebet",
+    hymns:[
+      {id:"h4", title:"Antwort zum Weihrauch I", content:{
+        de:{text:"Wir beten dich an, o Christus, mit deinem guten Vater und dem Heiligen Geist, denn du bist auferstanden und hast uns erlöst.", translit:null},
+        cop:{text:"Ⲧⲉⲛⲟⲩⲱϣⲧ ⲙⲙⲟⲕ ⲱ Ⲡⲭ͞ⲥ̅", translit:"Tenouosht mmok o Pi-Christos"},
+        ar:{text:"نسجد لك أيها المسيح مع أبيك الصالح والروح القدس", translit:null},
+      }},
+      {id:"h5", title:"Antwort zum Weihrauch II", content:{
+        de:{text:"Ehre sei dir immerdar, du Hoffnung unserer Väter.", translit:null},
+        cop:{text:"Ⲱⲟⲩ ⲛⲁⲕ ⲛⲥⲏⲟⲩ ⲛⲓⲃⲉⲛ", translit:"Ou nak nsiou niven"},
+        ar:{text:"المجد لك كل حين يا رجاء آبائنا", translit:null},
+      }},
+    ]
+  },
+  {
+    id:"s3", title:"Antworten der Anaphora",
+    hymns:[
+      {id:"h6", title:"Amen. Amen. Amen.", content:{
+        de:{text:"Amen. Amen. Amen. Bis er kommt, verkünden wir seinen Tod.", translit:null},
+        cop:{text:"Ⲁⲙⲏⲛ Ⲁⲙⲏⲛ Ⲁⲙⲏⲛ", translit:"Amen Amen Amen"},
+        ar:{text:"آمين آمين آمين. كل ما نأكل من هذا الجسد", translit:null},
+      }},
+      {id:"h7", title:"Erbarme dich unser", content:{
+        de:{text:"Erbarme dich unser, Gott, der Vater, der Allherrscher.", translit:null},
+        cop:{text:"Ⲛⲁⲓ ⲛⲁⲛ Ⲫϯ Ⲫⲓⲱⲧ Ⲡⲓⲡⲁⲛⲧⲟⲕⲣⲁⲧⲱⲣ", translit:"Nai nan Efnouti Efiot Pi-pantokrator"},
+        ar:{text:"ارحمنا يا الله الآب ضابط الكل", translit:null},
+      }},
+    ]
+  },
+];
+
+const TOTAL_HYMNS = STATIONS.reduce((n,s)=>n+s.hymns.length,0);
+
+/* Platzhalter-Passwort für den Prüfer-Bereich.
+   In der echten App sollte jeder Prüfer einen eigenen Zugang haben,
+   statt sich ein gemeinsames Passwort zu teilen. */
+const PRUEFER_PASSWORD = "dienst2026";
+
+/* ---------------- App-Zustand ---------------- */
+let state = {
+  role: "diakon", // "diakon" | "pruefer"
+  profile: null,  // {name, slug, email}
+  view: "home",   // home | station | hymn | pruefer-home | pruefer-station | zertifikat
+  currentStationId: null,
+  currentHymnId: null,
+  currentLang: "de",
+  showTranslit: false,
+  speed: 1,
+  pruefer_selectedDiakon: null,
+  progress: {},      // {hymnId: bool}  -- personal
+  certified: {},      // {stationId: {by, date}} -- shared
+  accounts: [],       // shared list of {vorname, nachname, email, password, slug}
+  authTab: "login",   // "login" | "register" -- welcher Tab im Diakon-Login aktiv ist
+  authError: "",
+  prueferAuthenticated: false,
+  prueferPasswordInput: "",
+  prueferError: "",
+  prueferName: "",
+};
+
+function slugify(name){
+  return name.trim().toLowerCase().replace(/[^a-z0-9äöüß]+/gi,"-").replace(/^-+|-+$/g,"");
+}
+
+/* ---------------- Storage ---------------- */
+async function loadProfile(){
+  try{
+    const r = await window.storage.get("profile", false);
+    if(r) state.profile = JSON.parse(r.value);
+  }catch(e){ /* kein Profil vorhanden */ }
+}
+async function saveProfile(){
+  await window.storage.set("profile", JSON.stringify(state.profile), false);
+}
+async function clearProfile(){
+  try{ await window.storage.delete("profile", false); }catch(e){}
+  state.profile = null;
+  state.progress = {};
+  state.certified = {};
+}
+async function loadProgress(){
+  if(!state.profile) return;
+  try{
+    const r = await window.storage.get("progress:"+state.profile.slug, false);
+    if(r) state.progress = JSON.parse(r.value);
+  }catch(e){ state.progress = {}; }
+}
+async function saveProgress(){
+  await window.storage.set("progress:"+state.profile.slug, JSON.stringify(state.progress), false);
+}
+async function loadCertified(slug){
+  try{
+    const r = await window.storage.get("certified:"+slug, true);
+    return r ? JSON.parse(r.value) : {};
+  }catch(e){ return {}; }
+}
+async function saveCertified(slug, data){
+  await window.storage.set("certified:"+slug, JSON.stringify(data), true);
+}
+
+/* Konten (Vorname, Nachname, E-Mail, Passwort) — für den Prototyp in
+   gemeinsamem Speicher als Klartext. In der echten App gehört das in ein
+   richtiges Backend mit gehashten Passwörtern (z. B. Supabase Auth). */
+async function loadAccounts(){
+  try{
+    const r = await window.storage.get("accounts", true);
+    return r ? JSON.parse(r.value) : [];
+  }catch(e){ return []; }
+}
+async function saveAccounts(list){
+  await window.storage.set("accounts", JSON.stringify(list), true);
+}
+function uniqueSlug(base, accounts){
+  let slug = base, n = 2;
+  while(accounts.find(a=>a.slug===slug)){ slug = base+"-"+n; n++; }
+  return slug;
+}
+
+/* ---------------- Hilfsfunktionen ---------------- */
+function findStation(id){ return STATIONS.find(s=>s.id===id); }
+function findHymn(id){ for(const s of STATIONS){ const h=s.hymns.find(h=>h.id===id); if(h) return {hymn:h, station:s}; } }
+function stationSelfDoneCount(station){ return station.hymns.filter(h=>state.progress[h.id]).length; }
+function isStationCertified(stationId){ return !!state.certified[stationId]; }
+function isStationUnlocked(index){
+  if(index===0) return true;
+  return isStationCertified(STATIONS[index-1].id);
+}
+function allStationsCertified(){ return STATIONS.every(s=>isStationCertified(s.id)); }
+
+/* placeholder "audio": kurzer Ton per Web Audio API, nur zu Demozwecken */
+let audioCtx = null;
+function playPlaceholderTone(speed){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const dur = 1.1/ (speed||1);
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(392, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(330, audioCtx.currentTime+dur);
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime+0.05);
+    gain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime+dur);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+dur+0.05);
+  }catch(e){}
+}
+
+/* ---------------- Rendering ---------------- */
+const root = document.getElementById("app");
+
+function render(){
+  root.innerHTML = "";
+  root.appendChild(renderHeader());
+  const main = document.createElement("main");
+  main.appendChild(renderBody());
+  root.appendChild(main);
+}
+
+function renderHeader(){
+  const h = document.createElement("header");
+  h.className = "top";
+  h.innerHTML = `
+    <div class="top-row">
+      <div class="titles">
+        <svg class="crest" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="21" stroke="#D9BD84" stroke-width="1.3"/>
+          <g stroke="#D9BD84" stroke-width="2.4" stroke-linecap="round">
+            <path d="M24 11v26"/>
+            <path d="M13 18h22"/>
+          </g>
+          <g fill="#D9BD84">
+            <circle cx="24" cy="9.5" r="2.6"/>
+            <circle cx="24" cy="38.5" r="2.6"/>
+            <circle cx="10.5" cy="18" r="2.6"/>
+            <circle cx="37.5" cy="18" r="2.6"/>
+          </g>
+        </svg>
+        <div>
+          <h1>Lernprogramm für Diakone</h1>
+          <div class="sub">Koptisch-Orthodoxe Kirche Zürich, Diözese von Österreich und dem deutschsprachigen Raum der Schweiz</div>
+        </div>
+      </div>
+      <div class="role-switch" id="roleSwitch">
+        <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
+        <button data-role="pruefer" class="${state.role==='pruefer'?'active':''}">Prüfer</button>
+      </div>
+    </div>
+  `;
+  h.querySelector("#roleSwitch").addEventListener("click", async (e)=>{
+    const btn = e.target.closest("button"); if(!btn) return;
+    state.role = btn.dataset.role;
+    state.authError = "";
+    state.view = state.role==="pruefer" ? "pruefer-home" : "home";
+    if(state.role==="pruefer") state.accounts = await loadAccounts();
+    render();
+  });
+
+  if(state.role==="diakon" && state.profile){
+    const out = document.createElement("div");
+    out.className = "logout-link";
+    out.textContent = "Abmelden (" + state.profile.name + ")";
+    out.addEventListener("click", async ()=>{ await clearProfile(); render(); });
+    h.appendChild(out);
+  }
+  if(state.role==="pruefer" && state.prueferAuthenticated){
+    const out = document.createElement("div");
+    out.className = "logout-link";
+    out.textContent = "Prüfer-Bereich verlassen";
+    out.addEventListener("click", ()=>{ state.prueferAuthenticated=false; state.prueferPasswordInput=""; render(); });
+    h.appendChild(out);
+  }
+  return h;
+}
+
+function renderBody(){
+  if(state.role==="pruefer"){
+    if(!state.prueferAuthenticated) return renderPrueferGate();
+    if(state.view==="pruefer-station") return renderPrueferStation();
+    return renderPrueferHome();
+  }
+  if(!state.profile){
+    return renderDiakonAuthGate();
+  }
+  if(state.view==="hymn") return renderHymn();
+  if(state.view==="station") return renderStation();
+  if(state.view==="zertifikat") return renderCertificate();
+  return renderHome();
+}
+
+function renderPrueferGate(){
+  const wrap = document.createElement("div");
+  wrap.className = "profile-gate";
+  wrap.innerHTML = `
+    <h2 class="serif" style="font-size:26px;">Prüfer-Bereich</h2>
+    <p>Dieser Bereich ist nur für Verantwortliche, die Stationen bestätigen dürfen. Bitte Namen und Passwort eingeben.</p>
+    <div class="field">
+      <label>Ihr Name</label>
+      <input type="text" id="prueferNameInput" placeholder="z. B. Abouna Marcos" />
+    </div>
+    <div class="field">
+      <label>Passwort</label>
+      <input type="password" id="prueferPw" placeholder="Passwort" />
+    </div>
+    <button class="btn" id="prueferGoBtn">Anmelden</button>
+    ${state.prueferError ? `<div class="error-text">${state.prueferError}</div>` : ""}
+    <div class="footnote">Hinweis: Im Prototyp teilen sich alle Prüfer ein gemeinsames Passwort. In der echten App sollte jeder Prüfer einen eigenen Zugang haben.</div>
+  `;
+  const nameInput = wrap.querySelector("#prueferNameInput");
+  const pwInput = wrap.querySelector("#prueferPw");
+  nameInput.value = state.prueferName;
+  pwInput.value = state.prueferPasswordInput;
+  const submit = ()=>{
+    if(!nameInput.value.trim()){
+      state.prueferError = "Bitte Namen eingeben."; render(); return;
+    }
+    if(pwInput.value === PRUEFER_PASSWORD){
+      state.prueferName = nameInput.value.trim();
+      state.prueferAuthenticated = true;
+      state.prueferError = "";
+      state.view = "pruefer-home";
+    } else {
+      state.prueferError = "Falsches Passwort.";
+      state.prueferPasswordInput = pwInput.value;
+    }
+    render();
+  };
+  wrap.querySelector("#prueferGoBtn").addEventListener("click", submit);
+  pwInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") submit(); });
+  return wrap;
+}
+
+function renderDiakonAuthGate(){
+  const wrap = document.createElement("div");
+  wrap.className = "profile-gate";
+
+  const header = document.createElement("div");
+  header.innerHTML = `<h2 class="serif" style="font-size:26px;">Willkommen</h2>
+    <p>Melde dich an oder registriere dich, um deinen persönlichen Lernfortschritt zu speichern.</p>`;
+  wrap.appendChild(header);
+
+  const tabs = document.createElement("div");
+  tabs.className = "auth-tabs";
+  tabs.innerHTML = `
+    <button class="auth-tab ${state.authTab==='login'?'active':''}" data-tab="login">Anmelden</button>
+    <button class="auth-tab ${state.authTab==='register'?'active':''}" data-tab="register">Registrieren</button>
+  `;
+  tabs.addEventListener("click",(e)=>{
+    const b = e.target.closest("button"); if(!b) return;
+    state.authTab = b.dataset.tab; state.authError = "";
+    render();
+  });
+  wrap.appendChild(tabs);
+
+  const form = document.createElement("div");
+
+  if(state.authTab === "register"){
+    form.innerHTML = `
+      <div class="field-row">
+        <div class="field"><label>Vorname</label><input type="text" id="regVorname" /></div>
+        <div class="field"><label>Nachname</label><input type="text" id="regNachname" /></div>
+      </div>
+      <div class="field"><label>E-Mail</label><input type="email" id="regEmail" /></div>
+      <div class="field"><label>Passwort</label><input type="password" id="regPassword" /></div>
+      <button class="btn" id="regBtn">Registrieren</button>
+      ${state.authError ? `<div class="error-text">${state.authError}</div>` : ""}
+    `;
+    wrap.appendChild(form);
+    wrap.querySelector("#regBtn").addEventListener("click", async ()=>{
+      const vorname = wrap.querySelector("#regVorname").value.trim();
+      const nachname = wrap.querySelector("#regNachname").value.trim();
+      const email = wrap.querySelector("#regEmail").value.trim().toLowerCase();
+      const password = wrap.querySelector("#regPassword").value;
+      if(!vorname || !nachname || !email || !password){
+        state.authError = "Bitte alle Felder ausfüllen."; render(); return;
+      }
+      const accounts = await loadAccounts();
+      if(accounts.find(a=>a.email===email)){
+        state.authError = "Für diese E-Mail existiert bereits ein Konto."; render(); return;
+      }
+      const slug = uniqueSlug(slugify(vorname+"-"+nachname), accounts);
+      const account = {vorname, nachname, email, password, slug};
+      accounts.push(account);
+      await saveAccounts(accounts);
+      state.accounts = accounts;
+      state.profile = {name: vorname+" "+nachname, slug, email};
+      await saveProfile();
+      await loadProgress();
+      state.certified = await loadCertified(slug);
+      state.authError = "";
+      render();
+    });
+  } else {
+    form.innerHTML = `
+      <div class="field"><label>E-Mail</label><input type="email" id="loginEmail" /></div>
+      <div class="field"><label>Passwort</label><input type="password" id="loginPassword" /></div>
+      <button class="btn" id="loginBtn">Anmelden</button>
+      ${state.authError ? `<div class="error-text">${state.authError}</div>` : ""}
+    `;
+    wrap.appendChild(form);
+    wrap.querySelector("#loginBtn").addEventListener("click", async ()=>{
+      const email = wrap.querySelector("#loginEmail").value.trim().toLowerCase();
+      const password = wrap.querySelector("#loginPassword").value;
+      const accounts = await loadAccounts();
+      const account = accounts.find(a=>a.email===email && a.password===password);
+      if(!account){
+        state.authError = "E-Mail oder Passwort ist falsch."; render(); return;
+      }
+      state.accounts = accounts;
+      state.profile = {name: account.vorname+" "+account.nachname, slug: account.slug, email: account.email};
+      await saveProfile();
+      await loadProgress();
+      state.certified = await loadCertified(account.slug);
+      state.authError = "";
+      render();
+    });
+  }
+
+  const note = document.createElement("div");
+  note.className = "footnote";
+  note.textContent = "Hinweis: Dies ist ein Prototyp. Passwörter werden hier nur zu Demozwecken gespeichert — für den echten Einsatz braucht es ein richtiges Login-System.";
+  wrap.appendChild(note);
+
+  return wrap;
+}
+
+function renderHome(){
+  const wrap = document.createElement("div");
+  const cert = allStationsCertified();
+  const intro = document.createElement("div");
+  intro.innerHTML = `<h2 class="serif" style="font-size:24px;">Hallo ${state.profile.name}</h2>
+    <p style="color:var(--muted); margin-top:6px; font-size:14px;">Lerne die Stationen der Reihe nach. Wenn du eine Station geübt hast, geh zum Prüfer in der Kirche und singe sie vor.</p>`;
+  wrap.appendChild(intro);
+
+  if(cert){
+    const banner = document.createElement("div");
+    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between;";
+    banner.innerHTML = `<span style="font-size:14px;">Alle Stationen bestätigt — dein Zertifikat ist bereit.</span>`;
+    const btn = document.createElement("button");
+    btn.className = "btn"; btn.style.margin="0"; btn.textContent = "Zertifikat ansehen";
+    btn.addEventListener("click", ()=>{ state.view="zertifikat"; render(); });
+    banner.appendChild(btn);
+    wrap.appendChild(banner);
+  }
+
+  const list = document.createElement("div");
+  list.style.marginTop = "20px";
+  STATIONS.forEach((s, i)=>{
+    const unlocked = isStationUnlocked(i);
+    const done = stationSelfDoneCount(s);
+    const certified = isStationCertified(s.id);
+    const row = document.createElement("div");
+    row.className = "station-row" + (unlocked? "" : " locked");
+    row.innerHTML = `
+      <div class="station-num">${i+1}</div>
+      <div class="station-body">
+        <div class="station-title">${s.title}</div>
+        <div class="station-meta">${done}/${s.hymns.length} selbst geübt</div>
+      </div>
+      <div class="badge ${certified? 'done' : (unlocked? '' : 'locked')}">${certified? 'Bestätigt' : (unlocked? 'Offen' : 'Gesperrt')}</div>
+    `;
+    if(unlocked){
+      row.addEventListener("click", ()=>{ state.currentStationId = s.id; state.view="station"; render(); });
+    }
+    list.appendChild(row);
+  });
+  wrap.appendChild(list);
+
+  const note = document.createElement("div");
+  note.className = "footnote";
+  note.textContent = "Hinweis: Nur ein Prüfer/Verantwortlicher kann eine Station offiziell bestätigen (im Prüfer-Bereich). Dein eigenes Häkchen zeigt nur, dass du selbst geübt hast.";
+  wrap.appendChild(note);
+
+  return wrap;
+}
+
+function renderStation(){
+  const s = findStation(state.currentStationId);
+  const wrap = document.createElement("div");
+  const crumb = document.createElement("div");
+  crumb.className = "crumb";
+  crumb.textContent = "← Alle Stationen";
+  crumb.addEventListener("click", ()=>{ state.view="home"; render(); });
+  wrap.appendChild(crumb);
+
+  const title = document.createElement("h2");
+  title.className = "serif";
+  title.style.fontSize = "24px";
+  title.textContent = s.title;
+  wrap.appendChild(title);
+
+  const list = document.createElement("div");
+  list.style.marginTop = "14px";
+  s.hymns.forEach(h=>{
+    const self = !!state.progress[h.id];
+    const row = document.createElement("div");
+    row.className = "hymn-row";
+    row.innerHTML = `
+      <div class="check ${self?'self':''}">${self? '✓' : ''}</div>
+      <div class="hymn-title">${h.title}</div>
+      <div class="hymn-tag">${self? 'geübt' : 'noch offen'}</div>
+    `;
+    row.addEventListener("click", ()=>{
+      state.currentHymnId = h.id;
+      state.currentLang = "de";
+      state.showTranslit = false;
+      state.speed = 1;
+      state.view = "hymn";
+      render();
+    });
+    list.appendChild(row);
+  });
+  wrap.appendChild(list);
+  return wrap;
+}
+
+function renderHymn(){
+  const {hymn, station} = findHymn(state.currentHymnId);
+  const wrap = document.createElement("div");
+  const crumb = document.createElement("div");
+  crumb.className = "crumb";
+  crumb.textContent = "← " + station.title;
+  crumb.addEventListener("click", ()=>{ state.view="station"; render(); });
+  wrap.appendChild(crumb);
+
+  const title = document.createElement("h2");
+  title.className = "serif";
+  title.style.fontSize = "24px";
+  title.textContent = hymn.title;
+  wrap.appendChild(title);
+
+  const tabs = document.createElement("div");
+  tabs.className = "lang-tabs";
+  LANGS.forEach(l=>{
+    const b = document.createElement("button");
+    b.className = "lang-tab" + (state.currentLang===l.code? " active":"");
+    b.textContent = l.label;
+    b.addEventListener("click", ()=>{ state.currentLang=l.code; state.showTranslit=false; render(); });
+    tabs.appendChild(b);
+  });
+  wrap.appendChild(tabs);
+
+  const content = hymn.content[state.currentLang];
+
+  const player = document.createElement("div");
+  player.className = "player";
+  player.innerHTML = `
+    <button class="play-btn" id="playBtn">▶</button>
+    <div>
+      <div style="font-weight:600;">Aufnahme anhören</div>
+      <div class="audio-note">Platzhalter-Ton — hier kommt später die echte Audioaufnahme rein</div>
+    </div>
+    <div class="speed-row" id="speedRow">
+      <button data-s="0.75">0.75x</button>
+      <button data-s="1" class="active">1x</button>
+      <button data-s="1.25">1.25x</button>
+    </div>
+  `;
+  player.querySelector("#playBtn").addEventListener("click", ()=> playPlaceholderTone(state.speed));
+  player.querySelector("#speedRow").addEventListener("click",(e)=>{
+    const b = e.target.closest("button"); if(!b) return;
+    state.speed = parseFloat(b.dataset.s);
+    player.querySelectorAll("#speedRow button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+  });
+  wrap.appendChild(player);
+
+  const textBlock = document.createElement("div");
+  textBlock.className = "text-block";
+  textBlock.textContent = (state.currentLang==="cop" && state.showTranslit && content.translit) ? content.translit : content.text;
+  wrap.appendChild(textBlock);
+
+  if(state.currentLang==="cop" && content.translit){
+    const toggle = document.createElement("div");
+    toggle.className = "translit-toggle";
+    toggle.innerHTML = `<div class="toggle ${state.showTranslit?'on':''}" id="translitToggle"><div class="knob"></div></div><span>Lautschrift statt koptischer Schrift anzeigen</span>`;
+    toggle.querySelector("#translitToggle").addEventListener("click", ()=>{ state.showTranslit=!state.showTranslit; render(); });
+    wrap.appendChild(toggle);
+  }
+
+  const selfRow = document.createElement("div");
+  selfRow.className = "self-learn-row";
+  const learned = !!state.progress[hymn.id];
+  selfRow.innerHTML = `
+    <div>
+      <div style="font-weight:600; font-size:15px;">Ich habe das geübt</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">Nur dein persönlicher Fortschritt — die offizielle Bestätigung gibt der Prüfer.</div>
+    </div>
+    <div class="toggle ${learned?'on':''}" id="selfToggle"><div class="knob"></div></div>
+  `;
+  selfRow.querySelector("#selfToggle").addEventListener("click", async ()=>{
+    state.progress[hymn.id] = !state.progress[hymn.id];
+    await saveProgress();
+    render();
+  });
+  wrap.appendChild(selfRow);
+
+  return wrap;
+}
+
+function renderCertificate(){
+  const wrap = document.createElement("div");
+  const crumb = document.createElement("div");
+  crumb.className = "crumb";
+  crumb.textContent = "← Zurück";
+  crumb.addEventListener("click", ()=>{ state.view="home"; render(); });
+  wrap.appendChild(crumb);
+
+  const cert = document.createElement("div");
+  cert.className = "certificate";
+  const dates = Object.values(state.certified).map(c=>c.date).filter(Boolean).sort();
+  const lastDate = dates.length? dates[dates.length-1] : new Date().toLocaleDateString("de-CH");
+  cert.innerHTML = `
+    <div class="kicker">KOPTISCH-ORTHODOXE KIRCHE ZÜRICH</div>
+    <h2 class="serif">Zertifikat</h2>
+    <div style="font-size:14px; color:var(--muted); margin-top:10px;">verliehen an</div>
+    <div class="name">${state.profile.name}</div>
+    <div class="desc">hat alle ${STATIONS.length} Stationen der liturgischen Diakonenantworten erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist berechtigt, als Diakon am Altar zu dienen.</div>
+    <div class="date">Abgeschlossen am ${lastDate}</div>
+  `;
+  wrap.appendChild(cert);
+
+  const printBtn = document.createElement("button");
+  printBtn.className = "btn secondary";
+  printBtn.style.marginTop = "18px";
+  printBtn.textContent = "Drucken / als PDF speichern";
+  printBtn.addEventListener("click", ()=> window.print());
+  wrap.appendChild(printBtn);
+
+  return wrap;
+}
+
+/* ---------------- Prüfer-Ansicht ---------------- */
+function renderPrueferHome(){
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `<h2 class="serif" style="font-size:24px;">Diakone</h2>
+    <p style="color:var(--muted); font-size:14px; margin-top:6px;">Wähle einen Diakon aus, um Stationen zu bestätigen.</p>`;
+  const list = document.createElement("div");
+  list.style.marginTop = "16px";
+  if(state.accounts.length===0){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerHTML = `<h3>Noch keine Diakone registriert</h3><p>Sobald sich jemand im Diakon-Bereich registriert, erscheint er hier.</p>`;
+    list.appendChild(empty);
+  }
+  state.accounts.forEach(u=>{
+    const fullName = u.vorname+" "+u.nachname;
+    const row = document.createElement("div");
+    row.className = "diakon-pick";
+    row.innerHTML = `<span>${fullName}</span><span style="color:var(--muted); font-size:13px;">öffnen →</span>`;
+    row.addEventListener("click", async ()=>{
+      state.pruefer_selectedDiakon = {name: fullName, slug: u.slug};
+      state.certified = await loadCertified(u.slug);
+      const pr = await window.storage.get("progress:"+u.slug, false).catch(()=>null);
+      state.pruefer_progress = pr ? JSON.parse(pr.value) : {};
+      state.view = "pruefer-station";
+      render();
+    });
+    list.appendChild(row);
+  });
+  wrap.appendChild(list);
+  return wrap;
+}
+
+function renderPrueferStation(){
+  const u = state.pruefer_selectedDiakon;
+  const wrap = document.createElement("div");
+  const crumb = document.createElement("div");
+  crumb.className = "crumb";
+  crumb.textContent = "← Alle Diakone";
+  crumb.addEventListener("click", ()=>{ state.view="pruefer-home"; render(); });
+  wrap.appendChild(crumb);
+
+  const title = document.createElement("h2");
+  title.className = "serif";
+  title.style.fontSize = "24px";
+  title.textContent = u.name;
+  wrap.appendChild(title);
+
+  const sub = document.createElement("p");
+  sub.style.cssText = "color:var(--muted); font-size:13px; margin-top:6px;";
+  sub.textContent = "Bestätige eine Station, nachdem der Diakon sie vor Ort vorgesungen hat.";
+  wrap.appendChild(sub);
+
+  const list = document.createElement("div");
+  list.style.marginTop = "14px";
+  STATIONS.forEach((s,i)=>{
+    const unlocked = i===0 || isStationCertified(STATIONS[i-1].id);
+    const selfDone = s.hymns.filter(h=> (state.pruefer_progress||{})[h.id]).length;
+    const certified = isStationCertified(s.id);
+    const row = document.createElement("div");
+    row.className = "approve-row";
+    row.innerHTML = `
+      <div class="info">
+        <b>${i+1}. ${s.title}</b>
+        <span>${selfDone}/${s.hymns.length} vom Diakon selbst als geübt markiert</span>
+      </div>
+    `;
+    const btn = document.createElement("button");
+    if(certified){
+      btn.className = "btn"; btn.disabled = true; btn.style.background = "var(--sage)";
+      btn.textContent = "Bestätigt";
+    } else if(!unlocked){
+      btn.className = "btn"; btn.disabled = true;
+      btn.textContent = "Vorherige Station offen";
+    } else {
+      btn.className = "btn";
+      btn.textContent = "Als bestanden bestätigen";
+      btn.addEventListener("click", async ()=>{
+        state.certified[s.id] = {by: state.prueferName, date: new Date().toLocaleDateString("de-CH")};
+        await saveCertified(u.slug, state.certified);
+        render();
+      });
+    }
+    row.appendChild(btn);
+    list.appendChild(row);
+  });
+  wrap.appendChild(list);
+
+  const note = document.createElement("div");
+  note.className = "footnote";
+  note.textContent = "Bestätigt von: " + state.prueferName + ". In der echten App hätte jeder Prüfer einen eigenen, persönlichen Zugang statt eines gemeinsamen Passworts.";
+  wrap.appendChild(note);
+
+  return wrap;
+}
+
+/* ---------------- Start ---------------- */
+async function init(){
+  await loadProfile();
+  if(state.profile){
+    await loadProgress();
+    state.certified = await loadCertified(state.profile.slug);
+  }
+  state.accounts = await loadAccounts();
+  render();
+}
+init();
+</script>
+</body>
+</html>
