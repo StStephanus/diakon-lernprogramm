@@ -461,10 +461,10 @@ function playPlaceholderTone(speed){
 }
 
 /* Echte Aufnahme aus Supabase Storage (Bucket "audio").
-   Erwartetes Dateischema: {hymnId}-{lang}.mp3, z. B. s1h2-de.mp3 */
+   Erwartetes Dateischema: {hymnId}-{lang}.mp4, z. B. s1h2-de.mp4 */
 let currentAudioEl = null;
 function getAudioUrl(hymnId, lang){
-  return `${SUPABASE_URL}/storage/v1/object/public/audio/${hymnId}-${lang}.mp3`;
+  return `${SUPABASE_URL}/storage/v1/object/public/audio/${hymnId}-${lang}.mp4`;
 }
 function playHymnAudio(hymnId, lang, speed, onStatus){
   if(currentAudioEl){ currentAudioEl.pause(); currentAudioEl = null; }
