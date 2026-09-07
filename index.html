@@ -464,7 +464,7 @@ function playPlaceholderTone(speed){
    Erwartetes Dateischema: {hymnId}-{lang}.mp4, z. B. s1h2-de.mp4 */
 let currentAudioEl = null;
 function getAudioUrl(hymnId, lang){
-  return `${SUPABASE_URL}/storage/v1/object/public/audio/${hymnId}-${lang}.mp4`;
+  return `${SUPABASE_URL}/storage/v1/object/public/Audios/${hymnId}-${lang}.mp4`;
 }
 function playHymnAudio(hymnId, lang, speed, onStatus){
   if(currentAudioEl){ currentAudioEl.pause(); currentAudioEl = null; }
