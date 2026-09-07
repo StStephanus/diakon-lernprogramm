@@ -143,6 +143,14 @@
   }
   .lang-chip.done{background:var(--gold); color:var(--midnight); border-color:var(--gold);}
 
+  .diff-badge{
+    font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:999px; flex:none;
+    text-transform:uppercase; letter-spacing:.3px;
+  }
+  .diff-badge.leicht{background:#E4EFE2; color:#3C6B34; border:1px solid #A9CBA1;}
+  .diff-badge.mittel{background:#FBEBD9; color:#9A5B12; border:1px solid #E8BC85;}
+  .diff-badge.schwer{background:#F5DEDF; color:#8E2A2E; border:1px solid #DDA0A2;}
+
   /* Hymn detail */
   .lang-tabs{display:flex; gap:8px; margin:18px 0 20px;}
   .lang-tab{
@@ -173,8 +181,12 @@
     border-radius:6px; padding:20px; font-size:19px; line-height:1.7;
     font-family:"Cormorant Garamond", serif;
   }
-  .translit-toggle{
-    display:flex; align-items:center; gap:8px; margin-top:10px; font-size:13px; color:var(--muted); cursor:pointer;
+  .translit-line{
+    margin-top:12px; font-size:15px; color:var(--muted); font-style:italic; line-height:1.5;
+  }
+  .translit-label{
+    font-style:normal; font-weight:600; color:var(--sage); margin-right:6px; font-size:12px;
+    text-transform:uppercase; letter-spacing:.3px;
   }
   .self-learn-row{
     margin-top:24px; display:flex; align-items:center; justify-content:space-between;
@@ -237,51 +249,54 @@ const LANGS = [
 
 const STATIONS = [
   {
-    id:"s1", title:"Grundantworten der Liturgie",
+    id:"s1", title:"Wiederkehrende Antworten",
     hymns:[
-      {id:"h1", title:"Kyrie eleison", content:{
-        de:{text:"Herr, erbarme dich.", translit:null},
-        cop:{text:"Ⲕⲩⲣⲓⲉ ⲉⲗⲉⲏⲥⲟⲛ", translit:"Kyrie eleison"},
-        ar:{text:"يا رب ارحم", translit:null},
+      {id:"s1h1", title:"Epi Eprosevki Estasite", difficulty:"leicht", content:{
+        cop:{text:"Ⲉⲡⲓ Ⲡⲣⲟⲥⲉⲩⲭⲏ, Ⲥⲧⲁⲑⲏⲧⲉ.", translit:"Epi Eprosevki Estasite", needsReview:true},
       }},
-      {id:"h2", title:"Amen", content:{
-        de:{text:"Amen.", translit:null},
-        cop:{text:"Ⲁⲙⲏⲛ", translit:"Amen"},
-        ar:{text:"آمين", translit:null},
+      {id:"s1h2", title:"Epros Eveksaste", difficulty:"leicht", content:{
+        de:{text:"Betet", translit:null},
+        cop:{text:"Ⲡⲣⲟⲥⲉⲩⲝⲁⲥⲑⲉ.", translit:"Epros Eveksaste", needsReview:true},
+        ar:{text:"Sallo", translit:null},
       }},
-      {id:"h3", title:"Und mit deinem Geiste", content:{
-        de:{text:"Und mit deinem Geiste.", translit:null},
-        ar:{text:"ولروحك أيضاً", translit:null},
+      {id:"s1h3", title:"Tob hina", difficulty:"schwer", content:{
+        de:{text:"Bittet, dass Gott sich unser erbarme, gnädig mit uns sei, uns erhöre, uns helfe, die Gebete und Bitten seiner Heiligen annehme, für unser Wohlergehen zu allen Zeiten (und nach der Lammprozession: und uns würdig mache, die Teilhabe an seinen heiligen, gesegneten Sakramenten zu erlangen) zur Vergebung unserer Sünden", translit:null},
+        cop:{text:null, translit:"Tob hina ente efnouti nai nan entef shenhit charon entef sotem eron entef er-voythin eron entef-etshi enni tiho nem nitobh enteni ethouab entaf entotou e-ehri egon epi aghathon enseyo niven (nach der Lammprozession: entef ayten en emepsha ethren etshi evolchen ti kinonia ente nef mestirjon ethouab) etesmaro-out epiko evol ente nennovi."},
+        ar:{text:"Etlobo lekaj jar7amana allah ua yatara2af 3alyna wayasm3na wa yo3inana wa yakbal eleh so2alat wa telbati keddisieh. Menhom belsala7y 3anna fi kolla hienen (nach der Lammprozession: wa an yag3lana mosta7ekin an nanal men sharikat asrarihi almokkadasa almobaraka) lemaghferat 5atayana", translit:null},
+      }},
+      {id:"s1h4", title:"Evangeliumsgebet", difficulty:"leicht", content:{
+        de:{text:"Betet um des Heiligen Evangeliums Willen", translit:null},
+        ar:{text:"Sallo men agl el Engil almokkadas", translit:null},
+      }},
+      {id:"s1h5", title:"Stasite", difficulty:"leicht", content:{
+        cop:{text:"Ⲥⲧⲁⲑⲏⲧⲉ Ⲙⲉⲧⲁ Ⲫⲟⲃⲟⲩ Ⲑⲉⲟⲩ, Ⲁⲕⲟⲩⲥⲱⲙⲉⲛ Ⲧⲟⲩ Ⲁⲅⲓⲟⲩ Ⲉⲩⲁⲅⲅⲉⲗⲓⲟⲩ.", translit:"Stasite metavovo theo, akosomen to agyo evangeliou", needsReview:true},
+      }},
+      {id:"s1h6", title:"Taski falasimon", difficulty:"mittel", content:{
+        cop:{text:null, translit:"Taski falasimon tou kiryo eklenati"},
+      }},
+      {id:"s1h7", title:"Epros chomen", difficulty:"mittel", content:{
+        cop:{text:null, translit:"Epros chomen se-o metavovo, amin"},
       }},
     ]
   },
   {
-    id:"s2", title:"Weihrauchgebet",
+    id:"s2", title:"Morgen- und Abendweihrauch",
     hymns:[
-      {id:"h4", title:"Antwort zum Weihrauch I", content:{
-        de:{text:"Wir beten dich an, o Christus, mit deinem guten Vater und dem Heiligen Geist, denn du bist auferstanden und hast uns erlöst.", translit:null},
-        cop:{text:"Ⲧⲉⲛⲟⲩⲱϣⲧ ⲙⲙⲟⲕ ⲱ Ⲡⲭ͞ⲥ̅", translit:"Tenouosht mmok o Pi-Christos"},
-        ar:{text:"نسجد لك أيها المسيح مع أبيك الصالح والروح القدس", translit:null},
+      {id:"s2h1", title:"Gebet für die Entschlafenen", difficulty:"schwer", content:{
+        de:{text:"Bittet für unsere Väter und Brüder, die entschlafen und aus dem Leben geschieden sind im Glauben an Christus seit dem Anfang: unsere heiligen Väter, die Erzbischöfe, Bischöfe, Erzpriester, Priester, unsere Brüder, die Diakone, unsere Mönchsväter und Laienväter und für alle Christen, damit Christus, unser Gott, ihren Seelen im Paradies der Freude ewige Ruhe schenke. Uns möge er Barmherzigkeit erweisen und unsere Sünden vergeben.", translit:null},
+        ar:{text:"Etlobo Aan aba-ana ua echuatana allazina rakado uatanajjaHo fi al-ieman belmasiH monzo albad-e. aba-ina alkeddisien ro-asa al asakifa ua aba-ina al asakifa aba-ina al kamamisa ua aba-ina al kesos ua echuatina al schmamisa aba-ina al rohhban ua aba-ina al Aelmanejjin ua Aan nejaH kol al masiHejjin lekaj al masiH elahhna jonajjeH nefosahom agmaAin fi ferdaus al naAim ua naHno ajdan jasnaA maAana raHmatan ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"h5", title:"Antwort zum Weihrauch II", content:{
-        de:{text:"Ehre sei dir immerdar, du Hoffnung unserer Väter.", translit:null},
-        cop:{text:"Ⲱⲟⲩ ⲛⲁⲕ ⲛⲥⲏⲟⲩ ⲛⲓⲃⲉⲛ", translit:"Ou nak nsiou niven"},
-        ar:{text:"المجد لك كل حين يا رجاء آبائنا", translit:null},
+      {id:"s2h2", title:"Gebet für die Kranken", difficulty:"schwer", content:{
+        de:{text:"Bittet für unsere Väter und Brüder, die an irgendeiner Krankheit leiden, ob an diesem Ort oder an einem anderen Ort, dass Christus unser Gott uns und ihnen Gesundheit und Heilung schenke und uns unsere Sünden vergeben", translit:null},
+        ar:{text:"Etlobo Aan ahba-ena ua echuatina almarda bekolli maraden en kan fi haza almaskan au bekolli maudeAen lekej almasieH elahhna jonAem Aaleina ua Aaleihom belAafeja ualschifaa ua jaghfer lana chatajana.", translit:null},
       }},
-    ]
-  },
-  {
-    id:"s3", title:"Antworten der Anaphora",
-    hymns:[
-      {id:"h6", title:"Amen. Amen. Amen.", content:{
-        de:{text:"Amen. Amen. Amen. Bis er kommt, verkünden wir seinen Tod.", translit:null},
-        cop:{text:"Ⲁⲙⲏⲛ Ⲁⲙⲏⲛ Ⲁⲙⲏⲛ", translit:"Amen Amen Amen"},
-        ar:{text:"آمين آمين آمين. كل ما نأكل من هذا الجسد", translit:null},
+      {id:"s2h3", title:"Gebet für die Reisenden", difficulty:"schwer", content:{
+        de:{text:"Bittet für unsere Väter und Brüder, die auf Reisen sind und für die, die eine Reise in allerlei Orte vorhaben, dass Gott ihnen allen ihre Wege ebne, sei es auf dem Meer, auf den Flüssen, auf den Seen oder auf den Reisewegen, und dass Christus, unser Gott diejenigen, die ihre Reise auf alle Art verrichten, heimführe und unsere Sünden vergebe", translit:null},
+        ar:{text:"Etlobo Aan aba-ina ua echuatna almosafirin ua allazina jodmirun alsafar fi kolli maudeAen lekej josahel torekahom agmaAin en kana fi albaHr au al anhar au alboHeirat au altorek almasluka au almosafirina bekolli nauAen lekej almasieH elahhna jaroddahom ela masakinahom salimin ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"h7", title:"Erbarme dich unser", content:{
-        de:{text:"Erbarme dich unser, Gott, der Vater, der Allherrscher.", translit:null},
-        cop:{text:"Ⲛⲁⲓ ⲛⲁⲛ Ⲫϯ Ⲫⲓⲱⲧ Ⲡⲓⲡⲁⲛⲧⲟⲕⲣⲁⲧⲱⲣ", translit:"Nai nan Efnouti Efiot Pi-pantokrator"},
-        ar:{text:"ارحمنا يا الله الآب ضابط الكل", translit:null},
+      {id:"s2h4", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", content:{
+        de:{text:"Bittet für diejenigen, die sich um die Opfer kümmern um die Darreichungen, die Erstlinge der Ernte, die Öle, den Weihrauch, die Vorhänge, die Lesebücher und die Schätze des Altars. Dass Christus unser Gott sie im himmlischen Jerusalem belohne und uns unsere Sünden vergebe.", translit:null},
+        ar:{text:"Etlobo Aan almohhtammin belsaAaed ualkrabin ualbekur ualzeit ualbechur ualsetur uakoteb alkeraa ua auani almazbaH lekej almasieH elahhna jokafeahom fi oroschalim alsmaeja uajaghfer lana chatajana.", translit:null},
       }},
     ]
   },
@@ -307,7 +322,6 @@ let state = {
   currentStationId: null,
   currentHymnId: null,
   currentLang: "de",
-  showTranslit: false,
   speed: 1,
   pruefer_selectedDiakon: null,
   pruefer_progress: {},
@@ -725,14 +739,16 @@ function renderStation(){
       const abbr = l.code==="de"?"DE":(l.code==="cop"?"KO":"AR");
       return `<div class="lang-chip ${done?'done':''}" title="${l.label}">${abbr}</div>`;
     }).join("");
+    const needsReview = hymnLangs.some(l => h.content[l.code] && h.content[l.code].needsReview);
+    const diffBadge = h.difficulty ? `<div class="diff-badge ${h.difficulty}">${h.difficulty}</div>` : "";
     row.innerHTML = `
-      <div class="hymn-title">${h.title}</div>
+      <div class="hymn-title">${h.title}${needsReview ? ' <span title="Koptische Schrift noch ungeprüft" style="color:var(--gold);">⚠</span>' : ''}</div>
+      ${diffBadge}
       <div class="lang-chips">${chips}</div>
     `;
     row.addEventListener("click", ()=>{
       state.currentHymnId = h.id;
       state.currentLang = hymnLangs[0].code;
-      state.showTranslit = false;
       state.speed = 1;
       state.view = "hymn";
       render();
@@ -758,6 +774,13 @@ function renderHymn(){
   title.textContent = hymn.title;
   wrap.appendChild(title);
 
+  if(hymn.difficulty){
+    const diffRow = document.createElement("div");
+    diffRow.style.marginTop = "6px";
+    diffRow.innerHTML = `<span class="diff-badge ${hymn.difficulty}">${hymn.difficulty}</span>`;
+    wrap.appendChild(diffRow);
+  }
+
   const hymnLangs = LANGS.filter(l => hymn.content[l.code]);
   if(!hymn.content[state.currentLang]) state.currentLang = hymnLangs[0].code;
 
@@ -767,7 +790,7 @@ function renderHymn(){
     const b = document.createElement("button");
     b.className = "lang-tab" + (state.currentLang===l.code? " active":"");
     b.textContent = l.label;
-    b.addEventListener("click", ()=>{ state.currentLang=l.code; state.showTranslit=false; render(); });
+    b.addEventListener("click", ()=>{ state.currentLang=l.code; render(); });
     tabs.appendChild(b);
   });
   wrap.appendChild(tabs);
@@ -805,15 +828,27 @@ function renderHymn(){
 
   const textBlock = document.createElement("div");
   textBlock.className = "text-block";
-  textBlock.textContent = (state.currentLang==="cop" && state.showTranslit && content.translit) ? content.translit : content.text;
+  textBlock.textContent = content.text || content.translit || "";
   wrap.appendChild(textBlock);
 
-  if(state.currentLang==="cop" && content.translit){
-    const toggle = document.createElement("div");
-    toggle.className = "translit-toggle";
-    toggle.innerHTML = `<div class="toggle ${state.showTranslit?'on':''}" id="translitToggle"><div class="knob"></div></div><span>Lautschrift statt koptischer Schrift anzeigen</span>`;
-    toggle.querySelector("#translitToggle").addEventListener("click", ()=>{ state.showTranslit=!state.showTranslit; render(); });
-    wrap.appendChild(toggle);
+  if(state.currentLang==="cop" && content.translit && content.text){
+    const translitLine = document.createElement("div");
+    translitLine.className = "translit-line";
+    translitLine.innerHTML = `<span class="translit-label">Aussprache (Franco-Koptisch):</span> ${content.translit}`;
+    wrap.appendChild(translitLine);
+  }
+  if(state.currentLang==="cop" && !content.text){
+    const pending = document.createElement("div");
+    pending.className = "translit-line";
+    pending.style.color = "var(--burgundy)";
+    pending.innerHTML = `<span class="translit-label">Hinweis:</span> Die koptische Originalschrift wird hier noch ergänzt — aktuell nur die Aussprache.`;
+    wrap.appendChild(pending);
+  }
+  if(state.currentLang==="cop" && content.needsReview){
+    const review = document.createElement("div");
+    review.style.cssText = "margin-top:14px; padding:12px 14px; background:#FBEBD9; border:1px solid #E8BC85; border-radius:6px; font-size:13px; color:#7A4A0E;";
+    review.textContent = "⚠️ Diese koptische Schreibweise wurde anhand bekannter liturgischer Standardformeln rekonstruiert und noch NICHT von jemandem geprüft, der Koptisch liest. Bitte vor Verwendung von einer kundigen Person in der Gemeinde gegenlesen lassen.";
+    wrap.appendChild(review);
   }
 
   const selfRow = document.createElement("div");
