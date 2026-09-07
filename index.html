@@ -133,7 +133,8 @@
   }
   .check.self{border-color:var(--gold); background:var(--gold);}
   .check.cert{border-color:var(--burgundy); background:var(--burgundy);}
-  .hymn-title{font-size:16px;flex:1;}
+  .hymn-title-group{display:flex; align-items:center; gap:10px; flex:1; min-width:0;}
+  .hymn-title{font-size:16px;}
   .hymn-tag{font-size:12px;color:var(--muted);}
   .lang-chips{display:flex; gap:4px; flex:none;}
   .lang-chip{
@@ -252,11 +253,11 @@ const STATIONS = [
     id:"s1", title:"Wiederkehrende Antworten",
     hymns:[
       {id:"s1h1", title:"Epi Eprosevki Estasite", difficulty:"leicht", content:{
-        cop:{text:"Ⲉⲡⲓ Ⲡⲣⲟⲥⲉⲩⲭⲏ, Ⲥⲧⲁⲑⲏⲧⲉ.", translit:"Epi Eprosevki Estasite", needsReview:true},
+        cop:{text:null, translit:"Epi Eprosevki Estasite"},
       }},
       {id:"s1h2", title:"Epros Eveksaste", difficulty:"leicht", content:{
         de:{text:"Betet", translit:null},
-        cop:{text:"Ⲡⲣⲟⲥⲉⲩⲝⲁⲥⲑⲉ.", translit:"Epros Eveksaste", needsReview:true},
+        cop:{text:null, translit:"Epros Eveksaste"},
         ar:{text:"Sallo", translit:null},
       }},
       {id:"s1h3", title:"Tob hina", difficulty:"schwer", content:{
@@ -269,7 +270,7 @@ const STATIONS = [
         ar:{text:"Sallo men agl el Engil almokkadas", translit:null},
       }},
       {id:"s1h5", title:"Stasite", difficulty:"leicht", content:{
-        cop:{text:"Ⲥⲧⲁⲑⲏⲧⲉ Ⲙⲉⲧⲁ Ⲫⲟⲃⲟⲩ Ⲑⲉⲟⲩ, Ⲁⲕⲟⲩⲥⲱⲙⲉⲛ Ⲧⲟⲩ Ⲁⲅⲓⲟⲩ Ⲉⲩⲁⲅⲅⲉⲗⲓⲟⲩ.", translit:"Stasite metavovo theo, akosomen to agyo evangeliou", needsReview:true},
+        cop:{text:null, translit:"Stasite metavovo theo, akosomen to agyo evangeliou"},
       }},
       {id:"s1h6", title:"Taski falasimon", difficulty:"mittel", content:{
         cop:{text:null, translit:"Taski falasimon tou kiryo eklenati"},
@@ -739,11 +740,12 @@ function renderStation(){
       const abbr = l.code==="de"?"DE":(l.code==="cop"?"KO":"AR");
       return `<div class="lang-chip ${done?'done':''}" title="${l.label}">${abbr}</div>`;
     }).join("");
-    const needsReview = hymnLangs.some(l => h.content[l.code] && h.content[l.code].needsReview);
     const diffBadge = h.difficulty ? `<div class="diff-badge ${h.difficulty}">${h.difficulty}</div>` : "";
     row.innerHTML = `
-      <div class="hymn-title">${h.title}${needsReview ? ' <span title="Koptische Schrift noch ungeprüft" style="color:var(--gold);">⚠</span>' : ''}</div>
-      ${diffBadge}
+      <div class="hymn-title-group">
+        <span class="hymn-title">${h.title}</span>
+        ${diffBadge}
+      </div>
       <div class="lang-chips">${chips}</div>
     `;
     row.addEventListener("click", ()=>{
@@ -768,18 +770,20 @@ function renderHymn(){
   crumb.addEventListener("click", ()=>{ state.view="station"; render(); });
   wrap.appendChild(crumb);
 
+  const titleRow = document.createElement("div");
+  titleRow.style.cssText = "display:flex; align-items:center; gap:10px; flex-wrap:wrap;";
   const title = document.createElement("h2");
   title.className = "serif";
   title.style.fontSize = "24px";
   title.textContent = hymn.title;
-  wrap.appendChild(title);
-
+  titleRow.appendChild(title);
   if(hymn.difficulty){
-    const diffRow = document.createElement("div");
-    diffRow.style.marginTop = "6px";
-    diffRow.innerHTML = `<span class="diff-badge ${hymn.difficulty}">${hymn.difficulty}</span>`;
-    wrap.appendChild(diffRow);
+    const diffSpan = document.createElement("span");
+    diffSpan.className = "diff-badge " + hymn.difficulty;
+    diffSpan.textContent = hymn.difficulty;
+    titleRow.appendChild(diffSpan);
   }
+  wrap.appendChild(titleRow);
 
   const hymnLangs = LANGS.filter(l => hymn.content[l.code]);
   if(!hymn.content[state.currentLang]) state.currentLang = hymnLangs[0].code;
@@ -830,26 +834,6 @@ function renderHymn(){
   textBlock.className = "text-block";
   textBlock.textContent = content.text || content.translit || "";
   wrap.appendChild(textBlock);
-
-  if(state.currentLang==="cop" && content.translit && content.text){
-    const translitLine = document.createElement("div");
-    translitLine.className = "translit-line";
-    translitLine.innerHTML = `<span class="translit-label">Aussprache (Franco-Koptisch):</span> ${content.translit}`;
-    wrap.appendChild(translitLine);
-  }
-  if(state.currentLang==="cop" && !content.text){
-    const pending = document.createElement("div");
-    pending.className = "translit-line";
-    pending.style.color = "var(--burgundy)";
-    pending.innerHTML = `<span class="translit-label">Hinweis:</span> Die koptische Originalschrift wird hier noch ergänzt — aktuell nur die Aussprache.`;
-    wrap.appendChild(pending);
-  }
-  if(state.currentLang==="cop" && content.needsReview){
-    const review = document.createElement("div");
-    review.style.cssText = "margin-top:14px; padding:12px 14px; background:#FBEBD9; border:1px solid #E8BC85; border-radius:6px; font-size:13px; color:#7A4A0E;";
-    review.textContent = "⚠️ Diese koptische Schreibweise wurde anhand bekannter liturgischer Standardformeln rekonstruiert und noch NICHT von jemandem geprüft, der Koptisch liest. Bitte vor Verwendung von einer kundigen Person in der Gemeinde gegenlesen lassen.";
-    wrap.appendChild(review);
-  }
 
   const selfRow = document.createElement("div");
   selfRow.className = "self-learn-row";
