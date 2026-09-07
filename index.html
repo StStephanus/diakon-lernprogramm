@@ -251,7 +251,6 @@ const STATIONS = [
       }},
       {id:"h3", title:"Und mit deinem Geiste", content:{
         de:{text:"Und mit deinem Geiste.", translit:null},
-        cop:{text:"Ⲛⲉⲙ ⲡⲉⲕⲡ͞ⲛⲁ̅", translit:"Nem pek-pnevma"},
         ar:{text:"ولروحك أيضاً", translit:null},
       }},
     ]
@@ -717,10 +716,11 @@ function renderStation(){
   const list = document.createElement("div");
   list.style.marginTop = "14px";
   s.hymns.forEach(h=>{
+    const hymnLangs = LANGS.filter(l => h.content[l.code]);
     const learnedLangs = langsLearnedFor(state.progress, h.id);
     const row = document.createElement("div");
     row.className = "hymn-row";
-    const chips = LANGS.map(l=>{
+    const chips = hymnLangs.map(l=>{
       const done = learnedLangs.includes(l.code);
       const abbr = l.code==="de"?"DE":(l.code==="cop"?"KO":"AR");
       return `<div class="lang-chip ${done?'done':''}" title="${l.label}">${abbr}</div>`;
@@ -731,7 +731,7 @@ function renderStation(){
     `;
     row.addEventListener("click", ()=>{
       state.currentHymnId = h.id;
-      state.currentLang = "de";
+      state.currentLang = hymnLangs[0].code;
       state.showTranslit = false;
       state.speed = 1;
       state.view = "hymn";
@@ -758,9 +758,12 @@ function renderHymn(){
   title.textContent = hymn.title;
   wrap.appendChild(title);
 
+  const hymnLangs = LANGS.filter(l => hymn.content[l.code]);
+  if(!hymn.content[state.currentLang]) state.currentLang = hymnLangs[0].code;
+
   const tabs = document.createElement("div");
   tabs.className = "lang-tabs";
-  LANGS.forEach(l=>{
+  hymnLangs.forEach(l=>{
     const b = document.createElement("button");
     b.className = "lang-tab" + (state.currentLang===l.code? " active":"");
     b.textContent = l.label;
@@ -768,6 +771,12 @@ function renderHymn(){
     tabs.appendChild(b);
   });
   wrap.appendChild(tabs);
+  if(hymnLangs.length < LANGS.length){
+    const note = document.createElement("p");
+    note.style.cssText = "color:var(--muted); font-size:12px; margin-top:-14px; margin-bottom:18px;";
+    note.textContent = "Diese Antwort wird bei uns nur in " + hymnLangs.map(l=>l.label).join(" und ") + " gesungen.";
+    wrap.appendChild(note);
+  }
 
   const content = hymn.content[state.currentLang];
 
@@ -921,9 +930,11 @@ function renderPrueferStation(){
     const unlocked = i===0 || isStationCertified(STATIONS[i-1].id);
     const certified = isStationCertified(s.id);
     const perLang = LANGS.map(l=>{
-      const n = s.hymns.filter(h => (state.pruefer_progress[h.id]||{})[l.code]).length;
-      return `${l.label}: ${n}/${s.hymns.length}`;
-    }).join(" · ");
+      const applicable = s.hymns.filter(h => h.content[l.code]);
+      if(applicable.length===0) return null;
+      const n = applicable.filter(h => (state.pruefer_progress[h.id]||{})[l.code]).length;
+      return `${l.label}: ${n}/${applicable.length}`;
+    }).filter(Boolean).join(" · ");
     const row = document.createElement("div");
     row.className = "approve-row";
     row.innerHTML = `
