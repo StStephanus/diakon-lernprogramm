@@ -909,7 +909,8 @@ function renderHome(){
     banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#FBEBD9; border:1px solid var(--gold); border-radius:6px;";
     banner.innerHTML = `<span style="font-size:14px;">🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!</span>`;
     wrap.appendChild(banner);
-  } else if(certDone){
+  }
+  if(certDone){
     const banner = document.createElement("div");
     banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;";
     banner.innerHTML = `<span style="font-size:14px;">Alle Pflicht-Antworten bestätigt — dein Zertifikat ist bereit.</span>`;
