@@ -57,6 +57,13 @@
     font-family:"Source Sans 3",sans-serif; font-size:13px; padding:6px 14px; cursor:pointer;
   }
   .role-switch button.active{background:var(--gold); color:var(--midnight); font-weight:600;}
+  .info-btn{
+    width:26px; height:26px; border-radius:50%; border:1px solid var(--gold);
+    background:transparent; color:var(--parchment); font-family:"Cormorant Garamond",serif;
+    font-style:italic; font-weight:700; font-size:15px; cursor:pointer;
+    align-items:center; justify-content:center;
+  }
+  .info-btn:hover{background:var(--gold); color:var(--midnight);}
   header.top .top-row{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
   .logout-link{
     display:block; margin-top:10px; font-size:12px; color:var(--gold-light);
@@ -143,6 +150,7 @@
     display:flex; align-items:center; justify-content:center; background:#fff;
   }
   .lang-chip.done{background:var(--gold); color:var(--midnight); border-color:var(--gold);}
+  .lang-chip.certified{box-shadow:0 0 0 2px var(--burgundy); border-color:var(--burgundy);}
 
   .diff-badge{
     font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:999px; flex:none;
@@ -371,6 +379,7 @@ let state = {
   prueferPasswordInput: "",
   prueferError: "",
   prueferName: "",
+  showOnboardingManually: false,
 };
 
 /* ---------------- Datenbank (Supabase) ---------------- */
@@ -438,16 +447,19 @@ async function setProgress(hymnId, lang, learned){
 }
 
 async function loadCertified(userId){
-  const { data, error } = await sb.from("certifications").select("hymn_id, approved_by, approved_at").eq("user_id", userId);
+  const { data, error } = await sb.from("certifications").select("hymn_id, lang, approved_by, approved_at").eq("user_id", userId);
   const result = {};
   if(!error && data){
-    data.forEach(row => { result[row.hymn_id] = { by: row.approved_by, date: new Date(row.approved_at).toLocaleDateString("de-CH") }; });
+    data.forEach(row => {
+      if(!result[row.hymn_id]) result[row.hymn_id] = {};
+      result[row.hymn_id][row.lang] = { by: row.approved_by, date: new Date(row.approved_at).toLocaleDateString("de-CH") };
+    });
   }
   return result;
 }
 
-async function certifyHymn(userId, hymnId, approvedByName){
-  await sb.from("certifications").upsert({ user_id: userId, hymn_id: hymnId, approved_by: approvedByName, approved_at: new Date().toISOString() });
+async function certifyHymn(userId, hymnId, lang, approvedByName){
+  await sb.from("certifications").upsert({ user_id: userId, hymn_id: hymnId, lang, approved_by: approvedByName, approved_at: new Date().toISOString() });
 }
 
 async function loadAllDiakone(){
@@ -458,6 +470,7 @@ async function loadAllDiakone(){
 /* ---------------- Hilfsfunktionen ---------------- */
 function findStation(id){ return STATIONS.find(s=>s.id===id); }
 function findHymn(id){ for(const s of STATIONS){ const h=s.hymns.find(h=>h.id===id); if(h) return {hymn:h, station:s}; } }
+function hymnLangCodes(hymn){ return LANGS.filter(l => hymn.content[l.code]).map(l=>l.code); }
 function langsLearnedFor(progressObj, hymnId){
   const rec = (progressObj||{})[hymnId] || {};
   return LANGS.filter(l => rec[l.code]).map(l=>l.code);
@@ -468,16 +481,27 @@ function stationSelfDoneCount(station){
   // Anzahl Pflicht-Antworten, die in mindestens einer Sprache als geübt markiert sind
   return mandatoryHymns(station).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
 }
-function isHymnCertified(hymnId){ return !!state.certified[hymnId]; }
+function certifiedLangsFor(hymnId){
+  return Object.keys(state.certified[hymnId] || {});
+}
+function isHymnLangCertified(hymnId, lang){ return !!(state.certified[hymnId] && state.certified[hymnId][lang]); }
+function isHymnCertifiedAnyLang(hymnId){ return certifiedLangsFor(hymnId).length > 0; }
+function isHymnFullyCertified(hymn){
+  const needed = hymnLangCodes(hymn);
+  const have = certifiedLangsFor(hymn.id);
+  return needed.length>0 && needed.every(l => have.includes(l));
+}
 function allMandatoryCertified(){
-  return STATIONS.every(s => mandatoryHymns(s).every(h => isHymnCertified(h.id)));
+  // Zertifikat: pro Pflicht-Antwort reicht mindestens eine bestätigte Sprache
+  return STATIONS.every(s => mandatoryHymns(s).every(h => isHymnCertifiedAnyLang(h.id)));
 }
 function allHymnsCertified(){
-  return STATIONS.every(s => s.hymns.every(h => isHymnCertified(h.id)));
+  // Belohnung: jede Antwort (Pflicht + freiwillig) muss in ALLEN ihren Sprachen bestätigt sein
+  return STATIONS.every(s => s.hymns.every(h => isHymnFullyCertified(h)));
 }
 function stationCertifiedCount(station){
   const mand = mandatoryHymns(station);
-  return mand.filter(h => isHymnCertified(h.id)).length;
+  return mand.filter(h => isHymnCertifiedAnyLang(h.id)).length;
 }
 
 /* placeholder "audio": kurzer Ton per Web Audio API, nur falls keine echte Aufnahme existiert */
@@ -534,7 +558,7 @@ function render(){
   main.appendChild(renderBody());
   root.appendChild(main);
 
-  if(state.role==="diakon" && state.profile && !state.profile.onboarded){
+  if(state.role==="diakon" && state.profile && (!state.profile.onboarded || state.showOnboardingManually)){
     root.appendChild(renderOnboardingModal());
   }
 }
@@ -553,14 +577,16 @@ function renderOnboardingModal(){
       <li>Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.</li>
       <li>Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.</li>
       <li>Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.</li>
-      <li>Sobald <strong>alle Pflicht-Antworten</strong> bestätigt sind, erhältst du dein <strong>Zertifikat</strong>.</li>
-      <li>Bestätigst du zusätzlich auch <strong>alle freiwilligen Antworten</strong>, gibt es eine besondere Belohnung.</li>
+      <li>Es reicht, jede Pflicht-Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.</li>
+      <li>Sobald jede <strong>Pflicht-Antwort</strong> in mindestens einer Sprache bestätigt ist, erhältst du dein <strong>Zertifikat</strong>.</li>
+      <li>Für die besondere <strong>Belohnung</strong> müsst ihr alle Antworten — Pflicht <em>und</em> freiwillig — in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen.</li>
     </ul>
-    <button class="btn" id="onboardOk">Verstanden, los geht's</button>
+    <button class="btn" id="onboardOk">${state.profile.onboarded ? "Schliessen" : "Verstanden, los geht's"}</button>
   `;
   overlay.appendChild(box);
   box.querySelector("#onboardOk").addEventListener("click", async ()=>{
-    await markOnboarded();
+    state.showOnboardingManually = false;
+    if(!state.profile.onboarded) await markOnboarded();
     render();
   });
   return overlay;
@@ -578,12 +604,19 @@ function renderHeader(){
           <div class="sub">Koptisch-Orthodoxe Kirche in der Deutschschweiz</div>
         </div>
       </div>
-      <div class="role-switch" id="roleSwitch">
-        <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
-        <button data-role="pruefer" class="${state.role==='pruefer'?'active':''}">Prüfer</button>
+      <div style="display:flex; align-items:center; gap:8px; flex:none;">
+        <button id="infoBtn" class="info-btn" title="Wie funktioniert das?" style="display:${state.role==='diakon' && state.profile ? 'flex':'none'};">i</button>
+        <div class="role-switch" id="roleSwitch">
+          <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
+          <button data-role="pruefer" class="${state.role==='pruefer'?'active':''}">Prüfer</button>
+        </div>
       </div>
     </div>
   `;
+  const infoBtn = h.querySelector("#infoBtn");
+  if(infoBtn){
+    infoBtn.addEventListener("click", ()=>{ state.showOnboardingManually = true; render(); });
+  }
   h.querySelector("#roleSwitch").addEventListener("click", async (e)=>{
     const btn = e.target.closest("button"); if(!btn) return;
     state.role = btn.dataset.role;
@@ -815,7 +848,7 @@ function renderHome(){
         <div class="station-title">${s.title}</div>
         <div class="station-meta">${metaText}</div>
       </div>
-      <div class="badge ${stationDone? 'done' : ''}">${stationDone? 'Fertig' : 'Offen'}</div>
+      ${stationDone ? `<div class="badge done">Fertig</div>` : ""}
     `;
     row.addEventListener("click", ()=>{ state.currentStationId = s.id; state.view="station"; render(); });
     list.appendChild(row);
@@ -824,7 +857,7 @@ function renderHome(){
 
   const note = document.createElement("div");
   note.className = "footnote";
-  note.textContent = "Alle Antworten sind jederzeit zugänglich. Wenn du eine Antwort geübt hast, geh zum Prüfer, der bestätigt sie dann einzeln. Sobald alle Pflicht-Antworten bestätigt sind, erhältst du dein Zertifikat; bestätigst du zusätzlich auch alle freiwilligen, gibt's eine besondere Belohnung.";
+  note.textContent = "Alle Antworten sind jederzeit zugänglich. Es reicht, jede Pflicht-Antwort in einer Sprache zu lernen und dem Prüfer vorzusingen — dann erhältst du dein Zertifikat. Für die besondere Belohnung müsst ihr alle Antworten (Pflicht + freiwillig) in allen verfügbaren Sprachen bestätigt bekommen.";
   wrap.appendChild(note);
 
   return wrap;
@@ -867,12 +900,16 @@ function renderStation(){
     row.className = "hymn-row";
     const chips = hymnLangs.map(l=>{
       const done = learnedLangs.includes(l.code);
+      const cert = isHymnLangCertified(h.id, l.code);
       const abbr = l.code==="de"?"DE":(l.code==="cop"?"KO":"AR");
-      return `<div class="lang-chip ${done?'done':''}" title="${l.label}">${abbr}</div>`;
+      const cls = [done?'done':'', cert?'certified':''].filter(Boolean).join(' ');
+      const titleTxt = l.label + (cert ? " — vom Prüfer bestätigt" : (done ? " — selbst geübt" : ""));
+      return `<div class="lang-chip ${cls}" title="${titleTxt}">${abbr}</div>`;
     }).join("");
     const diffBadge = h.difficulty ? `<div class="diff-badge ${h.difficulty}">${h.difficulty}</div>` : "";
     const voluntBadge = h.mandatory===false ? `<div class="volunt-badge">freiwillig</div>` : "";
-    const certBadge = isHymnCertified(h.id) ? `<div class="cert-badge" title="Vom Prüfer bestätigt">✓ bestätigt</div>` : "";
+    const certLangs = certifiedLangsFor(h.id);
+    const certBadge = certLangs.length>0 ? `<div class="cert-badge" title="Vom Prüfer bestätigt">✓ ${certLangs.map(c=>c==="de"?"DE":(c==="cop"?"KO":"AR")).join(", ")}</div>` : "";
     row.innerHTML = `
       <div class="hymn-title-group">
         <span class="hymn-title">${h.title}</span>
@@ -1004,12 +1041,14 @@ function renderHymn(){
   wrap.appendChild(selfRow);
 
   const certInfo = document.createElement("div");
-  if(isHymnCertified(hymn.id)){
+  const certForLang = isHymnLangCertified(hymn.id, state.currentLang);
+  if(certForLang){
+    const rec = state.certified[hymn.id][state.currentLang];
     certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; font-size:13px; color:var(--burgundy); font-weight:600;";
-    certInfo.textContent = `✓ Vom Prüfer bestätigt (${state.certified[hymn.id].by}, ${state.certified[hymn.id].date}) — du kannst trotzdem jederzeit weiter üben.`;
+    certInfo.textContent = `✓ Auf ${currentLangLabel} vom Prüfer bestätigt (${rec.by}, ${rec.date}) — du kannst trotzdem jederzeit weiter üben.`;
   } else {
     certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:var(--parchment-2); border:1px solid var(--line); border-radius:6px; font-size:13px; color:var(--muted);";
-    certInfo.textContent = "Noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort vorzusingen.";
+    certInfo.textContent = `Auf ${currentLangLabel} noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort in dieser Sprache vorzusingen.`;
   }
   wrap.appendChild(certInfo);
 
@@ -1114,34 +1153,47 @@ function renderPrueferStation(){
 
     const list = document.createElement("div");
     s.hymns.forEach(h=>{
-      const learnedLangs = LANGS.filter(l => (state.pruefer_progress[h.id]||{})[l.code]).map(l=>l.label);
-      const langInfo = learnedLangs.length>0 ? `Selbst geübt: ${learnedLangs.join(", ")}` : "Noch nicht selbst als geübt markiert";
+      const hymnLangs = LANGS.filter(l => h.content[l.code]);
+      const learnedLangCodes = LANGS.filter(l => (state.pruefer_progress[h.id]||{})[l.code]).map(l=>l.code);
       const voluntTag = h.mandatory===false ? ` <span class="volunt-badge">freiwillig</span>` : "";
-      const certified = isHymnCertified(h.id);
       const row = document.createElement("div");
       row.className = "approve-row";
-      row.innerHTML = `
-        <div class="info">
-          <b>${h.title}${voluntTag}</b>
-          <span>${langInfo}</span>
-          ${certified ? `<span style="color:var(--burgundy);">Bestätigt von ${state.certified[h.id].by} am ${state.certified[h.id].date}</span>` : ""}
-        </div>
-      `;
-      const btn = document.createElement("button");
-      if(certified){
-        btn.className = "btn"; btn.style.background = "var(--sage)";
-        btn.textContent = "Erneut bestätigen";
-      } else {
+      row.style.flexDirection = "column";
+      row.style.alignItems = "stretch";
+      row.style.gap = "10px";
+
+      const info = document.createElement("div");
+      info.className = "info";
+      info.innerHTML = `<b>${h.title}${voluntTag}</b>`;
+      row.appendChild(info);
+
+      const langRow = document.createElement("div");
+      langRow.style.cssText = "display:flex; flex-wrap:wrap; gap:8px;";
+      hymnLangs.forEach(l=>{
+        const selfDone = learnedLangCodes.includes(l.code);
+        const certified = isHymnLangCertified(h.id, l.code);
+        const btn = document.createElement("button");
         btn.className = "btn";
-        btn.textContent = "Bestätigen";
-      }
-      btn.addEventListener("click", async ()=>{
-        btn.disabled = true; btn.textContent = "Speichere …";
-        await certifyHymn(u.id, h.id, state.prueferName);
-        state.certified[h.id] = {by: state.prueferName, date: new Date().toLocaleDateString("de-CH")};
-        render();
+        btn.style.margin = "0";
+        btn.style.fontSize = "13px";
+        btn.style.padding = "8px 12px";
+        if(certified){
+          btn.style.background = "var(--sage)";
+          const rec = state.certified[h.id][l.code];
+          btn.textContent = `${l.label}: bestätigt (${rec.date})`;
+        } else {
+          btn.textContent = `${l.label}${selfDone ? " — bestätigen" : " — noch nicht selbst geübt, trotzdem bestätigen"}`;
+        }
+        btn.addEventListener("click", async ()=>{
+          btn.disabled = true; btn.textContent = "Speichere …";
+          await certifyHymn(u.id, h.id, l.code, state.prueferName);
+          if(!state.certified[h.id]) state.certified[h.id] = {};
+          state.certified[h.id][l.code] = {by: state.prueferName, date: new Date().toLocaleDateString("de-CH")};
+          render();
+        });
+        langRow.appendChild(btn);
       });
-      row.appendChild(btn);
+      row.appendChild(langRow);
       list.appendChild(row);
     });
     wrap.appendChild(list);
