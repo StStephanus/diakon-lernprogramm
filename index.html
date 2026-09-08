@@ -65,10 +65,10 @@
   }
   .info-btn:hover{background:var(--gold); color:var(--midnight);}
   header.top .top-row{display:flex; flex-direction:column; gap:14px;}
-  header.top .controls-row{display:flex; align-items:center; gap:8px;}
+  header.top .controls-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; row-gap:8px;}
   .logout-link{
-    display:block; margin-top:10px; font-size:12px; color:var(--gold-light);
-    text-decoration:underline; cursor:pointer; text-align:right;
+    display:inline-block; font-size:12px; color:var(--gold-light);
+    text-decoration:underline; cursor:pointer; white-space:nowrap;
   }
 
   main{padding:22px 20px 60px;}
@@ -605,12 +605,13 @@ function renderHeader(){
           <div class="sub">Koptisch-Orthodoxe Kirche in der Deutschschweiz</div>
         </div>
       </div>
-      <div class="controls-row" style="justify-content:flex-end;">
-        <button id="infoBtn" class="info-btn" title="Wie funktioniert das?" style="display:${state.role==='diakon' && state.profile ? 'flex':'none'};">i</button>
+      <div class="controls-row" id="controlsRow" style="justify-content:space-between;">
+        <button id="infoBtn" class="info-btn" title="Wie funktioniert das?" style="display:${state.role==='diakon' && state.profile ? 'flex':'none'}; visibility:${state.role==='diakon' && state.profile ? 'visible':'hidden'};">i</button>
         <div class="role-switch" id="roleSwitch">
           <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
           <button data-role="pruefer" class="${state.role==='pruefer'?'active':''}">Prüfer</button>
         </div>
+        <span id="logoutSlot"></span>
       </div>
     </div>
   `;
@@ -627,19 +628,20 @@ function renderHeader(){
     render();
   });
 
+  const logoutSlot = h.querySelector("#logoutSlot");
   if(state.role==="diakon" && state.profile){
-    const out = document.createElement("div");
+    const out = document.createElement("span");
     out.className = "logout-link";
     out.textContent = "Abmelden (" + state.profile.name + ")";
     out.addEventListener("click", async ()=>{ await logoutAccount(); render(); });
-    h.appendChild(out);
+    logoutSlot.appendChild(out);
   }
   if(state.role==="pruefer" && state.prueferAuthenticated){
-    const out = document.createElement("div");
+    const out = document.createElement("span");
     out.className = "logout-link";
     out.textContent = "Prüfer-Bereich verlassen";
     out.addEventListener("click", ()=>{ state.prueferAuthenticated=false; state.prueferPasswordOk=false; state.prueferPasswordInput=""; state.prueferName=""; render(); });
-    h.appendChild(out);
+    logoutSlot.appendChild(out);
   }
   return h;
 }
