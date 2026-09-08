@@ -291,7 +291,7 @@ const STATIONS = [
         cop:{text:null, translit:"Epros Eveksaste"},
         ar:{text:"Sallo", translit:null},
       }},
-      {id:"s1h3", title:"Tob hina", difficulty:"schwer", mandatory:true, content:{
+      {id:"s1h3", title:"Tob hina", difficulty:"schwer", mandatory:false, content:{
         de:{text:"Bittet, dass Gott sich unser erbarme, gnädig mit uns sei, uns erhöre, uns helfe, die Gebete und Bitten seiner Heiligen annehme, für unser Wohlergehen zu allen Zeiten<br><br><strong><em>und nach der Lammprozession:</em></strong> und uns würdig mache, die Teilhabe an seinen heiligen, gesegneten Sakramenten zu erlangen<br><br>zur Vergebung unserer Sünden", translit:null, html:true},
         cop:{text:null, translit:"Tob hina ente efnouti nai nan entef shenhit charon entef sotem eron entef er-voythin eron entef-etshi enni tiho nem nitobh enteni ethouab entaf entotou e-ehri egon epi aghathon enseyo niven<br><br><strong><em>nach der Lammprozession:</em></strong> entef ayten en emepsha ethren etshi evolchen ti kinonia ente nef mestirjon ethouab<br><br>etesmaro-out epiko evol ente nennovi.", html:true},
         ar:{text:"Etlobo lekaj jar7amana allah ua yatara2af 3alyna wayasm3na wa yo3inana wa yakbal eleh so2alat wa telbati keddisieh. Menhom belsala7y 3anna fi kolla hienen<br><br><strong><em>nach der Lammprozession:</em></strong> wa an yag3lana mosta7ekin an nanal men sharikat asrarihi almokkadasa almobaraka<br><br>lemaghferat 5atayana", translit:null, html:true},
@@ -314,19 +314,19 @@ const STATIONS = [
   {
     id:"s2", title:"Morgen- und Abendweihrauch",
     hymns:[
-      {id:"s2h1", title:"Gebet für die Entschlafenen", difficulty:"schwer", mandatory:true, content:{
+      {id:"s2h1", title:"Gebet für die Entschlafenen", difficulty:"schwer", mandatory:false, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die entschlafen und aus dem Leben geschieden sind im Glauben an Christus seit dem Anfang: unsere heiligen Väter, die Erzbischöfe, Bischöfe, Erzpriester, Priester, unsere Brüder, die Diakone, unsere Mönchsväter und Laienväter und für alle Christen, damit Christus, unser Gott, ihren Seelen im Paradies der Freude ewige Ruhe schenke. Uns möge er Barmherzigkeit erweisen und unsere Sünden vergeben.", translit:null},
         ar:{text:"Etlobo Aan aba-ana ua echuatana allazina rakado uatanajjaHo fi al-ieman belmasiH monzo albad-e. aba-ina alkeddisien ro-asa al asakifa ua aba-ina al asakifa aba-ina al kamamisa ua aba-ina al kesos ua echuatina al schmamisa aba-ina al rohhban ua aba-ina al Aelmanejjin ua Aan nejaH kol al masiHejjin lekaj al masiH elahhna jonajjeH nefosahom agmaAin fi ferdaus al naAim ua naHno ajdan jasnaA maAana raHmatan ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h2", title:"Gebet für die Kranken", difficulty:"schwer", mandatory:true, content:{
+      {id:"s2h2", title:"Gebet für die Kranken", difficulty:"schwer", mandatory:false, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die an irgendeiner Krankheit leiden, ob an diesem Ort oder an einem anderen Ort, dass Christus unser Gott uns und ihnen Gesundheit und Heilung schenke und uns unsere Sünden vergeben", translit:null},
         ar:{text:"Etlobo Aan ahba-ena ua echuatina almarda bekolli maraden en kan fi haza almaskan au bekolli maudeAen lekej almasieH elahhna jonAem Aaleina ua Aaleihom belAafeja ualschifaa ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h3", title:"Gebet für die Reisenden", difficulty:"schwer", mandatory:true, content:{
+      {id:"s2h3", title:"Gebet für die Reisenden", difficulty:"schwer", mandatory:false, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die auf Reisen sind und für die, die eine Reise in allerlei Orte vorhaben, dass Gott ihnen allen ihre Wege ebne, sei es auf dem Meer, auf den Flüssen, auf den Seen oder auf den Reisewegen, und dass Christus, unser Gott diejenigen, die ihre Reise auf alle Art verrichten, heimführe und unsere Sünden vergebe", translit:null},
         ar:{text:"Etlobo Aan aba-ina ua echuatna almosafirin ua allazina jodmirun alsafar fi kolli maudeAen lekej josahel torekahom agmaAin en kana fi albaHr au al anhar au alboHeirat au altorek almasluka au almosafirina bekolli nauAen lekej almasieH elahhna jaroddahom ela masakinahom salimin ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h4", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", mandatory:true, content:{
+      {id:"s2h4", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", mandatory:false, content:{
         de:{text:"Bittet für diejenigen, die sich um die Opfer kümmern um die Darreichungen, die Erstlinge der Ernte, die Öle, den Weihrauch, die Vorhänge, die Lesebücher und die Schätze des Altars. Dass Christus unser Gott sie im himmlischen Jerusalem belohne und uns unsere Sünden vergebe.", translit:null},
         ar:{text:"Etlobo Aan almohhtammin belsaAaed ualkrabin ualbekur ualzeit ualbechur ualsetur uakoteb alkeraa ua auani almazbaH lekej almasieH elahhna jokafeahom fi oroschalim alsmaeja uajaghfer lana chatajana.", translit:null},
       }},
@@ -334,15 +334,105 @@ const STATIONS = [
   },
   {
     id:"s3", title:"Lammprozession",
-    hymns:[]
+    hymns:[
+      {id:"s3h1", title:"Gebet für die Gaben", difficulty:"mittel", mandatory:true, content:{
+        de:{text:"Betet für diese heiligen und ehrwürdigen Gaben. Für unsere Opfer und für diejenigen, die sie dargebracht haben, kiryeleison.", translit:null},
+        cop:{text:null, translit:"Epros eveksasti eperton agjon timjon zoron toton ki sisjon emon ki epros viron ton, Kerjeleison"},
+        ar:{text:"Sallo men agl hazihi alkarabien almokaddasa alkariema ua takdomatena uallaziena kaddamoha, ya rabborham.", translit:null},
+      }},
+      {id:"s3h2", title:"Ezpatir", difficulty:"schwer", mandatory:false, content:{
+        de:{text:"Einer ist der heilige Vater, einer ist der heilige Sohn, einer ist der Heilige Geist Amen, gepriesen sei der Herr und Gott in alle Ewigkeiten. Amen. All ihr Völker, preist den Herrn. Lasst alle Nationen ihn preisen, denn seine Barmherzigkeit währt über uns. Und das Recht des Herrn dauert für immer. Amen, Halleluja", translit:null},
+        cop:{text:null, translit:"Espatier agjos essejjos agjos en epnevma agjon Amin, eflogetos kerejos ose oos estos ie onas Amin, ne esnos tiro esmo epschojs maro esmo erof engi ni la os tiro ge ab ef naj tagro e-ehhri egon ouoh ti mesmi ente epschojs schop scha eneh, Amin, Alleloja"},
+        ar:{text:"UaHedon houa alab elkoddoos uaHedon houa elebn elkoddoos uaHedon houa alroH elkodos Amin, mobarak alrabb alelahh ela alabad jagamieA alomam bareko alrabb ualtobarekaho gamieAa alscheAob le anna raHmataho kad sabotat Aaleina ua Hakk alrabb jadoum ela alabad, Amin, Alleloja", translit:null},
+      }},
+    ]
   },
   {
     id:"s4", title:"Liturgie der Gläubigen",
-    hymns:[]
+    hymns:[
+      {id:"s4h1", title:"Gebet für den Frieden", difficulty:"mittel", mandatory:true, content:{
+        de:{text:"Betet für den vollkommen Frieden, für die Liebe und für die reinen, apostolischen Küsse", translit:null},
+        ar:{text:"Sallo men agl al-salam alkamel ual-maHabba ualkobla altahira alrasolejja", translit:null},
+      }},
+      {id:"s4h2", title:"Aspazesti", difficulty:"schwer", mandatory:false, content:{
+        de:{text:"Grüßt einander mit einem heiligen Kuss Herr, erbarme dich, Herr, erbarme dich, Herr, erbarme dich. Ja, o Herr, Jesus Christus, der der Sohn Gottes ist, erhöre uns und erbarme dich unser. Tretet heran, tretet heran nach der Vorschrift. Steht in Ehrfurcht und schaut nach Osten. Wir sind aufmerksam.", translit:null},
+        ar:{text:"Kabbelo baAdakom baAdan bekoblaten mokaddasa, jarabbo erHam, jarabbo erHam, jarabbo erHam; naAam jarabb allazi houa JasuAa almasieH ebno allah esmaAna ua erHamna, takaddamo Ala haza alrasm, kefo bereAdaten ue ela alschark enzoro, nonset.", translit:null},
+      }},
+      {id:"s4h3", title:"Wer sitzt, stehe auf", difficulty:"leicht", mandatory:true, content:{
+        de:{text:"Wer sitzt, stehe auf!", translit:null},
+        ar:{text:"Ayohal geluus, kefo!", translit:null},
+      }},
+      {id:"s4h4", title:"Schauet nach Osten!", difficulty:"leicht", mandatory:true, content:{
+        de:{text:"Schauet nach Osten!", translit:null},
+        ar:{text:"Ua ilal shark onzoro!", translit:null},
+      }},
+      {id:"s4h5", title:"Wir sind aufmerksam!", difficulty:"leicht", mandatory:true, content:{
+        de:{text:"Wir sind aufmerksam!", translit:null},
+        cop:{text:null, translit:"Epros chomen!"},
+        ar:{text:"Nanset!", translit:null},
+      }},
+      {id:"s4h6", title:"Verbeugt euch vor Gott", difficulty:"leicht", mandatory:true, content:{
+        de:{text:"Verbeugt euch vor Gott, in Ehrfurcht und Zittern!", translit:null},
+        cop:{text:null, translit:"O oscht em evnoti chen o hoti nem o estertier!"},
+        ar:{text:"Esgodo lellahy bechaufen ua reAdaten!", translit:null},
+      }},
+      {id:"s4h7", title:"Seid aufmerksam, Amen!", difficulty:"leicht", mandatory:true, content:{
+        de:{text:"Seid aufmerksam, Amen!", translit:null},
+        cop:{text:null, translit:"Epros chomen, Amin!"},
+        ar:{text:"Nanset, Amin!", translit:null},
+      }},
+      {id:"s4h8", title:"Gebet für den Kirchenfrieden", difficulty:"mittel", mandatory:true, content:{
+        de:{text:"Betet für den Frieden der einen heiligen, universalen und apostolischen, orthodoxen Kirche Gottes", translit:null},
+        ar:{text:"Sallo men agl salam kanisat allah aluaHeda almokaddasa algameAa alrasoleja alorthozokseja", translit:null},
+      }},
+      {id:"s4h9", title:"Gebet für den Patriarchen und Bischof", difficulty:"mittel", mandatory:true, content:{
+        de:{text:"Betet für unseren Pontifex, den Papst Anba Tawadros der Zweite, Papst und Patriarch und Erzbischof der großen Stadt Alexandria und für seinen Teilhaber am apostolischen Dienst, Bischof Anba Gabriel und für unsere orthodoxen Bischöfe", translit:null},
+        ar:{text:"Sallo men agl ra-ies kahanatna albaba alanba Tawadros althani baba ua batrejark ua ra-ies asakefat almadina alAozma aleskandareja ua scharikaho fel chedma al rasuleja abina el oskof el mokaram al anba Gabriel ua sa-er asakefatna alorthozoksejien", translit:null},
+      }},
+      {id:"s4h10", title:"Gebet für die Kirchenväter", difficulty:"mittel", mandatory:true, content:{
+        de:{text:"Betet für die Erzpriester, Priester, Diakone, Subdiakone und die sieben Weihestufen der Kirche Gottes", translit:null},
+        ar:{text:"Sallo men agl alkmamesa ualkesus ualschmamesa ualebezjakonien ua sabA taghamat kaniesat ellah", translit:null},
+      }},
+      {id:"s4h11", title:"Gebet für den Ort", difficulty:"mittel", mandatory:true, content:{
+        de:{text:"Betet für die Sicherheit der Welt, dieser unserer Stadt, aller Städte, Länder, Inseln und Klöster", translit:null},
+        ar:{text:"Sallo men agl chalas elAalam ua madinatna hazihi uasa-er almodon ualakaliem ual gaza-er ualadjora", translit:null},
+      }},
+      {id:"s4h12", title:"Gebet für die Saaten und Gewässer", difficulty:"schwer", mandatory:true, content:{
+        de:{text:"Bittet für den Regen und das Wasser der Flüsse, für die Saaten, Kräuter und Gewächse des Feldes; für die Luft des Himmels, die Früchte der Erde, die Bäume, die Weinberge und für jede nützliche Pflanze auf der ganzen Erde. Dass Christus unser Gott sie segne, uns Menschen ernähre, den Tieren Sicherheit gebe und uns unsere Sünden vergebe", translit:null},
+        ar:{text:"Etlobo An mijah el amtar ual anhar ua An el zeruA ual Aoschb ua nabat el Hakl ua ahujat al sama ua samarat el ard ual schagar ual kurum ua koll schagaraten moßmera fi koll al maskuna. Lekei jubarekha al masieH ilahuna ua JäAulana naHnol baschar ua joAti al nagata lel Hajauan, uajaghfer lana chatajana", translit:null},
+      }},
+      {id:"s4h13", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", mandatory:true, content:{
+        de:{text:"Betet für diese heiligen und kostbaren Gaben, für unser Opfer und für die Jenigen, die sie dargebracht haben.", translit:null},
+        ar:{text:"Sallo men agl hazihi alkrabien almokaddasa al karima uatakdomatina uallazina kaddamoha", translit:null},
+      }},
+      {id:"s4h14", title:"Die Leser", difficulty:"schwer", mandatory:true, content:{
+        de:{text:"Die Leser sollen die Namen unserer Väter, der heiligen Patriarchen, die entschlafen sind, sagen. Der Herr schenke all ihren Seelen ewige Ruhe und vergebe uns unsere Sünden.", translit:null},
+        cop:{text:null, translit:"Ni etosch marota ouo en neran ente eßouav empatrjar-schies etav enkot epschojs ma emton en no epsiki tero ouo entef kanen novi nan evol"},
+        ar:{text:"Alkari-un fal-jakolo asmaa aba-ena albatareka alkeddisien allazina rakado alrabb jonajjeH nefoshom agmaAien uajaghfer lana chatajana", translit:null},
+      }},
+      {id:"s4h15", title:"Amen, Amen, Betet!", difficulty:"leicht", mandatory:true, content:{
+        de:{text:"Amen, Amen, Betet!", translit:null},
+        cop:{text:null, translit:"Amin, Amin, Epros eveksasti!"},
+        ar:{text:"Amin, Amin, Sallo!", translit:null},
+      }},
+      {id:"s4h16", title:"Sotis Amin", difficulty:"leicht", mandatory:true, content:{
+        de:{text:"In Wahrheit hast du uns erlöst mit deinem Geiste, Amen", translit:null},
+        cop:{text:null, translit:"Soties amin keto ebnevmati so, Amin"},
+        ar:{text:"Chalesto Hakkan uamaAa roHeka. Amin", translit:null},
+      }},
+      {id:"s4h17", title:"Amin Amin Amin", difficulty:"schwer", mandatory:true, content:{
+        de:{text:"Amen, amen, amen, ich glaube, ich glaube, ich glaube dass dies die Wahrheit ist, Amen. Betet für uns und für alle Christen, die uns gebeten haben, ihrer im Hause Gottes zu gedenken. Der Friede und die Liebe Jesu Christi seien mit euch. Singt Lob: Halleluja. Betet, für die würdige Teilnahme an diesem heiligen, reinen, kostbaren und himmlischen Sakrament. Kyrie eleison", translit:null},
+        ar:{text:"Amin,Amin,Amin, ohmen,ohmen, ohmen anna haza houa belHakikati Amin. Etlobo Aanna ua Aan koll elmasie-Hejjien allaziena kalo lana men aglehem an nazkorahom fi beit elrabb. Salam ua maHabbat rabbana JasuA almasieH maAakom, rattelo benaschiden, alleloja. Sallo men agl el tanauel besteHkaken men elasrar al-mokaddasa altahera al zakeja alsamaejja. Jarabbo erHam", translit:null},
+      }},
+    ]
   },
   {
     id:"s5", title:"Spezielle Anlässe",
-    hymns:[]
+    hymns:[
+      {id:"s5h1", title:"Endung der Hymnen an Festtagen", difficulty:"mittel", mandatory:true, content:{
+        de:{text:"Nur Melodie, kein fester Text", translit:null},
+      }},
+    ]
   },
 ];
 
