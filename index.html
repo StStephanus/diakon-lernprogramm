@@ -152,6 +152,15 @@
   .diff-badge.mittel{background:#FBEBD9; color:#9A5B12; border:1px solid #E8BC85;}
   .diff-badge.schwer{background:#F5DEDF; color:#8E2A2E; border:1px solid #DDA0A2;}
 
+  .volunt-badge{
+    font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:999px; flex:none;
+    background:#EEE8DA; color:var(--muted); border:1px solid var(--line);
+  }
+  .cert-badge{
+    font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:999px; flex:none;
+    background:var(--burgundy); color:#fff;
+  }
+
   /* Hymn detail */
   .lang-tabs{display:flex; gap:8px; margin:18px 0 20px;}
   .lang-tab{
@@ -234,6 +243,19 @@
   .empty{padding:40px 4px; text-align:center; color:var(--muted);}
   .empty h3{color:var(--ink); margin-bottom:8px;}
   .footnote{margin-top:40px; font-size:12px; color:var(--muted); line-height:1.6; border-top:1px solid var(--line); padding-top:14px;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(28,20,15,0.55); z-index:1000;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-box{
+    background:var(--parchment); border-radius:10px; max-width:520px; width:100%;
+    max-height:85vh; overflow-y:auto; padding:26px 24px; border:1px solid var(--line);
+  }
+  .modal-box h2{font-size:22px; margin-bottom:4px;}
+  .modal-box ul{margin:10px 0 0; padding-left:20px; line-height:1.7; font-size:14px;}
+  .modal-box li{margin-bottom:6px;}
+  .modal-box .btn{margin-top:20px; width:100%;}
 </style>
 </head>
 <body>
@@ -252,30 +274,30 @@ const STATIONS = [
   {
     id:"s1", title:"Wiederkehrende Antworten",
     hymns:[
-      {id:"s1h1", title:"Epi Eprosevki Estasite", difficulty:"leicht", content:{
+      {id:"s1h1", title:"Epi Eprosevki Estasite", difficulty:"leicht", mandatory:true, content:{
         cop:{text:null, translit:"Epi Eprosevki Estasite"},
       }},
-      {id:"s1h2", title:"Epros Eveksaste", difficulty:"leicht", content:{
+      {id:"s1h2", title:"Epros Eveksaste", difficulty:"leicht", mandatory:true, content:{
         de:{text:"Betet", translit:null},
         cop:{text:null, translit:"Epros Eveksaste"},
         ar:{text:"Sallo", translit:null},
       }},
-      {id:"s1h3", title:"Tob hina", difficulty:"schwer", content:{
+      {id:"s1h3", title:"Tob hina", difficulty:"schwer", mandatory:true, content:{
         de:{text:"Bittet, dass Gott sich unser erbarme, gnädig mit uns sei, uns erhöre, uns helfe, die Gebete und Bitten seiner Heiligen annehme, für unser Wohlergehen zu allen Zeiten<br><br><strong><em>und nach der Lammprozession:</em></strong> und uns würdig mache, die Teilhabe an seinen heiligen, gesegneten Sakramenten zu erlangen<br><br>zur Vergebung unserer Sünden", translit:null, html:true},
         cop:{text:null, translit:"Tob hina ente efnouti nai nan entef shenhit charon entef sotem eron entef er-voythin eron entef-etshi enni tiho nem nitobh enteni ethouab entaf entotou e-ehri egon epi aghathon enseyo niven<br><br><strong><em>nach der Lammprozession:</em></strong> entef ayten en emepsha ethren etshi evolchen ti kinonia ente nef mestirjon ethouab<br><br>etesmaro-out epiko evol ente nennovi.", html:true},
         ar:{text:"Etlobo lekaj jar7amana allah ua yatara2af 3alyna wayasm3na wa yo3inana wa yakbal eleh so2alat wa telbati keddisieh. Menhom belsala7y 3anna fi kolla hienen<br><br><strong><em>nach der Lammprozession:</em></strong> wa an yag3lana mosta7ekin an nanal men sharikat asrarihi almokkadasa almobaraka<br><br>lemaghferat 5atayana", translit:null, html:true},
       }},
-      {id:"s1h4", title:"Evangeliumsgebet", difficulty:"leicht", content:{
+      {id:"s1h4", title:"Evangeliumsgebet", difficulty:"leicht", mandatory:true, content:{
         de:{text:"Betet um des Heiligen Evangeliums Willen", translit:null},
         ar:{text:"Sallo men agl el Engil almokkadas", translit:null},
       }},
-      {id:"s1h5", title:"Stasite", difficulty:"leicht", content:{
+      {id:"s1h5", title:"Stasite", difficulty:"leicht", mandatory:true, content:{
         cop:{text:null, translit:"Stasite metavovo theo, akosomen to agyo evangeliou"},
       }},
-      {id:"s1h6", title:"Taski falasimon", difficulty:"mittel", content:{
+      {id:"s1h6", title:"Taski falasimon", difficulty:"mittel", mandatory:true, content:{
         cop:{text:null, translit:"Taski falasimon tou kiryo eklenati"},
       }},
-      {id:"s1h7", title:"Epros chomen", difficulty:"mittel", content:{
+      {id:"s1h7", title:"Epros chomen", difficulty:"mittel", mandatory:true, content:{
         cop:{text:null, translit:"Epros chomen se-o metavovo, amin"},
       }},
     ]
@@ -283,19 +305,19 @@ const STATIONS = [
   {
     id:"s2", title:"Morgen- und Abendweihrauch",
     hymns:[
-      {id:"s2h1", title:"Gebet für die Entschlafenen", difficulty:"schwer", content:{
+      {id:"s2h1", title:"Gebet für die Entschlafenen", difficulty:"schwer", mandatory:true, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die entschlafen und aus dem Leben geschieden sind im Glauben an Christus seit dem Anfang: unsere heiligen Väter, die Erzbischöfe, Bischöfe, Erzpriester, Priester, unsere Brüder, die Diakone, unsere Mönchsväter und Laienväter und für alle Christen, damit Christus, unser Gott, ihren Seelen im Paradies der Freude ewige Ruhe schenke. Uns möge er Barmherzigkeit erweisen und unsere Sünden vergeben.", translit:null},
         ar:{text:"Etlobo Aan aba-ana ua echuatana allazina rakado uatanajjaHo fi al-ieman belmasiH monzo albad-e. aba-ina alkeddisien ro-asa al asakifa ua aba-ina al asakifa aba-ina al kamamisa ua aba-ina al kesos ua echuatina al schmamisa aba-ina al rohhban ua aba-ina al Aelmanejjin ua Aan nejaH kol al masiHejjin lekaj al masiH elahhna jonajjeH nefosahom agmaAin fi ferdaus al naAim ua naHno ajdan jasnaA maAana raHmatan ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h2", title:"Gebet für die Kranken", difficulty:"schwer", content:{
+      {id:"s2h2", title:"Gebet für die Kranken", difficulty:"schwer", mandatory:true, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die an irgendeiner Krankheit leiden, ob an diesem Ort oder an einem anderen Ort, dass Christus unser Gott uns und ihnen Gesundheit und Heilung schenke und uns unsere Sünden vergeben", translit:null},
         ar:{text:"Etlobo Aan ahba-ena ua echuatina almarda bekolli maraden en kan fi haza almaskan au bekolli maudeAen lekej almasieH elahhna jonAem Aaleina ua Aaleihom belAafeja ualschifaa ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h3", title:"Gebet für die Reisenden", difficulty:"schwer", content:{
+      {id:"s2h3", title:"Gebet für die Reisenden", difficulty:"schwer", mandatory:true, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die auf Reisen sind und für die, die eine Reise in allerlei Orte vorhaben, dass Gott ihnen allen ihre Wege ebne, sei es auf dem Meer, auf den Flüssen, auf den Seen oder auf den Reisewegen, und dass Christus, unser Gott diejenigen, die ihre Reise auf alle Art verrichten, heimführe und unsere Sünden vergebe", translit:null},
         ar:{text:"Etlobo Aan aba-ina ua echuatna almosafirin ua allazina jodmirun alsafar fi kolli maudeAen lekej josahel torekahom agmaAin en kana fi albaHr au al anhar au alboHeirat au altorek almasluka au almosafirina bekolli nauAen lekej almasieH elahhna jaroddahom ela masakinahom salimin ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h4", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", content:{
+      {id:"s2h4", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", mandatory:true, content:{
         de:{text:"Bittet für diejenigen, die sich um die Opfer kümmern um die Darreichungen, die Erstlinge der Ernte, die Öle, den Weihrauch, die Vorhänge, die Lesebücher und die Schätze des Altars. Dass Christus unser Gott sie im himmlischen Jerusalem belohne und uns unsere Sünden vergebe.", translit:null},
         ar:{text:"Etlobo Aan almohhtammin belsaAaed ualkrabin ualbekur ualzeit ualbechur ualsetur uakoteb alkeraa ua auani almazbaH lekej almasieH elahhna jokafeahom fi oroschalim alsmaeja uajaghfer lana chatajana.", translit:null},
       }},
@@ -321,6 +343,7 @@ const TOTAL_HYMNS = STATIONS.reduce((n,s)=>n+s.hymns.length,0);
    In der echten App sollte jeder Prüfer einen eigenen Zugang haben,
    statt sich ein gemeinsames Passwort zu teilen. */
 const PRUEFER_PASSWORD = "Diakonenkurs2026";
+const PRUEFER_NAMES = ["Markus Salib", "Amir Mikail"];
 
 /* ---------------- Supabase-Verbindung ---------------- */
 const SUPABASE_URL = "https://jyznqbklhmetwezcwwnu.supabase.co";
@@ -344,8 +367,10 @@ let state = {
   authTab: "login",   // "login" | "register"
   authError: "",
   prueferAuthenticated: false,
+  prueferPasswordOk: false,
   prueferPasswordInput: "",
   prueferError: "",
+  prueferName: "",
 };
 
 /* ---------------- Datenbank (Supabase) ---------------- */
@@ -361,7 +386,14 @@ async function loadProfile(){
     vorname: data.vorname,
     nachname: data.nachname,
     name: data.vorname + " " + data.nachname,
+    onboarded: !!data.onboarded,
   };
+}
+
+async function markOnboarded(){
+  if(!state.profile) return;
+  state.profile.onboarded = true;
+  await sb.from("profiles").update({ onboarded: true }).eq("id", state.profile.id);
 }
 
 async function registerAccount(vorname, nachname, email, password){
@@ -406,16 +438,16 @@ async function setProgress(hymnId, lang, learned){
 }
 
 async function loadCertified(userId){
-  const { data, error } = await sb.from("certifications").select("station_id, approved_by, approved_at").eq("user_id", userId);
+  const { data, error } = await sb.from("certifications").select("hymn_id, approved_by, approved_at").eq("user_id", userId);
   const result = {};
   if(!error && data){
-    data.forEach(row => { result[row.station_id] = { by: row.approved_by, date: new Date(row.approved_at).toLocaleDateString("de-CH") }; });
+    data.forEach(row => { result[row.hymn_id] = { by: row.approved_by, date: new Date(row.approved_at).toLocaleDateString("de-CH") }; });
   }
   return result;
 }
 
-async function certifyStation(userId, stationId, approvedByName){
-  await sb.from("certifications").upsert({ user_id: userId, station_id: stationId, approved_by: approvedByName, approved_at: new Date().toISOString() });
+async function certifyHymn(userId, hymnId, approvedByName){
+  await sb.from("certifications").upsert({ user_id: userId, hymn_id: hymnId, approved_by: approvedByName, approved_at: new Date().toISOString() });
 }
 
 async function loadAllDiakone(){
@@ -430,16 +462,23 @@ function langsLearnedFor(progressObj, hymnId){
   const rec = (progressObj||{})[hymnId] || {};
   return LANGS.filter(l => rec[l.code]).map(l=>l.code);
 }
+function mandatoryHymns(station){ return station.hymns.filter(h => h.mandatory!==false); }
+function voluntaryHymns(station){ return station.hymns.filter(h => h.mandatory===false); }
 function stationSelfDoneCount(station){
-  // Anzahl Antworten, die in mindestens einer Sprache als geübt markiert sind
-  return station.hymns.filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
+  // Anzahl Pflicht-Antworten, die in mindestens einer Sprache als geübt markiert sind
+  return mandatoryHymns(station).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
 }
-function isStationCertified(stationId){ return !!state.certified[stationId]; }
-function isStationUnlocked(index){
-  if(index===0) return true;
-  return isStationCertified(STATIONS[index-1].id);
+function isHymnCertified(hymnId){ return !!state.certified[hymnId]; }
+function allMandatoryCertified(){
+  return STATIONS.every(s => mandatoryHymns(s).every(h => isHymnCertified(h.id)));
 }
-function allStationsCertified(){ return STATIONS.every(s=>isStationCertified(s.id)); }
+function allHymnsCertified(){
+  return STATIONS.every(s => s.hymns.every(h => isHymnCertified(h.id)));
+}
+function stationCertifiedCount(station){
+  const mand = mandatoryHymns(station);
+  return mand.filter(h => isHymnCertified(h.id)).length;
+}
 
 /* placeholder "audio": kurzer Ton per Web Audio API, nur falls keine echte Aufnahme existiert */
 let audioCtx = null;
@@ -494,6 +533,37 @@ function render(){
   const main = document.createElement("main");
   main.appendChild(renderBody());
   root.appendChild(main);
+
+  if(state.role==="diakon" && state.profile && !state.profile.onboarded){
+    root.appendChild(renderOnboardingModal());
+  }
+}
+
+function renderOnboardingModal(){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  box.innerHTML = `
+    <h2 class="serif">Willkommen im Lernprogramm!</h2>
+    <p style="color:var(--muted); font-size:14px; margin-top:4px;">Kurz erklärt, wie alles funktioniert:</p>
+    <ul>
+      <li>Du findest alle liturgischen Antworten, gruppiert nach Stationen. Alle sind jederzeit für dich zugänglich, du kannst frei zwischen ihnen wechseln.</li>
+      <li>Es gibt <strong>Pflicht-Antworten</strong> (nötig fürs Zertifikat) und <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte).</li>
+      <li>Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.</li>
+      <li>Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.</li>
+      <li>Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.</li>
+      <li>Sobald <strong>alle Pflicht-Antworten</strong> bestätigt sind, erhältst du dein <strong>Zertifikat</strong>.</li>
+      <li>Bestätigst du zusätzlich auch <strong>alle freiwilligen Antworten</strong>, gibt es eine besondere Belohnung.</li>
+    </ul>
+    <button class="btn" id="onboardOk">Verstanden, los geht's</button>
+  `;
+  overlay.appendChild(box);
+  box.querySelector("#onboardOk").addEventListener("click", async ()=>{
+    await markOnboarded();
+    render();
+  });
+  return overlay;
 }
 
 function renderHeader(){
@@ -534,7 +604,7 @@ function renderHeader(){
     const out = document.createElement("div");
     out.className = "logout-link";
     out.textContent = "Prüfer-Bereich verlassen";
-    out.addEventListener("click", ()=>{ state.prueferAuthenticated=false; state.prueferPasswordInput=""; render(); });
+    out.addEventListener("click", ()=>{ state.prueferAuthenticated=false; state.prueferPasswordOk=false; state.prueferPasswordInput=""; state.prueferName=""; render(); });
     h.appendChild(out);
   }
   return h;
@@ -558,33 +628,51 @@ function renderBody(){
 function renderPrueferGate(){
   const wrap = document.createElement("div");
   wrap.className = "profile-gate";
+
+  if(!state.prueferPasswordOk){
+    wrap.innerHTML = `
+      <h2 class="serif" style="font-size:26px;">Prüfer-Bereich</h2>
+      <p>Dieser Bereich ist nur für Verantwortliche, die Antworten bestätigen dürfen. Bitte Passwort eingeben.</p>
+      <div class="field">
+        <label>Passwort</label>
+        <input type="password" id="prueferPw" placeholder="Passwort" />
+      </div>
+      <button class="btn" id="prueferGoBtn">Weiter</button>
+      ${state.prueferError ? `<div class="error-text">${state.prueferError}</div>` : ""}
+    `;
+    const pwInput = wrap.querySelector("#prueferPw");
+    pwInput.value = state.prueferPasswordInput;
+    const submit = ()=>{
+      if(pwInput.value === PRUEFER_PASSWORD){
+        state.prueferPasswordOk = true;
+        state.prueferError = "";
+      } else {
+        state.prueferError = "Falsches Passwort.";
+        state.prueferPasswordInput = pwInput.value;
+      }
+      render();
+    };
+    wrap.querySelector("#prueferGoBtn").addEventListener("click", submit);
+    pwInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") submit(); });
+    return wrap;
+  }
+
+  // Schritt 2: Wer bist du?
+  const nameButtons = PRUEFER_NAMES.map(n=>`<button class="btn secondary" style="display:block; width:100%; margin-top:10px;" data-name="${n}">${n}</button>`).join("");
   wrap.innerHTML = `
-    <h2 class="serif" style="font-size:26px;">Prüfer-Bereich</h2>
-    <p>Dieser Bereich ist nur für Verantwortliche, die Stationen bestätigen dürfen. Bitte Passwort eingeben.</p>
-    <div class="field">
-      <label>Passwort</label>
-      <input type="password" id="prueferPw" placeholder="Passwort" />
-    </div>
-    <button class="btn" id="prueferGoBtn">Anmelden</button>
-    ${state.prueferError ? `<div class="error-text">${state.prueferError}</div>` : ""}
-    <div class="footnote">Hinweis: Alle Prüfer teilen sich aktuell ein gemeinsames Passwort. Für mehr Sicherheit könnt ihr später jedem Prüfer einen eigenen, persönlichen Zugang geben.</div>
+    <h2 class="serif" style="font-size:26px;">Wer bestätigt gerade?</h2>
+    <p>Wähle deinen Namen, damit Bestätigungen zugeordnet werden können.</p>
+    <div id="nameBtns">${nameButtons}</div>
   `;
-  const pwInput = wrap.querySelector("#prueferPw");
-  pwInput.value = state.prueferPasswordInput;
-  const submit = async ()=>{
-    if(pwInput.value === PRUEFER_PASSWORD){
+  wrap.querySelectorAll("#nameBtns button").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      state.prueferName = btn.dataset.name;
       state.prueferAuthenticated = true;
-      state.prueferError = "";
       state.view = "pruefer-home";
       state.allDiakone = await loadAllDiakone();
-    } else {
-      state.prueferError = "Falsches Passwort.";
-      state.prueferPasswordInput = pwInput.value;
-    }
-    render();
-  };
-  wrap.querySelector("#prueferGoBtn").addEventListener("click", submit);
-  pwInput.addEventListener("keydown", (e)=>{ if(e.key==="Enter") submit(); });
+      render();
+    });
+  });
   return wrap;
 }
 
@@ -685,16 +773,22 @@ function renderDiakonAuthGate(){
 
 function renderHome(){
   const wrap = document.createElement("div");
-  const cert = allStationsCertified();
+  const certDone = allMandatoryCertified();
+  const rewardDone = allHymnsCertified();
   const intro = document.createElement("div");
   intro.innerHTML = `<h2 class="serif" style="font-size:24px;">Hallo ${state.profile.name}</h2>
-    <p style="color:var(--muted); margin-top:6px; font-size:14px;">Lerne die Stationen der Reihe nach. Wenn du eine Station geübt hast, geh zum Prüfer in der Kirche und singe sie vor.</p>`;
+    <p style="color:var(--muted); margin-top:6px; font-size:14px;">Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.</p>`;
   wrap.appendChild(intro);
 
-  if(cert){
+  if(rewardDone){
     const banner = document.createElement("div");
-    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between;";
-    banner.innerHTML = `<span style="font-size:14px;">Alle Stationen bestätigt — dein Zertifikat ist bereit.</span>`;
+    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#FBEBD9; border:1px solid var(--gold); border-radius:6px;";
+    banner.innerHTML = `<span style="font-size:14px;">🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!</span>`;
+    wrap.appendChild(banner);
+  } else if(certDone){
+    const banner = document.createElement("div");
+    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;";
+    banner.innerHTML = `<span style="font-size:14px;">Alle Pflicht-Antworten bestätigt — dein Zertifikat ist bereit.</span>`;
     const btn = document.createElement("button");
     btn.className = "btn"; btn.style.margin="0"; btn.textContent = "Zertifikat ansehen";
     btn.addEventListener("click", ()=>{ state.view="zertifikat"; render(); });
@@ -705,29 +799,32 @@ function renderHome(){
   const list = document.createElement("div");
   list.style.marginTop = "20px";
   STATIONS.forEach((s, i)=>{
-    const unlocked = isStationUnlocked(i);
     const done = stationSelfDoneCount(s);
-    const certified = isStationCertified(s.id);
+    const certCount = stationCertifiedCount(s);
+    const mandCount = mandatoryHymns(s).length;
+    const voluntCount = voluntaryHymns(s).length;
+    const metaText = mandCount>0
+      ? `${certCount}/${mandCount} Pflicht-Antworten bestätigt (${done} selbst geübt)` + (voluntCount>0 ? ` · ${voluntCount} freiwillig` : "")
+      : (voluntCount>0 ? `${voluntCount} freiwillige Antworten` : "");
+    const stationDone = mandCount>0 && certCount===mandCount;
     const row = document.createElement("div");
-    row.className = "station-row" + (unlocked? "" : " locked");
+    row.className = "station-row";
     row.innerHTML = `
       <div class="station-num">${i+1}</div>
       <div class="station-body">
         <div class="station-title">${s.title}</div>
-        <div class="station-meta">${done}/${s.hymns.length} selbst geübt</div>
+        <div class="station-meta">${metaText}</div>
       </div>
-      <div class="badge ${certified? 'done' : (unlocked? '' : 'locked')}">${certified? 'Bestätigt' : (unlocked? 'Offen' : 'Gesperrt')}</div>
+      <div class="badge ${stationDone? 'done' : ''}">${stationDone? 'Fertig' : 'Offen'}</div>
     `;
-    if(unlocked){
-      row.addEventListener("click", ()=>{ state.currentStationId = s.id; state.view="station"; render(); });
-    }
+    row.addEventListener("click", ()=>{ state.currentStationId = s.id; state.view="station"; render(); });
     list.appendChild(row);
   });
   wrap.appendChild(list);
 
   const note = document.createElement("div");
   note.className = "footnote";
-  note.textContent = "Hinweis: Nur ein Prüfer/Verantwortlicher kann eine Station offiziell bestätigen (im Prüfer-Bereich). Dein eigenes Häkchen zeigt nur, dass du selbst geübt hast.";
+  note.textContent = "Alle Antworten sind jederzeit zugänglich. Wenn du eine Antwort geübt hast, geh zum Prüfer, der bestätigt sie dann einzeln. Sobald alle Pflicht-Antworten bestätigt sind, erhältst du dein Zertifikat; bestätigst du zusätzlich auch alle freiwilligen, gibt's eine besondere Belohnung.";
   wrap.appendChild(note);
 
   return wrap;
@@ -774,10 +871,14 @@ function renderStation(){
       return `<div class="lang-chip ${done?'done':''}" title="${l.label}">${abbr}</div>`;
     }).join("");
     const diffBadge = h.difficulty ? `<div class="diff-badge ${h.difficulty}">${h.difficulty}</div>` : "";
+    const voluntBadge = h.mandatory===false ? `<div class="volunt-badge">freiwillig</div>` : "";
+    const certBadge = isHymnCertified(h.id) ? `<div class="cert-badge" title="Vom Prüfer bestätigt">✓ bestätigt</div>` : "";
     row.innerHTML = `
       <div class="hymn-title-group">
         <span class="hymn-title">${h.title}</span>
         ${diffBadge}
+        ${voluntBadge}
+        ${certBadge}
       </div>
       <div class="lang-chips">${chips}</div>
     `;
@@ -815,6 +916,12 @@ function renderHymn(){
     diffSpan.className = "diff-badge " + hymn.difficulty;
     diffSpan.textContent = hymn.difficulty;
     titleRow.appendChild(diffSpan);
+  }
+  if(hymn.mandatory===false){
+    const voluntSpan = document.createElement("span");
+    voluntSpan.className = "volunt-badge";
+    voluntSpan.textContent = "freiwillig";
+    titleRow.appendChild(voluntSpan);
   }
   wrap.appendChild(titleRow);
 
@@ -895,6 +1002,16 @@ function renderHymn(){
     render();
   });
   wrap.appendChild(selfRow);
+
+  const certInfo = document.createElement("div");
+  if(isHymnCertified(hymn.id)){
+    certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; font-size:13px; color:var(--burgundy); font-weight:600;";
+    certInfo.textContent = `✓ Vom Prüfer bestätigt (${state.certified[hymn.id].by}, ${state.certified[hymn.id].date}) — du kannst trotzdem jederzeit weiter üben.`;
+  } else {
+    certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:var(--parchment-2); border:1px solid var(--line); border-radius:6px; font-size:13px; color:var(--muted);";
+    certInfo.textContent = "Noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort vorzusingen.";
+  }
+  wrap.appendChild(certInfo);
 
   return wrap;
 }
@@ -984,49 +1101,51 @@ function renderPrueferStation(){
 
   const sub = document.createElement("p");
   sub.style.cssText = "color:var(--muted); font-size:13px; margin-top:6px;";
-  sub.textContent = "Bestätige eine Station, nachdem der Diakon sie vor Ort vorgesungen hat.";
+  sub.textContent = "Bestätige jede Antwort einzeln, nachdem sie dir vorgesungen wurde. Angemeldet als: " + state.prueferName;
   wrap.appendChild(sub);
 
-  const list = document.createElement("div");
-  list.style.marginTop = "14px";
   STATIONS.forEach((s,i)=>{
-    const unlocked = i===0 || isStationCertified(STATIONS[i-1].id);
-    const certified = isStationCertified(s.id);
-    const perLang = LANGS.map(l=>{
-      const applicable = s.hymns.filter(h => h.content[l.code]);
-      if(applicable.length===0) return null;
-      const n = applicable.filter(h => (state.pruefer_progress[h.id]||{})[l.code]).length;
-      return `${l.label}: ${n}/${applicable.length}`;
-    }).filter(Boolean).join(" · ");
-    const row = document.createElement("div");
-    row.className = "approve-row";
-    row.innerHTML = `
-      <div class="info">
-        <b>${i+1}. ${s.title}</b>
-        <span>Vom Diakon selbst als geübt markiert — ${perLang}</span>
-      </div>
-    `;
-    const btn = document.createElement("button");
-    if(certified){
-      btn.className = "btn"; btn.disabled = true; btn.style.background = "var(--sage)";
-      btn.textContent = "Bestätigt";
-    } else if(!unlocked){
-      btn.className = "btn"; btn.disabled = true;
-      btn.textContent = "Vorherige Station offen";
-    } else {
-      btn.className = "btn";
-      btn.textContent = "Als bestanden bestätigen";
+    if(s.hymns.length===0) return;
+    const stationHeader = document.createElement("h3");
+    stationHeader.className = "serif";
+    stationHeader.style.cssText = "font-size:18px; margin-top:26px; margin-bottom:4px;";
+    stationHeader.textContent = (i+1) + ". " + s.title;
+    wrap.appendChild(stationHeader);
+
+    const list = document.createElement("div");
+    s.hymns.forEach(h=>{
+      const learnedLangs = LANGS.filter(l => (state.pruefer_progress[h.id]||{})[l.code]).map(l=>l.label);
+      const langInfo = learnedLangs.length>0 ? `Selbst geübt: ${learnedLangs.join(", ")}` : "Noch nicht selbst als geübt markiert";
+      const voluntTag = h.mandatory===false ? ` <span class="volunt-badge">freiwillig</span>` : "";
+      const certified = isHymnCertified(h.id);
+      const row = document.createElement("div");
+      row.className = "approve-row";
+      row.innerHTML = `
+        <div class="info">
+          <b>${h.title}${voluntTag}</b>
+          <span>${langInfo}</span>
+          ${certified ? `<span style="color:var(--burgundy);">Bestätigt von ${state.certified[h.id].by} am ${state.certified[h.id].date}</span>` : ""}
+        </div>
+      `;
+      const btn = document.createElement("button");
+      if(certified){
+        btn.className = "btn"; btn.style.background = "var(--sage)";
+        btn.textContent = "Erneut bestätigen";
+      } else {
+        btn.className = "btn";
+        btn.textContent = "Bestätigen";
+      }
       btn.addEventListener("click", async ()=>{
         btn.disabled = true; btn.textContent = "Speichere …";
-        await certifyStation(u.id, s.id, "Prüfer");
-        state.certified[s.id] = {by: "Prüfer", date: new Date().toLocaleDateString("de-CH")};
+        await certifyHymn(u.id, h.id, state.prueferName);
+        state.certified[h.id] = {by: state.prueferName, date: new Date().toLocaleDateString("de-CH")};
         render();
       });
-    }
-    row.appendChild(btn);
-    list.appendChild(row);
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+    wrap.appendChild(list);
   });
-  wrap.appendChild(list);
 
   const note = document.createElement("div");
   note.className = "footnote";
