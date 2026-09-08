@@ -574,6 +574,10 @@ function stationSelfDoneCount(station){
   // Anzahl Pflicht-Antworten, die in mindestens einer Sprache als geübt markiert sind
   return mandatoryHymns(station).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
 }
+function stationVoluntSelfDoneCount(station){
+  // Anzahl freiwilliger Antworten, die in mindestens einer Sprache als geübt markiert sind
+  return voluntaryHymns(station).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
+}
 function certifiedLangsFor(hymnId){
   return Object.keys(state.certified[hymnId] || {});
 }
@@ -595,6 +599,10 @@ function allHymnsCertified(){
 function stationCertifiedCount(station){
   const mand = mandatoryHymns(station);
   return mand.filter(h => isHymnCertifiedAnyLang(h.id)).length;
+}
+function stationVoluntCertifiedCount(station){
+  const volunt = voluntaryHymns(station);
+  return volunt.filter(h => isHymnCertifiedAnyLang(h.id)).length;
 }
 
 /* placeholder "audio": kurzer Ton per Web Audio API, nur falls keine echte Aufnahme existiert */
@@ -928,10 +936,12 @@ function renderHome(){
     const certCount = stationCertifiedCount(s);
     const mandCount = mandatoryHymns(s).length;
     const voluntCount = voluntaryHymns(s).length;
+    const voluntCertCount = stationVoluntCertifiedCount(s);
+    const voluntDone = stationVoluntSelfDoneCount(s);
     const metaText = mandCount>0
-      ? `${certCount}/${mandCount} Pflicht-Antworten bestätigt (${done} selbst geübt)` + (voluntCount>0 ? ` · ${voluntCount} freiwillig` : "")
-      : (voluntCount>0 ? `${voluntCount} freiwillige Antworten` : "");
-    const stationDone = mandCount>0 && certCount===mandCount;
+      ? `${certCount}/${mandCount} Pflicht-Antworten bestätigt (${done} selbst geübt)` + (voluntCount>0 ? ` · ${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "")
+      : (voluntCount>0 ? `${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "");
+    const stationDone = mandCount>0 ? certCount===mandCount : (voluntCount>0 && voluntCertCount===voluntCount);
     const row = document.createElement("div");
     row.className = "station-row";
     row.innerHTML = `
@@ -1000,14 +1010,11 @@ function renderStation(){
     }).join("");
     const diffBadge = h.difficulty ? `<div class="diff-badge ${h.difficulty}">${h.difficulty}</div>` : "";
     const voluntBadge = h.mandatory===false ? `<div class="volunt-badge">freiwillig</div>` : "";
-    const certLangs = certifiedLangsFor(h.id);
-    const certBadge = certLangs.length>0 ? `<div class="cert-badge" title="Vom Prüfer bestätigt">✓ ${certLangs.map(c=>c==="de"?"DE":(c==="cop"?"KO":"AR")).join(", ")}</div>` : "";
     row.innerHTML = `
       <div class="hymn-title-group">
         <span class="hymn-title">${h.title}</span>
         ${diffBadge}
         ${voluntBadge}
-        ${certBadge}
       </div>
       <div class="lang-chips">${chips}</div>
     `;
