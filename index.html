@@ -1417,7 +1417,7 @@ function renderStufenZertifikat(){
   cert.className = "certificate";
   cert.innerHTML = `
     <div class="kicker">KOPTISCH-ORTHODOXE KIRCHE ZÜRICH</div>
-    <h2 class="serif">Stufen-Zertifikat</h2>
+    <h2 class="serif">Diakonenzertifikat der Stufe ${stufe}</h2>
     <div style="font-size:14px; color:var(--muted); margin-top:10px;">verliehen an</div>
     <div class="name">${state.profile.name}</div>
     <div class="desc">hat alle Pflicht-Antworten der <strong>${stufeNamen[stufe] || ("Stufe " + stufe)}</strong> (Altersgruppe ${stufeAlter[stufe] || ""}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.</div>
