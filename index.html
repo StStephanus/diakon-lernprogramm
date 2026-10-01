@@ -204,12 +204,6 @@
     color:var(--parchment); font-size:16px; cursor:pointer; flex:none;
     display:flex;align-items:center;justify-content:center;
   }
-  .speed-row{display:flex; gap:6px; margin-left:auto;}
-  .speed-row button{
-    background:transparent;border:1px solid var(--gold-light); color:var(--parchment);
-    font-size:12px; padding:4px 8px; border-radius:4px; cursor:pointer;
-  }
-  .speed-row button.active{background:var(--gold-light); color:var(--midnight);}
   .audio-note{font-size:11px; color:var(--gold-light); margin-top:8px;}
   .seek-row{display:flex; align-items:center; gap:10px;}
   .seek-time{font-size:11px; color:var(--gold-light); width:38px; flex:none;}
@@ -728,10 +722,10 @@ async function checkLernfortschrittPromotion(){
 
 /* placeholder "audio": kurzer Ton per Web Audio API, nur falls keine echte Aufnahme existiert */
 let audioCtx = null;
-function playPlaceholderTone(speed){
+function playPlaceholderTone(){
   try{
     audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
-    const dur = 1.1/ (speed||1);
+    const dur = 1.1;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = "sine";
@@ -813,7 +807,7 @@ function stopHymnAudio(){
 }
 
 /* callbacks: {onStatus(status), onTime(currentTime, duration)} */
-function playHymnAudio(hymnId, lang, speed, callbacks){
+function playHymnAudio(hymnId, lang, callbacks){
   stopHymnAudio();
   const key = hymnId + "_" + lang;
   currentAudioKey = key;
@@ -821,23 +815,14 @@ function playHymnAudio(hymnId, lang, speed, callbacks){
   const tryExt = (extIndex)=>{
     if(extIndex >= AUDIO_EXTENSIONS.length){
       callbacks.onStatus("missing");
-      playPlaceholderTone(speed);
+      playPlaceholderTone();
       return;
     }
     const url = getAudioUrl(hymnId, lang, AUDIO_EXTENSIONS[extIndex]);
     const audioEl = new Audio(url);
     audioEl.crossOrigin = "anonymous"; // nötig, damit der Hall-Effekt auf die Aufnahme angewendet werden kann
-    audioEl.preload = "auto"; // so viel wie möglich vorab laden, damit ein Tempo-Wechsel nicht ins Leere greift und stottert
+    audioEl.preload = "auto";
     currentAudioEl = audioEl;
-    audioEl.playbackRate = speed || 1;
-    // Die eingebaute Tonhöhen-Korrektur des Browsers (die bei Tempo-Änderungen die Stimme
-    // nicht höher/tiefer klingen lässt) ist rechenintensiv und verursacht zusammen mit dem
-    // Hall-Effekt auf manchen Geräten genau das Stottern/Aussetzen bei 0.5x/1.5x. Mit
-    // deaktivierter Korrektur läuft die Wiedergabe sauber durch (Stimme klingt bei
-    // langsamerem/schnellerem Tempo dann etwas tiefer/höher, aber ohne Aussetzer).
-    audioEl.preservesPitch = false;
-    audioEl.mozPreservesPitch = false;
-    audioEl.webkitPreservesPitch = false;
     // Browser lösen bei einer fehlenden/fehlerhaften Datei oft GLEICHZEITIG sowohl das
     // "error"-Event als auch eine abgelehnte play()-Anfrage aus. Ohne diese Sperre würde
     // dadurch der nächste Dateityp zweimal gestartet werden — man hätte die Aufnahme
@@ -1345,7 +1330,6 @@ function renderStation(){
     row.addEventListener("click", ()=>{
       state.currentHymnId = h.id;
       state.currentLang = hymnLangs[0].code;
-      state.speed = 1;
       state.view = "hymn";
       render();
     });
@@ -1425,11 +1409,6 @@ function renderHymn(){
         <div style="font-weight:600;">Aufnahme anhören</div>
         <div class="audio-note" id="audioStatus">Bereit</div>
       </div>
-      <div class="speed-row" id="speedRow">
-        <button data-s="0.5">0.5x</button>
-        <button data-s="1" class="active">1x</button>
-        <button data-s="1.5">1.5x</button>
-      </div>
     </div>
     <div class="seek-row">
       <span class="seek-time" id="seekCurrent">0:00</span>
@@ -1475,7 +1454,7 @@ function renderHymn(){
       if(currentAudioEl.paused) currentAudioEl.play().catch(()=>{});
       else currentAudioEl.pause();
     } else {
-      playHymnAudio(hymn.id, state.currentLang, state.speed, { onStatus: setStatus, onTime: setTime });
+      playHymnAudio(hymn.id, state.currentLang, { onStatus: setStatus, onTime: setTime });
     }
   });
   stopBtn.addEventListener("click", ()=>{
@@ -1489,13 +1468,6 @@ function renderHymn(){
       currentAudioEl.currentTime = (seekBar.value/1000) * currentAudioEl.duration;
     }
     userIsSeeking = false;
-  });
-  player.querySelector("#speedRow").addEventListener("click",(e)=>{
-    const b = e.target.closest("button"); if(!b) return;
-    state.speed = parseFloat(b.dataset.s);
-    player.querySelectorAll("#speedRow button").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    if(currentAudioKey === thisKey && currentAudioEl) currentAudioEl.playbackRate = state.speed;
   });
   wrap.appendChild(player);
 
