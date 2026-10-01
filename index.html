@@ -195,6 +195,10 @@
     color:var(--midnight); font-size:18px; cursor:pointer; flex:none;
     display:flex;align-items:center;justify-content:center;
   }
+  .play-btn .icon-pause{display:none; align-items:center; gap:4px;}
+  .play-btn .icon-pause span{width:4px; height:15px; background:var(--midnight); border-radius:1px; display:inline-block;}
+  .play-btn.show-pause .icon-play{display:none;}
+  .play-btn.show-pause .icon-pause{display:flex;}
   .stop-btn{
     width:46px;height:46px;border-radius:50%;background:transparent; border:1px solid var(--gold-light);
     color:var(--parchment); font-size:16px; cursor:pointer; flex:none;
@@ -823,8 +827,17 @@ function playHymnAudio(hymnId, lang, speed, callbacks){
     const url = getAudioUrl(hymnId, lang, AUDIO_EXTENSIONS[extIndex]);
     const audioEl = new Audio(url);
     audioEl.crossOrigin = "anonymous"; // nötig, damit der Hall-Effekt auf die Aufnahme angewendet werden kann
+    audioEl.preload = "auto"; // so viel wie möglich vorab laden, damit ein Tempo-Wechsel nicht ins Leere greift und stottert
     currentAudioEl = audioEl;
     audioEl.playbackRate = speed || 1;
+    // Die eingebaute Tonhöhen-Korrektur des Browsers (die bei Tempo-Änderungen die Stimme
+    // nicht höher/tiefer klingen lässt) ist rechenintensiv und verursacht zusammen mit dem
+    // Hall-Effekt auf manchen Geräten genau das Stottern/Aussetzen bei 0.5x/1.5x. Mit
+    // deaktivierter Korrektur läuft die Wiedergabe sauber durch (Stimme klingt bei
+    // langsamerem/schnellerem Tempo dann etwas tiefer/höher, aber ohne Aussetzer).
+    audioEl.preservesPitch = false;
+    audioEl.mozPreservesPitch = false;
+    audioEl.webkitPreservesPitch = false;
     // Browser lösen bei einer fehlenden/fehlerhaften Datei oft GLEICHZEITIG sowohl das
     // "error"-Event als auch eine abgelehnte play()-Anfrage aus. Ohne diese Sperre würde
     // dadurch der nächste Dateityp zweimal gestartet werden — man hätte die Aufnahme
@@ -1406,16 +1419,16 @@ function renderHymn(){
   player.className = "player";
   player.innerHTML = `
     <div class="player-row">
-      <button class="play-btn" id="playBtn">▶</button>
+      <button class="play-btn" id="playBtn"><span class="icon-play">▶</span><span class="icon-pause"><span></span><span></span></span></button>
       <button class="stop-btn" id="stopBtn" title="Stopp">■</button>
       <div>
         <div style="font-weight:600;">Aufnahme anhören</div>
         <div class="audio-note" id="audioStatus">Bereit</div>
       </div>
       <div class="speed-row" id="speedRow">
-        <button data-s="0.75">0.75x</button>
+        <button data-s="0.5">0.5x</button>
         <button data-s="1" class="active">1x</button>
-        <button data-s="1.25">1.25x</button>
+        <button data-s="1.5">1.5x</button>
       </div>
     </div>
     <div class="seek-row">
@@ -1438,11 +1451,11 @@ function renderHymn(){
   let userIsSeeking = false;
   const thisKey = hymn.id + "_" + state.currentLang;
   const setStatus = (s)=>{
-    if(s==="loading"){ statusEl.textContent = "Lädt …"; playBtn.textContent = "▶"; }
-    else if(s==="playing"){ statusEl.textContent = "Spielt ab …"; playBtn.textContent = "⏸"; }
-    else if(s==="paused"){ statusEl.textContent = "Pausiert"; playBtn.textContent = "▶"; }
-    else if(s==="missing"){ statusEl.textContent = "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)"; playBtn.textContent = "▶"; }
-    else { statusEl.textContent = "Bereit"; playBtn.textContent = "▶"; }
+    if(s==="loading"){ statusEl.textContent = "Lädt …"; playBtn.classList.remove("show-pause"); }
+    else if(s==="playing"){ statusEl.textContent = "Spielt ab …"; playBtn.classList.add("show-pause"); }
+    else if(s==="paused"){ statusEl.textContent = "Pausiert"; playBtn.classList.remove("show-pause"); }
+    else if(s==="missing"){ statusEl.textContent = "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)"; playBtn.classList.remove("show-pause"); }
+    else { statusEl.textContent = "Bereit"; playBtn.classList.remove("show-pause"); }
   };
   const setTime = (cur, dur)=>{
     if(userIsSeeking) return;
