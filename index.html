@@ -165,6 +165,13 @@
     font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:999px; flex:none;
     background:#EEE8DA; color:var(--muted); border:1px solid var(--line);
   }
+  .hymn-row.locked{cursor:default;}
+  .hymn-row.locked:hover .hymn-title{color:inherit;}
+  .hymn-row.locked .hymn-title{color:var(--muted); opacity:.65;}
+  .lock-badge{
+    font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:999px; flex:none;
+    background:#EDEAE2; color:var(--muted); border:1px solid var(--line); white-space:nowrap;
+  }
   .cert-badge{
     font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:999px; flex:none;
     background:var(--burgundy); color:#fff;
@@ -283,28 +290,28 @@ const STATIONS = [
   {
     id:"s1", title:"Wiederkehrende Antworten",
     hymns:[
-      {id:"s1h1", title:"Epi Eprosevki Estasite", difficulty:"leicht", mandatory:true, content:{
+      {id:"s1h1", title:"Epi Eprosevki Estasite", difficulty:"leicht", tier:1, mandatory:true, content:{
         cop:{text:null, translit:"Epi Eprosevki Estasite"},
       }},
-      {id:"s1h2", title:"Epros Eveksaste", difficulty:"leicht", mandatory:true, content:{
+      {id:"s1h2", title:"Epros Eveksaste", difficulty:"leicht", tier:1, mandatory:true, content:{
         cop:{text:null, translit:"Epros Eveksaste"},
       }},
-      {id:"s1h3", title:"Tob hina", difficulty:"schwer", mandatory:false, content:{
+      {id:"s1h3", title:"Tob hina", difficulty:"schwer", tier:3, mandatory:true, content:{
         de:{text:"Bittet, dass Gott sich unser erbarme, gnädig mit uns sei, uns erhöre, uns helfe, die Gebete und Bitten seiner Heiligen annehme, für unser Wohlergehen zu allen Zeiten<br><br><strong><em>und nach der Lammprozession:</em></strong> und uns würdig mache, die Teilhabe an seinen heiligen, gesegneten Sakramenten zu erlangen<br><br>zur Vergebung unserer Sünden", translit:null, html:true},
         cop:{text:null, translit:"Tob hina ente efnouti nai nan entef shenhit charon entef sotem eron entef er-voythin eron entef-etshi enni tiho nem nitobh enteni ethouab entaf entotou e-ehri egon epi aghathon enseyo niven<br><br><strong><em>nach der Lammprozession:</em></strong> entef ayten en emepsha ethren etshi evolchen ti kinonia ente nef mestirjon ethouab<br><br>etesmaro-out epiko evol ente nennovi.", html:true},
         ar:{text:"Etlobo lekaj jar7amana allah ua yatara2af 3alyna wayasm3na wa yo3inana wa yakbal eleh so2alat wa telbati keddisieh. Menhom belsala7y 3anna fi kolla hienen<br><br><strong><em>nach der Lammprozession:</em></strong> wa an yag3lana mosta7ekin an nanal men sharikat asrarihi almokkadasa almobaraka<br><br>lemaghferat 5atayana", translit:null, html:true},
       }},
-      {id:"s1h4", title:"Evangeliumsgebet", difficulty:"leicht", mandatory:true, content:{
+      {id:"s1h4", title:"Evangeliumsgebet", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"Betet um des Heiligen Evangeliums Willen", translit:null},
         ar:{text:"Sallo men agl el Engil almokkadas", translit:null},
       }},
-      {id:"s1h5", title:"Stasite", difficulty:"leicht", mandatory:true, content:{
+      {id:"s1h5", title:"Stasite", difficulty:"leicht", tier:1, mandatory:true, content:{
         cop:{text:null, translit:"Stasite metavovo theo, akosomen to agyo evangeliou"},
       }},
-      {id:"s1h6", title:"Taski falasimon", difficulty:"mittel", mandatory:true, content:{
+      {id:"s1h6", title:"Taski falasimon", difficulty:"mittel", tier:2, mandatory:true, content:{
         cop:{text:null, translit:"Taski falasimon tou kiryo eklenati"},
       }},
-      {id:"s1h7", title:"Epros chomen", difficulty:"mittel", mandatory:true, content:{
+      {id:"s1h7", title:"Epros chomen", difficulty:"mittel", tier:2, mandatory:true, content:{
         cop:{text:null, translit:"Epros chomen se-o metavovo, amin"},
       }},
     ]
@@ -312,19 +319,19 @@ const STATIONS = [
   {
     id:"s2", title:"Morgen- und Abendweihrauch",
     hymns:[
-      {id:"s2h1", title:"Gebet für die Entschlafenen", difficulty:"schwer", mandatory:false, content:{
+      {id:"s2h1", title:"Gebet für die Entschlafenen", difficulty:"schwer", tier:3, mandatory:false, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die entschlafen und aus dem Leben geschieden sind im Glauben an Christus seit dem Anfang: unsere heiligen Väter, die Erzbischöfe, Bischöfe, Erzpriester, Priester, unsere Brüder, die Diakone, unsere Mönchsväter und Laienväter und für alle Christen, damit Christus, unser Gott, ihren Seelen im Paradies der Freude ewige Ruhe schenke. Uns möge er Barmherzigkeit erweisen und unsere Sünden vergeben.", translit:null},
         ar:{text:"Etlobo Aan aba-ana ua echuatana allazina rakado uatanajjaHo fi al-ieman belmasiH monzo albad-e. aba-ina alkeddisien ro-asa al asakifa ua aba-ina al asakifa aba-ina al kamamisa ua aba-ina al kesos ua echuatina al schmamisa aba-ina al rohhban ua aba-ina al Aelmanejjin ua Aan nejaH kol al masiHejjin lekaj al masiH elahhna jonajjeH nefosahom agmaAin fi ferdaus al naAim ua naHno ajdan jasnaA maAana raHmatan ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h2", title:"Gebet für die Kranken", difficulty:"schwer", mandatory:false, content:{
+      {id:"s2h2", title:"Gebet für die Kranken", difficulty:"schwer", tier:3, mandatory:false, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die an irgendeiner Krankheit leiden, ob an diesem Ort oder an einem anderen Ort, dass Christus unser Gott uns und ihnen Gesundheit und Heilung schenke und uns unsere Sünden vergeben", translit:null},
         ar:{text:"Etlobo Aan ahba-ena ua echuatina almarda bekolli maraden en kan fi haza almaskan au bekolli maudeAen lekej almasieH elahhna jonAem Aaleina ua Aaleihom belAafeja ualschifaa ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h3", title:"Gebet für die Reisenden", difficulty:"schwer", mandatory:false, content:{
+      {id:"s2h3", title:"Gebet für die Reisenden", difficulty:"schwer", tier:3, mandatory:false, content:{
         de:{text:"Bittet für unsere Väter und Brüder, die auf Reisen sind und für die, die eine Reise in allerlei Orte vorhaben, dass Gott ihnen allen ihre Wege ebne, sei es auf dem Meer, auf den Flüssen, auf den Seen oder auf den Reisewegen, und dass Christus, unser Gott diejenigen, die ihre Reise auf alle Art verrichten, heimführe und unsere Sünden vergebe", translit:null},
         ar:{text:"Etlobo Aan aba-ina ua echuatna almosafirin ua allazina jodmirun alsafar fi kolli maudeAen lekej josahel torekahom agmaAin en kana fi albaHr au al anhar au alboHeirat au altorek almasluka au almosafirina bekolli nauAen lekej almasieH elahhna jaroddahom ela masakinahom salimin ua jaghfer lana chatajana.", translit:null},
       }},
-      {id:"s2h4", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", mandatory:false, content:{
+      {id:"s2h4", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", tier:3, mandatory:false, content:{
         de:{text:"Bittet für diejenigen, die sich um die Opfer kümmern um die Darreichungen, die Erstlinge der Ernte, die Öle, den Weihrauch, die Vorhänge, die Lesebücher und die Schätze des Altars. Dass Christus unser Gott sie im himmlischen Jerusalem belohne und uns unsere Sünden vergebe.", translit:null},
         ar:{text:"Etlobo Aan almohhtammin belsaAaed ualkrabin ualbekur ualzeit ualbechur ualsetur uakoteb alkeraa ua auani almazbaH lekej almasieH elahhna jokafeahom fi oroschalim alsmaeja uajaghfer lana chatajana.", translit:null},
       }},
@@ -333,12 +340,12 @@ const STATIONS = [
   {
     id:"s3", title:"Lammprozession",
     hymns:[
-      {id:"s3h1", title:"Gebet für die Gaben", difficulty:"mittel", mandatory:true, content:{
+      {id:"s3h1", title:"Gebet für die Gaben", difficulty:"mittel", tier:2, mandatory:true, content:{
         de:{text:"Betet für diese heiligen und ehrwürdigen Gaben. Für unsere Opfer und für diejenigen, die sie dargebracht haben, kiryeleison.", translit:null},
         cop:{text:null, translit:"Epros eveksasti eperton agjon timjon zoron toton ki sisjon emon ki epros viron ton, Kerjeleison"},
         ar:{text:"Sallo men agl hazihi alkarabien almokaddasa alkariema ua takdomatena uallaziena kaddamoha, ya rabborham.", translit:null},
       }},
-      {id:"s3h2", title:"Ezpatir", difficulty:"schwer", mandatory:false, content:{
+      {id:"s3h2", title:"Ezpatir", difficulty:"schwer", tier:3, mandatory:true, content:{
         de:{text:"Einer ist der heilige Vater, einer ist der heilige Sohn, einer ist der Heilige Geist Amen, gepriesen sei der Herr und Gott in alle Ewigkeiten. Amen. All ihr Völker, preist den Herrn. Lasst alle Nationen ihn preisen, denn seine Barmherzigkeit währt über uns. Und das Recht des Herrn dauert für immer. Amen, Halleluja", translit:null},
         cop:{text:null, translit:"Espatier agjos essejjos agjos en epnevma agjon Amin, eflogetos kerejos ose oos estos ie onas Amin, ne esnos tiro esmo epschojs maro esmo erof engi ni la os tiro ge ab ef naj tagro e-ehhri egon ouoh ti mesmi ente epschojs schop scha eneh, Amin, Alleloja"},
         ar:{text:"UaHedon houa alab elkoddoos uaHedon houa elebn elkoddoos uaHedon houa alroH elkodos Amin, mobarak alrabb alelahh ela alabad jagamieA alomam bareko alrabb ualtobarekaho gamieAa alscheAob le anna raHmataho kad sabotat Aaleina ua Hakk alrabb jadoum ela alabad, Amin, Alleloja", translit:null},
@@ -348,77 +355,77 @@ const STATIONS = [
   {
     id:"s4", title:"Liturgie der Gläubigen",
     hymns:[
-      {id:"s4h1", title:"Gebet für den Frieden", difficulty:"mittel", mandatory:true, content:{
+      {id:"s4h1", title:"Gebet für den Frieden", difficulty:"mittel", tier:2, mandatory:true, content:{
         de:{text:"Betet für den vollkommen Frieden, für die Liebe und für die reinen, apostolischen Küsse", translit:null},
         ar:{text:"Sallo men agl al-salam alkamel ual-maHabba ualkobla altahira alrasolejja", translit:null},
       }},
-      {id:"s4h2", title:"Aspazesti", difficulty:"schwer", mandatory:false, content:{
+      {id:"s4h2", title:"Aspazesti", difficulty:"schwer", tier:3, mandatory:true, content:{
         de:{text:"Grüßt einander mit einem heiligen Kuss Herr, erbarme dich, Herr, erbarme dich, Herr, erbarme dich. Ja, o Herr, Jesus Christus, der der Sohn Gottes ist, erhöre uns und erbarme dich unser. Tretet heran, tretet heran nach der Vorschrift. Steht in Ehrfurcht und schaut nach Osten. Wir sind aufmerksam.", translit:null},
         ar:{text:"Kabbelo baAdakom baAdan bekoblaten mokaddasa, jarabbo erHam, jarabbo erHam, jarabbo erHam; naAam jarabb allazi houa JasuAa almasieH ebno allah esmaAna ua erHamna, takaddamo Ala haza alrasm, kefo bereAdaten ue ela alschark enzoro, nonset.", translit:null},
       }},
-      {id:"s4h3", title:"Wer sitzt, stehe auf", difficulty:"leicht", mandatory:true, content:{
+      {id:"s4h3", title:"Wer sitzt, stehe auf", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"Wer sitzt, stehe auf!", translit:null},
         ar:{text:"Ayohal geluus, kefo!", translit:null},
       }},
-      {id:"s4h4", title:"Schauet nach Osten!", difficulty:"leicht", mandatory:true, content:{
+      {id:"s4h4", title:"Schauet nach Osten!", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"Schauet nach Osten!", translit:null},
         ar:{text:"Ua ilal shark onzoro!", translit:null},
       }},
-      {id:"s4h5", title:"Wir sind aufmerksam!", difficulty:"leicht", mandatory:true, content:{
+      {id:"s4h5", title:"Wir sind aufmerksam!", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"Wir sind aufmerksam!", translit:null},
         cop:{text:null, translit:"Epros chomen!"},
         ar:{text:"Nanset!", translit:null},
       }},
-      {id:"s4h6", title:"Verbeugt euch vor Gott", difficulty:"leicht", mandatory:true, content:{
+      {id:"s4h6", title:"Verbeugt euch vor Gott", difficulty:"leicht", tier:2, mandatory:true, content:{
         de:{text:"Verbeugt euch vor Gott, in Ehrfurcht und Zittern!", translit:null},
         cop:{text:null, translit:"O oscht em evnoti chen o hoti nem o estertier!"},
         ar:{text:"Esgodo lellahy bechaufen ua reAdaten!", translit:null},
       }},
-      {id:"s4h7", title:"Seid aufmerksam, Amen!", difficulty:"leicht", mandatory:true, content:{
+      {id:"s4h7", title:"Seid aufmerksam, Amen!", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"Seid aufmerksam, Amen!", translit:null},
         cop:{text:null, translit:"Epros chomen, Amin!"},
         ar:{text:"Nanset, Amin!", translit:null},
       }},
-      {id:"s4h8", title:"Gebet für den Kirchenfrieden", difficulty:"mittel", mandatory:true, content:{
+      {id:"s4h8", title:"Gebet für den Kirchenfrieden", difficulty:"mittel", tier:2, mandatory:true, content:{
         de:{text:"Betet für den Frieden der einen heiligen, universalen und apostolischen, orthodoxen Kirche Gottes", translit:null},
         ar:{text:"Sallo men agl salam kanisat allah aluaHeda almokaddasa algameAa alrasoleja alorthozokseja", translit:null},
       }},
-      {id:"s4h9", title:"Gebet für den Patriarchen", difficulty:"mittel", mandatory:true, content:{
+      {id:"s4h9", title:"Gebet für den Patriarchen", difficulty:"mittel", tier:3, mandatory:true, content:{
         de:{text:"Betet für unseren Pontifex, den Papst Anba Tawadros der Zweite, Papst und Patriarch und Erzbischof der großen Stadt Alexandria und für seinen Teilhaber am apostolischen Dienst, Bischof Anba Gabriel und für unsere orthodoxen Bischöfe", translit:null},
         ar:{text:"Sallo men agl ra-ies kahanatna albaba alanba Tawadros althani baba ua batrejark ua ra-ies asakefat almadina alAozma aleskandareja ua scharikaho fel chedma al rasuleja abina el oskof el mokaram al anba Gabriel ua sa-er asakefatna alorthozoksejien", translit:null},
       }},
-      {id:"s4h10", title:"Gebet für die Kirchenväter", difficulty:"mittel", mandatory:true, content:{
+      {id:"s4h10", title:"Gebet für die Kirchenväter", difficulty:"mittel", tier:2, mandatory:true, content:{
         de:{text:"Betet für die Erzpriester, Priester, Diakone, Subdiakone und die sieben Weihestufen der Kirche Gottes", translit:null},
         ar:{text:"Sallo men agl alkmamesa ualkesus ualschmamesa ualebezjakonien ua sabA taghamat kaniesat ellah", translit:null},
       }},
-      {id:"s4h11", title:"Gebet für den Ort", difficulty:"mittel", mandatory:true, content:{
+      {id:"s4h11", title:"Gebet für den Ort", difficulty:"mittel", tier:2, mandatory:true, content:{
         de:{text:"Betet für die Sicherheit der Welt, dieser unserer Stadt, aller Städte, Länder, Inseln und Klöster", translit:null},
         ar:{text:"Sallo men agl chalas elAalam ua madinatna hazihi uasa-er almodon ualakaliem ual gaza-er ualadjora", translit:null},
       }},
-      {id:"s4h12", title:"Gebet für die Saaten und Gewässer", difficulty:"schwer", mandatory:true, content:{
+      {id:"s4h12", title:"Gebet für die Saaten und Gewässer", difficulty:"schwer", tier:3, mandatory:true, content:{
         de:{text:"Bittet für den Regen und das Wasser der Flüsse, für die Saaten, Kräuter und Gewächse des Feldes; für die Luft des Himmels, die Früchte der Erde, die Bäume, die Weinberge und für jede nützliche Pflanze auf der ganzen Erde. Dass Christus unser Gott sie segne, uns Menschen ernähre, den Tieren Sicherheit gebe und uns unsere Sünden vergebe", translit:null},
         ar:{text:"Etlobo An mijah el amtar ual anhar ua An el zeruA ual Aoschb ua nabat el Hakl ua ahujat al sama ua samarat el ard ual schagar ual kurum ua koll schagaraten moßmera fi koll al maskuna. Lekei jubarekha al masieH ilahuna ua JäAulana naHnol baschar ua joAti al nagata lel Hajauan, uajaghfer lana chatajana", translit:null},
       }},
-      {id:"s4h13", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", mandatory:true, content:{
+      {id:"s4h13", title:"Gebet für die Opferdarbringenden", difficulty:"schwer", tier:2, mandatory:true, content:{
         de:{text:"Betet für diese heiligen und kostbaren Gaben, für unser Opfer und für die Jenigen, die sie dargebracht haben.", translit:null},
         ar:{text:"Sallo men agl hazihi alkrabien almokaddasa al karima uatakdomatina uallazina kaddamoha", translit:null},
       }},
-      {id:"s4h14", title:"Die Leser", difficulty:"schwer", mandatory:true, content:{
+      {id:"s4h14", title:"Die Leser", difficulty:"schwer", tier:2, mandatory:true, content:{
         de:{text:"Die Leser sollen die Namen unserer Väter, der heiligen Patriarchen, die entschlafen sind, sagen. Der Herr schenke all ihren Seelen ewige Ruhe und vergebe uns unsere Sünden.", translit:null},
         cop:{text:null, translit:"Ni etosch marota ouo en neran ente eßouav empatrjar-schies etav enkot epschojs ma emton en no epsiki tero ouo entef kanen novi nan evol"},
         ar:{text:"Alkari-un fal-jakolo asmaa aba-ena albatareka alkeddisien allazina rakado alrabb jonajjeH nefoshom agmaAien uajaghfer lana chatajana", translit:null},
       }},
-      {id:"s4h15", title:"Amen, Amen, Betet!", difficulty:"leicht", mandatory:true, content:{
+      {id:"s4h15", title:"Amen, Amen, Betet!", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"Amen, Amen, Betet!", translit:null},
         cop:{text:null, translit:"Amin, Amin, Epros eveksasti!"},
         ar:{text:"Amin, Amin, Sallo!", translit:null},
       }},
-      {id:"s4h16", title:"Sotis Amin", difficulty:"leicht", mandatory:true, content:{
+      {id:"s4h16", title:"Sotis Amin", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"In Wahrheit hast du uns erlöst mit deinem Geiste, Amen", translit:null},
         cop:{text:null, translit:"Soties amin keto ebnevmati so, Amin"},
         ar:{text:"Chalesto Hakkan uamaAa roHeka. Amin", translit:null},
       }},
-      {id:"s4h17", title:"Amin Amin Amin", difficulty:"schwer", mandatory:true, content:{
+      {id:"s4h17", title:"Amin Amin Amin", difficulty:"schwer", tier:3, mandatory:true, content:{
         de:{text:"Amen, amen, amen, ich glaube, ich glaube, ich glaube dass dies die Wahrheit ist, Amen. Betet für uns und für alle Christen, die uns gebeten haben, ihrer im Hause Gottes zu gedenken. Der Friede und die Liebe Jesu Christi seien mit euch. Singt Lob: Halleluja. Betet, für die würdige Teilnahme an diesem heiligen, reinen, kostbaren und himmlischen Sakrament. Kyrie eleison", translit:null},
         ar:{text:"Amin,Amin,Amin, ohmen,ohmen, ohmen anna haza houa belHakikati Amin. Etlobo Aanna ua Aan koll elmasie-Hejjien allaziena kalo lana men aglehem an nazkorahom fi beit elrabb. Salam ua maHabbat rabbana JasuA almasieH maAakom, rattelo benaschiden, alleloja. Sallo men agl el tanauel besteHkaken men elasrar al-mokaddasa altahera al zakeja alsamaejja. Jarabbo erHam", translit:null},
       }},
@@ -427,7 +434,7 @@ const STATIONS = [
   {
     id:"s5", title:"Spezielle Anlässe",
     hymns:[
-      {id:"s5h1", title:"Endung an Festtagen", difficulty:"mittel", mandatory:true, content:{
+      {id:"s5h1", title:"Endung an Festtagen", difficulty:"mittel", tier:2, mandatory:true, content:{
         de:{text:"Diese Endung wird an Festtagen am Ende einiger Antworten angehängt!", translit:null},
         cop:{text:null, translit:"Diese Endung wird an Festtagen am Ende einiger Antworten angehängt!"},
         ar:{text:"Diese Endung wird an Festtagen am Ende einiger Antworten angehängt!", translit:null},
@@ -471,7 +478,31 @@ let state = {
   prueferError: "",
   prueferName: "",
   showOnboardingManually: false,
+  pendingPromotion: null, // {type:"geburtstag"|"lernfortschritt", stufe:2|3} -- löst Glückwunsch-Overlay aus
+  stufenZertifikatStufe: null, // 1 oder 2 -- welches Stufen-Zertifikat gerade angezeigt wird
 };
+
+/* ---------------- Altersstufen ----------------
+   Stufe 1: bis 11 Jahre (exklusive 12)
+   Stufe 2: 12 bis 19 Jahre
+   Stufe 3: ab 20 Jahren
+   Die Stufe eines Nutzers kann nie sinken: sie steigt entweder automatisch mit dem
+   Alter (Geburtstag), oder sobald alle Pflicht-Antworten der aktuellen Stufe vom
+   Prüfer bestätigt wurden (Lernfortschritt). Beides wird in state.profile.stufe
+   persistiert (profiles.stufe in der Datenbank), nie neu heruntergerechnet. */
+function ageStufeFromBirthdate(geburtsdatum){
+  if(!geburtsdatum) return 1;
+  const bd = new Date(geburtsdatum);
+  if(isNaN(bd.getTime())) return 1;
+  const today = new Date();
+  let age = today.getFullYear() - bd.getFullYear();
+  const hadBirthdayThisYear = (today.getMonth() > bd.getMonth()) ||
+    (today.getMonth()===bd.getMonth() && today.getDate() >= bd.getDate());
+  if(!hadBirthdayThisYear) age -= 1;
+  if(age < 12) return 1;
+  if(age < 20) return 2;
+  return 3;
+}
 
 /* ---------------- Datenbank (Supabase) ---------------- */
 async function loadProfile(){
@@ -480,6 +511,15 @@ async function loadProfile(){
   const user = session.user;
   const { data, error } = await sb.from("profiles").select("*").eq("id", user.id).single();
   if(error || !data){ state.profile = null; return; }
+  const storedStufe = data.stufe || 1;
+  const ageStufe = ageStufeFromBirthdate(data.geburtsdatum);
+  let effectiveStufe = storedStufe;
+  if(ageStufe > storedStufe){
+    // Geburtstag seit letztem Login: automatisch hochstufen
+    effectiveStufe = ageStufe;
+    await sb.from("profiles").update({ stufe: effectiveStufe }).eq("id", user.id);
+    state.pendingPromotion = { type: "geburtstag", stufe: effectiveStufe };
+  }
   state.profile = {
     id: user.id,
     email: user.email,
@@ -487,6 +527,8 @@ async function loadProfile(){
     nachname: data.nachname,
     name: data.vorname + " " + data.nachname,
     onboarded: !!data.onboarded,
+    geburtsdatum: data.geburtsdatum,
+    stufe: effectiveStufe,
   };
 }
 
@@ -496,12 +538,13 @@ async function markOnboarded(){
   await sb.from("profiles").update({ onboarded: true }).eq("id", state.profile.id);
 }
 
-async function registerAccount(vorname, nachname, email, password){
+async function registerAccount(vorname, nachname, email, password, geburtsdatum){
   const { data, error } = await sb.auth.signUp({ email, password });
   if(error) return { error: error.message };
   const user = data.user;
   if(!user) return { error: "Registrierung fehlgeschlagen. Bitte erneut versuchen." };
-  const { error: profileError } = await sb.from("profiles").insert({ id: user.id, vorname, nachname });
+  const initialStufe = ageStufeFromBirthdate(geburtsdatum);
+  const { error: profileError } = await sb.from("profiles").insert({ id: user.id, vorname, nachname, geburtsdatum, stufe: initialStufe });
   if(profileError) return { error: profileError.message };
   return { error: null };
 }
@@ -562,7 +605,7 @@ async function deleteDiakon(userId){
 }
 
 async function loadAllDiakone(){
-  const { data, error } = await sb.from("profiles").select("id, vorname, nachname").order("nachname");
+  const { data, error } = await sb.from("profiles").select("id, vorname, nachname, geburtsdatum, stufe").order("nachname");
   return (!error && data) ? data : [];
 }
 
@@ -574,15 +617,23 @@ function langsLearnedFor(progressObj, hymnId){
   const rec = (progressObj||{})[hymnId] || {};
   return LANGS.filter(l => rec[l.code]).map(l=>l.code);
 }
-function mandatoryHymns(station){ return station.hymns.filter(h => h.mandatory!==false); }
-function voluntaryHymns(station){ return station.hymns.filter(h => h.mandatory===false); }
-function stationSelfDoneCount(station){
+/* ---------------- Stufen-bewusste Antworten-Auswahl ----------------
+   Jede Antwort hat ein "tier" (1/2/3): die Stufe, ab der sie überhaupt sichtbar/
+   anklickbar ("entsperrt") wird. Stufe 2 sieht also Stufe 1+2 entsperrt, Stufe 3
+   sieht alles entsperrt. "mandatory" entscheidet, ob eine entsperrte Antwort für
+   diese Person Pflicht ist oder freiwillig (freiwillige Antworten sind bei allen
+   Stufen in der Liste vorhanden, aber erst ab ihrer Stufe anklickbar). */
+function hymnUnlocked(hymn, stufe){ return hymn.tier <= stufe; }
+function mandatoryHymns(station, stufe){ return station.hymns.filter(h => hymnUnlocked(h, stufe) && h.mandatory!==false); }
+function voluntaryHymns(station, stufe){ return station.hymns.filter(h => hymnUnlocked(h, stufe) && h.mandatory===false); }
+function lockedHymns(station, stufe){ return station.hymns.filter(h => !hymnUnlocked(h, stufe)); }
+function stationSelfDoneCount(station, stufe){
   // Anzahl Pflicht-Antworten, die in mindestens einer Sprache als geübt markiert sind
-  return mandatoryHymns(station).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
+  return mandatoryHymns(station, stufe).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
 }
-function stationVoluntSelfDoneCount(station){
+function stationVoluntSelfDoneCount(station, stufe){
   // Anzahl freiwilliger Antworten, die in mindestens einer Sprache als geübt markiert sind
-  return voluntaryHymns(station).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
+  return voluntaryHymns(station, stufe).filter(h => langsLearnedFor(state.progress, h.id).length > 0).length;
 }
 function certifiedLangsFor(hymnId){
   return Object.keys(state.certified[hymnId] || {});
@@ -594,21 +645,40 @@ function isHymnFullyCertified(hymn){
   const have = certifiedLangsFor(hymn.id);
   return needed.length>0 && needed.every(l => have.includes(l));
 }
-function allMandatoryCertified(){
-  // Zertifikat: pro Pflicht-Antwort reicht mindestens eine bestätigte Sprache
-  return STATIONS.every(s => mandatoryHymns(s).every(h => isHymnCertifiedAnyLang(h.id)));
+function allMandatoryCertified(stufe){
+  // Zertifikat: pro (entsperrter) Pflicht-Antwort reicht mindestens eine bestätigte Sprache
+  return STATIONS.every(s => mandatoryHymns(s, stufe).every(h => isHymnCertifiedAnyLang(h.id)));
 }
-function allHymnsCertified(){
-  // Belohnung: jede Antwort (Pflicht + freiwillig) muss in ALLEN ihren Sprachen bestätigt sein
-  return STATIONS.every(s => s.hymns.every(h => isHymnFullyCertified(h)));
+function allHymnsCertified(stufe){
+  // Belohnung: jede entsperrte Antwort (Pflicht + freiwillig) muss in ALLEN ihren Sprachen bestätigt sein
+  return STATIONS.every(s => s.hymns.filter(h => hymnUnlocked(h, stufe)).every(h => isHymnFullyCertified(h)));
 }
-function stationCertifiedCount(station){
-  const mand = mandatoryHymns(station);
+function stationCertifiedCount(station, stufe){
+  const mand = mandatoryHymns(station, stufe);
   return mand.filter(h => isHymnCertifiedAnyLang(h.id)).length;
 }
-function stationVoluntCertifiedCount(station){
-  const volunt = voluntaryHymns(station);
+function stationVoluntCertifiedCount(station, stufe){
+  const volunt = voluntaryHymns(station, stufe);
   return volunt.filter(h => isHymnCertifiedAnyLang(h.id)).length;
+}
+function tierFullyCertified(tier){
+  // Für den Stufen-Aufstieg: sind ALLE Pflicht-Antworten GENAU dieser Stufe (nicht kumulativ) bestätigt?
+  return STATIONS.every(s => s.hymns.filter(h => h.tier===tier && h.mandatory!==false).every(h => isHymnCertifiedAnyLang(h.id)));
+}
+async function checkLernfortschrittPromotion(){
+  // Wird nach jedem Laden der Zertifizierungen aufgerufen: hat der Diakon seit dem letzten
+  // Mal alle Pflicht-Antworten SEINER aktuellen Stufe vom Prüfer bestätigt bekommen? Dann
+  // steigt er automatisch in die nächste Stufe auf (unabhängig vom Geburtsdatum).
+  if(!state.profile || state.profile.stufe >= 3) return;
+  if(tierFullyCertified(state.profile.stufe)){
+    const newStufe = state.profile.stufe + 1;
+    await sb.from("profiles").update({ stufe: newStufe }).eq("id", state.profile.id);
+    const abgeschlosseneStufe = state.profile.stufe;
+    state.profile.stufe = newStufe;
+    if(!state.pendingPromotion){
+      state.pendingPromotion = { type: "lernfortschritt", stufe: newStufe, abgeschlosseneStufe };
+    }
+  }
 }
 
 /* placeholder "audio": kurzer Ton per Web Audio API, nur falls keine echte Aufnahme existiert */
@@ -735,9 +805,49 @@ function render(){
   main.appendChild(renderBody());
   root.appendChild(main);
 
-  if(state.role==="diakon" && state.profile && (!state.profile.onboarded || state.showOnboardingManually)){
+  if(state.role==="diakon" && state.profile && state.pendingPromotion){
+    root.appendChild(renderPromotionModal());
+  } else if(state.role==="diakon" && state.profile && (!state.profile.onboarded || state.showOnboardingManually)){
     root.appendChild(renderOnboardingModal());
   }
+}
+
+function renderPromotionModal(){
+  const p = state.pendingPromotion;
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  if(p.type === "geburtstag"){
+    box.innerHTML = `
+      <h2 class="serif">🎂 Alles Gute zum Geburtstag!</h2>
+      <p style="color:var(--muted); font-size:14px; margin-top:4px;">Mit deinem neuen Alter bist du jetzt in <strong>Stufe ${p.stufe}</strong>. Neue Antworten sind ab sofort für dich freigeschaltet — du findest sie in den Stationen, vorher waren sie dort gesperrt.</p>
+      <button class="btn" id="promoOk">Verstanden</button>
+    `;
+  } else {
+    box.innerHTML = `
+      <h2 class="serif">🎉 Stufe ${p.abgeschlosseneStufe} abgeschlossen!</h2>
+      <p style="color:var(--muted); font-size:14px; margin-top:4px;">Du hast alle Pflicht-Antworten der Stufe ${p.abgeschlosseneStufe} erfolgreich vor einem Prüfer vorgetragen. Herzlichen Glückwunsch! Du steigst jetzt offiziell in <strong>Stufe ${p.stufe}</strong> auf — ab sofort sind neue Antworten für dich freigeschaltet.</p>
+      <p style="color:var(--muted); font-size:13px; margin-top:10px;">Denk daran: Eine Antwort deiner Stufe darfst du in der Liturgie erst vorsingen, sobald du die <strong>ganze Stufe</strong> gelernt hast — nicht schon, sobald du eine einzelne Antwort kannst.</p>
+      <button class="btn secondary" id="promoCert" style="margin-top:10px;">Stufen-Zertifikat ansehen</button>
+      <button class="btn" id="promoOk">Weiter</button>
+    `;
+  }
+  overlay.appendChild(box);
+  const certBtn = box.querySelector("#promoCert");
+  if(certBtn){
+    certBtn.addEventListener("click", ()=>{
+      state.stufenZertifikatStufe = p.abgeschlosseneStufe;
+      state.view = "stufenzertifikat";
+      state.pendingPromotion = null;
+      render();
+    });
+  }
+  box.querySelector("#promoOk").addEventListener("click", ()=>{
+    state.pendingPromotion = null;
+    render();
+  });
+  return overlay;
 }
 
 function renderOnboardingModal(){
@@ -749,14 +859,17 @@ function renderOnboardingModal(){
     <h2 class="serif">Willkommen im Lernprogramm!</h2>
     <p style="color:var(--muted); font-size:14px; margin-top:4px;">Kurz erklärt, wie alles funktioniert:</p>
     <ul>
-      <li>Du findest alle liturgischen Antworten, gruppiert nach Stationen. Alle sind jederzeit für dich zugänglich, du kannst frei zwischen ihnen wechseln.</li>
-      <li>Es gibt <strong>Pflicht-Antworten</strong> (nötig fürs Zertifikat) und <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte).</li>
+      <li>Es gibt drei <strong>Stufen</strong>, die sich nach deinem Alter richten: Stufe 1 (unter 12 Jahren), Stufe 2 (12 bis 20 Jahre) und Stufe 3 (ab 20 Jahren). Deine Stufe wird automatisch aus deinem Geburtsdatum berechnet.</li>
+      <li>Du siehst in jeder Station <strong>alle</strong> Antworten — auch die höherer Stufen. Antworten, die noch nicht zu deiner Stufe gehören, sind mit einem Schloss-Symbol markiert und können noch nicht geöffnet werden.</li>
+      <li>Sobald du älter wirst oder deine aktuelle Stufe vollständig gelernt hast, schaltet sich die nächste Stufe automatisch frei — du bekommst dann eine Mitteilung dazu.</li>
+      <li>Innerhalb deiner freigeschalteten Antworten gibt es <strong>Pflicht-Antworten</strong> (nötig fürs Zertifikat deiner Stufe) und <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte). Ein paar wenige Antworten sind für alle komplett freiwillig und werden erst ab Stufe 3 als solche angezeigt.</li>
       <li>Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.</li>
       <li>Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.</li>
       <li>Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.</li>
       <li>Es reicht, jede Pflicht-Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.</li>
-      <li>Sobald jede <strong>Pflicht-Antwort</strong> in mindestens einer Sprache bestätigt ist, erhältst du dein <strong>Zertifikat</strong>.</li>
-      <li>Für die besondere <strong>Belohnung</strong> müsst ihr alle Antworten — Pflicht <em>und</em> freiwillig — in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen.</li>
+      <li><strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.</li>
+      <li>Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du ein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf. Erwachsene (Stufe 3) erhalten nach Abschluss aller Pflicht-Antworten das grosse <strong>Zertifikat</strong>.</li>
+      <li>Für die besondere <strong>Belohnung</strong> müsst ihr alle freigeschalteten Antworten — Pflicht <em>und</em> freiwillig — in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen.</li>
     </ul>
     <button class="btn" id="onboardOk">${state.profile.onboarded ? "Schliessen" : "Verstanden, los geht's"}</button>
   `;
@@ -830,6 +943,7 @@ function renderBody(){
   if(state.view==="hymn") return renderHymn();
   if(state.view==="station") return renderStation();
   if(state.view==="zertifikat") return renderCertificate();
+  if(state.view==="stufenzertifikat") return renderStufenZertifikat();
   return renderHome();
 }
 
@@ -914,6 +1028,7 @@ function renderDiakonAuthGate(){
         <div class="field"><label>Vorname</label><input type="text" id="regVorname" /></div>
         <div class="field"><label>Nachname</label><input type="text" id="regNachname" /></div>
       </div>
+      <div class="field"><label>Geburtsdatum</label><input type="date" id="regGeburtsdatum" /></div>
       <div class="field"><label>E-Mail</label><input type="email" id="regEmail" /></div>
       <div class="field"><label>Passwort</label><input type="password" id="regPassword" /></div>
       <button class="btn" id="regBtn">Registrieren</button>
@@ -924,22 +1039,24 @@ function renderDiakonAuthGate(){
     regBtn.addEventListener("click", async ()=>{
       const vorname = wrap.querySelector("#regVorname").value.trim();
       const nachname = wrap.querySelector("#regNachname").value.trim();
+      const geburtsdatum = wrap.querySelector("#regGeburtsdatum").value;
       const email = wrap.querySelector("#regEmail").value.trim().toLowerCase();
       const password = wrap.querySelector("#regPassword").value;
-      if(!vorname || !nachname || !email || !password){
+      if(!vorname || !nachname || !geburtsdatum || !email || !password){
         state.authError = "Bitte alle Felder ausfüllen."; render(); return;
       }
       if(password.length < 6){
         state.authError = "Das Passwort muss mindestens 6 Zeichen haben."; render(); return;
       }
       regBtn.disabled = true; regBtn.textContent = "Registriere …";
-      const result = await registerAccount(vorname, nachname, email, password);
+      const result = await registerAccount(vorname, nachname, email, password, geburtsdatum);
       if(result.error){
         state.authError = result.error; render(); return;
       }
       await loadProfile();
       await loadProgress();
       state.certified = await loadCertified(state.profile.id);
+      await checkLernfortschrittPromotion();
       state.authError = "";
       render();
     });
@@ -966,6 +1083,7 @@ function renderDiakonAuthGate(){
       await loadProfile();
       await loadProgress();
       state.certified = await loadCertified(state.profile.id);
+      await checkLernfortschrittPromotion();
       state.authError = "";
       render();
     });
@@ -981,8 +1099,9 @@ function renderDiakonAuthGate(){
 
 function renderHome(){
   const wrap = document.createElement("div");
-  const certDone = allMandatoryCertified();
-  const rewardDone = allHymnsCertified();
+  const stufe = state.profile.stufe;
+  const certDone = allMandatoryCertified(stufe);
+  const rewardDone = allHymnsCertified(stufe);
   const intro = document.createElement("div");
   intro.innerHTML = `<h2 class="serif" style="font-size:24px;">Hallo ${state.profile.name}</h2>
     <p style="color:var(--muted); margin-top:6px; font-size:14px;">Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.</p>`;
@@ -1005,15 +1124,32 @@ function renderHome(){
     wrap.appendChild(banner);
   }
 
+  // Frühere Stufen-Zertifikate zum erneuten Ansehen (Stufe 1/2, falls bereits abgeschlossen)
+  const abgeschlosseneStufen = [1,2].filter(t => t < stufe && tierFullyCertified(t));
+  if(abgeschlosseneStufen.length){
+    const box = document.createElement("div");
+    box.style.cssText = "margin-top:14px; padding:12px 16px; background:#F3F1EA; border:1px solid var(--line); border-radius:6px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;";
+    box.innerHTML = `<span style="font-size:13px; color:var(--muted);">Deine früheren Stufen-Zertifikate:</span>`;
+    abgeschlosseneStufen.forEach(t=>{
+      const btn = document.createElement("button");
+      btn.className = "btn secondary";
+      btn.style.margin = "0";
+      btn.textContent = `Stufe ${t}-Zertifikat`;
+      btn.addEventListener("click", ()=>{ state.stufenZertifikatStufe = t; state.view = "stufenzertifikat"; render(); });
+      box.appendChild(btn);
+    });
+    wrap.appendChild(box);
+  }
+
   const list = document.createElement("div");
   list.style.marginTop = "20px";
   STATIONS.forEach((s, i)=>{
-    const done = stationSelfDoneCount(s);
-    const certCount = stationCertifiedCount(s);
-    const mandCount = mandatoryHymns(s).length;
-    const voluntCount = voluntaryHymns(s).length;
-    const voluntCertCount = stationVoluntCertifiedCount(s);
-    const voluntDone = stationVoluntSelfDoneCount(s);
+    const done = stationSelfDoneCount(s, stufe);
+    const certCount = stationCertifiedCount(s, stufe);
+    const mandCount = mandatoryHymns(s, stufe).length;
+    const voluntCount = voluntaryHymns(s, stufe).length;
+    const voluntCertCount = stationVoluntCertifiedCount(s, stufe);
+    const voluntDone = stationVoluntSelfDoneCount(s, stufe);
     const metaText = mandCount>0
       ? `${certCount}/${mandCount} Pflicht-Antworten bestätigt (${done} selbst geübt)` + (voluntCount>0 ? ` · ${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "")
       : (voluntCount>0 ? `${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "");
@@ -1069,12 +1205,27 @@ function renderStation(){
     return wrap;
   }
 
+  const stufe = state.profile.stufe;
   const list = document.createElement("div");
   list.style.marginTop = "14px";
   s.hymns.forEach(h=>{
+    const unlocked = hymnUnlocked(h, stufe);
     const hymnLangs = LANGS.filter(l => h.content[l.code]);
-    const learnedLangs = langsLearnedFor(state.progress, h.id);
     const row = document.createElement("div");
+
+    if(!unlocked){
+      row.className = "hymn-row locked";
+      row.innerHTML = `
+        <div class="hymn-title-group">
+          <span class="hymn-title">${h.title}</span>
+          <div class="lock-badge">🔒 ab Stufe ${h.tier}</div>
+        </div>
+      `;
+      list.appendChild(row);
+      return;
+    }
+
+    const learnedLangs = langsLearnedFor(state.progress, h.id);
     row.className = "hymn-row";
     const chips = hymnLangs.map(l=>{
       const done = learnedLangs.includes(l.code);
@@ -1115,6 +1266,14 @@ function renderHymn(){
   crumb.textContent = "← " + station.title;
   crumb.addEventListener("click", ()=>{ state.view="station"; render(); });
   wrap.appendChild(crumb);
+
+  if(!hymnUnlocked(hymn, state.profile.stufe)){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.innerHTML = `<h3>Noch gesperrt</h3><p>Diese Antwort gehört zu Stufe ${hymn.tier} — sie wird freigeschaltet, sobald du diese Stufe erreichst.</p>`;
+    wrap.appendChild(empty);
+    return wrap;
+  }
 
   const titleRow = document.createElement("div");
   titleRow.style.cssText = "display:flex; align-items:center; gap:10px; flex-wrap:wrap;";
@@ -1262,6 +1421,57 @@ function renderCertificate(){
   return wrap;
 }
 
+function renderStufenZertifikat(){
+  const stufe = state.stufenZertifikatStufe;
+  const wrap = document.createElement("div");
+  const crumb = document.createElement("div");
+  crumb.className = "crumb";
+  crumb.textContent = "← Zurück";
+  crumb.addEventListener("click", ()=>{ state.view="home"; state.stufenZertifikatStufe=null; render(); });
+  wrap.appendChild(crumb);
+
+  // Alle Pflicht-Hymnen dieser Stufe einsammeln, um das letzte Bestätigungsdatum zu bestimmen
+  const hymnIdsOfStufe = [];
+  STATIONS.forEach(s=>{
+    s.hymns.forEach(h=>{
+      if(h.tier===stufe && h.mandatory!==false) hymnIdsOfStufe.push(h.id);
+    });
+  });
+  const dates = hymnIdsOfStufe
+    .map(id=>{
+      const langs = certifiedLangsFor(id);
+      const entries = langs.map(l=> state.certified[id] && state.certified[id][l]).filter(Boolean);
+      return entries.map(e=>e.date).filter(Boolean);
+    })
+    .flat()
+    .sort();
+  const lastDate = dates.length? dates[dates.length-1] : new Date().toLocaleDateString("de-CH");
+
+  const stufeNamen = { 1: "Stufe 1", 2: "Stufe 2", 3: "Stufe 3" };
+  const stufeAlter = { 1: "unter 12 Jahren", 2: "zwischen 12 und 20 Jahren", 3: "ab 20 Jahren" };
+
+  const cert = document.createElement("div");
+  cert.className = "certificate";
+  cert.innerHTML = `
+    <div class="kicker">KOPTISCH-ORTHODOXE KIRCHE ZÜRICH</div>
+    <h2 class="serif">Stufen-Zertifikat</h2>
+    <div style="font-size:14px; color:var(--muted); margin-top:10px;">verliehen an</div>
+    <div class="name">${state.profile.name}</div>
+    <div class="desc">hat alle Pflicht-Antworten der <strong>${stufeNamen[stufe] || ("Stufe " + stufe)}</strong> (Altersgruppe ${stufeAlter[stufe] || ""}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.</div>
+    <div class="date">Abgeschlossen am ${lastDate}</div>
+  `;
+  wrap.appendChild(cert);
+
+  const printBtn = document.createElement("button");
+  printBtn.className = "btn secondary";
+  printBtn.style.marginTop = "18px";
+  printBtn.textContent = "Drucken / als PDF speichern";
+  printBtn.addEventListener("click", ()=> window.print());
+  wrap.appendChild(printBtn);
+
+  return wrap;
+}
+
 /* ---------------- Prüfer-Ansicht ---------------- */
 function renderPrueferHome(){
   const wrap = document.createElement("div");
@@ -1286,7 +1496,8 @@ function renderPrueferHome(){
     `;
     row.querySelectorAll(".diakon-open").forEach(el=>{
       el.addEventListener("click", async ()=>{
-        state.pruefer_selectedDiakon = {name: fullName, id: u.id};
+        const effectiveStufe = Math.max(u.stufe || 1, ageStufeFromBirthdate(u.geburtsdatum));
+        state.pruefer_selectedDiakon = {name: fullName, id: u.id, stufe: effectiveStufe};
         state.certified = await loadCertified(u.id);
         const { data } = await sb.from("progress").select("hymn_id, lang, learned").eq("user_id", u.id);
         state.pruefer_progress = {};
@@ -1331,6 +1542,13 @@ function renderPrueferStation(){
   sub.textContent = "Bestätige jede Antwort einzeln, nachdem sie dir vorgesungen wurde. Angemeldet als: " + state.prueferName;
   wrap.appendChild(sub);
 
+  if(u.stufe < 3 && tierFullyCertified(u.stufe)){
+    const banner = document.createElement("div");
+    banner.style.cssText = "margin-top:14px; padding:12px 14px; background:#FBEBD9; border:1px solid var(--gold); border-radius:6px; font-size:13px;";
+    banner.textContent = `Stufe ${u.stufe} ist vollständig bestätigt. Beim nächsten Login von ${u.name} wird automatisch Stufe ${u.stufe+1} freigeschaltet.`;
+    wrap.appendChild(banner);
+  }
+
   STATIONS.forEach((s,i)=>{
     if(s.hymns.length===0) return;
     const stationHeader = document.createElement("h3");
@@ -1341,14 +1559,26 @@ function renderPrueferStation(){
 
     const list = document.createElement("div");
     s.hymns.forEach(h=>{
-      const hymnLangs = LANGS.filter(l => h.content[l.code]);
-      const learnedLangCodes = LANGS.filter(l => (state.pruefer_progress[h.id]||{})[l.code]).map(l=>l.code);
-      const voluntTag = h.mandatory===false ? ` <span class="volunt-badge">freiwillig</span>` : "";
+      const unlocked = hymnUnlocked(h, u.stufe);
       const row = document.createElement("div");
       row.className = "approve-row";
       row.style.flexDirection = "column";
       row.style.alignItems = "stretch";
       row.style.gap = "10px";
+
+      if(!unlocked){
+        row.style.opacity = ".55";
+        const info = document.createElement("div");
+        info.className = "info";
+        info.innerHTML = `<b>${h.title}</b> <span class="lock-badge">🔒 ab Stufe ${h.tier}</span>`;
+        row.appendChild(info);
+        list.appendChild(row);
+        return;
+      }
+
+      const hymnLangs = LANGS.filter(l => h.content[l.code]);
+      const learnedLangCodes = LANGS.filter(l => (state.pruefer_progress[h.id]||{})[l.code]).map(l=>l.code);
+      const voluntTag = h.mandatory===false ? ` <span class="volunt-badge">freiwillig</span>` : "";
 
       const info = document.createElement("div");
       info.className = "info";
@@ -1410,6 +1640,7 @@ async function init(){
   if(state.profile){
     await loadProgress();
     state.certified = await loadCertified(state.profile.id);
+      await checkLernfortschrittPromotion();
   }
   render();
 }
