@@ -802,6 +802,17 @@ function playHymnAudio(hymnId, lang, speed, onStatus){
     audioEl.crossOrigin = "anonymous"; // nötig, damit der Hall-Effekt auf die Aufnahme angewendet werden kann
     currentAudioEl = audioEl;
     audioEl.playbackRate = speed || 1;
+    // Browser lösen bei einer fehlenden/fehlerhaften Datei oft GLEICHZEITIG sowohl das
+    // "error"-Event als auch eine abgelehnte play()-Anfrage aus. Ohne diese Sperre würde
+    // dadurch der nächste Dateityp zweimal gestartet werden — man hätte die Aufnahme
+    // doppelt (überlagert) gehört. Diese Sperre stellt sicher, dass pro Versuch nur
+    // genau EINMAL zum nächsten Format gewechselt wird.
+    let fallbackAusgeloest = false;
+    const zumNaechstenFormatWechseln = ()=>{
+      if(fallbackAusgeloest) return;
+      fallbackAusgeloest = true;
+      tryExt(extIndex+1);
+    };
     audioEl.addEventListener("canplay", ()=>{
       try{
         const ctx = ensureReverbGraph();
@@ -817,12 +828,8 @@ function playHymnAudio(hymnId, lang, speed, onStatus){
       onStatus("playing");
     });
     audioEl.addEventListener("ended", ()=> onStatus("idle"));
-    audioEl.addEventListener("error", ()=>{
-      tryExt(extIndex+1);
-    });
-    audioEl.play().catch(()=>{
-      tryExt(extIndex+1);
-    });
+    audioEl.addEventListener("error", zumNaechstenFormatWechseln);
+    audioEl.play().catch(zumNaechstenFormatWechseln);
   };
   tryExt(0);
 }
