@@ -187,11 +187,17 @@
 
   .player{
     background:var(--midnight); color:var(--parchment); border-radius:8px;
-    padding:18px; display:flex; align-items:center; gap:16px;
+    padding:18px; display:flex; flex-direction:column; gap:14px;
   }
+  .player-row{display:flex; align-items:center; gap:16px;}
   .play-btn{
     width:46px;height:46px;border-radius:50%;background:var(--gold); border:none;
     color:var(--midnight); font-size:18px; cursor:pointer; flex:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .stop-btn{
+    width:46px;height:46px;border-radius:50%;background:transparent; border:1px solid var(--gold-light);
+    color:var(--parchment); font-size:16px; cursor:pointer; flex:none;
     display:flex;align-items:center;justify-content:center;
   }
   .speed-row{display:flex; gap:6px; margin-left:auto;}
@@ -201,6 +207,10 @@
   }
   .speed-row button.active{background:var(--gold-light); color:var(--midnight);}
   .audio-note{font-size:11px; color:var(--gold-light); margin-top:8px;}
+  .seek-row{display:flex; align-items:center; gap:10px;}
+  .seek-time{font-size:11px; color:var(--gold-light); width:38px; flex:none;}
+  .seek-time.total{text-align:right;}
+  .seek-bar{flex:1; accent-color:var(--gold); cursor:pointer;}
 
   .text-block{
     margin-top:22px; background:var(--parchment-2); border:1px solid var(--line);
@@ -737,6 +747,7 @@ function playPlaceholderTone(speed){
    Es werden die Formate der Reihe nach durchprobiert, damit sie gemischt abgelegt werden können. */
 let currentAudioEl = null;
 let currentAudioSourceNode = null;
+let currentAudioKey = null; // merkt sich, zu welcher Antwort+Sprache die aktuell geladene Aufnahme gehört
 const AUDIO_EXTENSIONS = ["mp4", "mp3", "m4a"];
 function getAudioUrl(hymnId, lang, ext){
   return `${SUPABASE_URL}/storage/v1/object/public/Audios/${hymnId}-${lang}.${ext}`;
@@ -787,13 +798,25 @@ function ensureReverbGraph(){
   return audioCtx;
 }
 
-function playHymnAudio(hymnId, lang, speed, onStatus){
-  if(currentAudioEl){ currentAudioEl.pause(); currentAudioEl = null; }
-  if(currentAudioSourceNode){ try{ currentAudioSourceNode.disconnect(); }catch(e){} currentAudioSourceNode = null; }
-  onStatus("loading");
+/* Beendet die aktuelle Wiedergabe vollständig (Stopp-Button ODER Verlassen der Seite —
+   das Audio soll NIE im Hintergrund weiterlaufen, wenn man zu einer anderen Ansicht wechselt). */
+function stopHymnAudio(){
+  if(currentAudioEl){ try{ currentAudioEl.pause(); }catch(e){} }
+  if(currentAudioSourceNode){ try{ currentAudioSourceNode.disconnect(); }catch(e){} }
+  currentAudioEl = null;
+  currentAudioSourceNode = null;
+  currentAudioKey = null;
+}
+
+/* callbacks: {onStatus(status), onTime(currentTime, duration)} */
+function playHymnAudio(hymnId, lang, speed, callbacks){
+  stopHymnAudio();
+  const key = hymnId + "_" + lang;
+  currentAudioKey = key;
+  callbacks.onStatus("loading");
   const tryExt = (extIndex)=>{
     if(extIndex >= AUDIO_EXTENSIONS.length){
-      onStatus("missing");
+      callbacks.onStatus("missing");
       playPlaceholderTone(speed);
       return;
     }
@@ -825,9 +848,21 @@ function playHymnAudio(hymnId, lang, speed, onStatus){
         // Falls der Hall (z. B. wegen fehlender CORS-Freigabe im Storage) nicht angewendet werden kann,
         // spielt die Aufnahme trotzdem ganz normal ohne Effekt weiter.
       }
-      onStatus("playing");
+      callbacks.onStatus("playing");
     });
-    audioEl.addEventListener("ended", ()=> onStatus("idle"));
+    audioEl.addEventListener("timeupdate", ()=>{
+      if(currentAudioEl === audioEl) callbacks.onTime(audioEl.currentTime, audioEl.duration || 0);
+    });
+    audioEl.addEventListener("loadedmetadata", ()=>{
+      if(currentAudioEl === audioEl) callbacks.onTime(audioEl.currentTime, audioEl.duration || 0);
+    });
+    audioEl.addEventListener("play", ()=>{
+      if(currentAudioEl === audioEl) callbacks.onStatus("playing");
+    });
+    audioEl.addEventListener("pause", ()=>{
+      if(currentAudioEl === audioEl && !audioEl.ended) callbacks.onStatus("paused");
+    });
+    audioEl.addEventListener("ended", ()=> callbacks.onStatus("idle"));
     audioEl.addEventListener("error", zumNaechstenFormatWechseln);
     audioEl.play().catch(zumNaechstenFormatWechseln);
   };
@@ -838,6 +873,12 @@ function playHymnAudio(hymnId, lang, speed, onStatus){
 const root = document.getElementById("app");
 
 function render(){
+  // Die Aufnahme darf nie im Hintergrund weiterlaufen: sobald die Hymnen-Seite verlassen
+  // wird (oder auf eine andere Sprache derselben Antwort gewechselt wird), wird sie gestoppt.
+  const erwarteterAudioKey = state.view==="hymn" ? (state.currentHymnId + "_" + state.currentLang) : null;
+  if(currentAudioKey !== null && currentAudioKey !== erwarteterAudioKey){
+    stopHymnAudio();
+  }
   root.innerHTML = "";
   root.appendChild(renderHeader());
   const main = document.createElement("main");
@@ -1364,33 +1405,84 @@ function renderHymn(){
   const player = document.createElement("div");
   player.className = "player";
   player.innerHTML = `
-    <button class="play-btn" id="playBtn">▶</button>
-    <div>
-      <div style="font-weight:600;">Aufnahme anhören</div>
-      <div class="audio-note" id="audioStatus">Bereit</div>
+    <div class="player-row">
+      <button class="play-btn" id="playBtn">▶</button>
+      <button class="stop-btn" id="stopBtn" title="Stopp">■</button>
+      <div>
+        <div style="font-weight:600;">Aufnahme anhören</div>
+        <div class="audio-note" id="audioStatus">Bereit</div>
+      </div>
+      <div class="speed-row" id="speedRow">
+        <button data-s="0.75">0.75x</button>
+        <button data-s="1" class="active">1x</button>
+        <button data-s="1.25">1.25x</button>
+      </div>
     </div>
-    <div class="speed-row" id="speedRow">
-      <button data-s="0.75">0.75x</button>
-      <button data-s="1" class="active">1x</button>
-      <button data-s="1.25">1.25x</button>
+    <div class="seek-row">
+      <span class="seek-time" id="seekCurrent">0:00</span>
+      <input type="range" class="seek-bar" id="seekBar" min="0" max="1000" value="0" />
+      <span class="seek-time total" id="seekTotal">0:00</span>
     </div>
   `;
   const statusEl = player.querySelector("#audioStatus");
-  const setStatus = (s)=>{
-    if(s==="loading") statusEl.textContent = "Lädt …";
-    else if(s==="playing") statusEl.textContent = "Spielt ab …";
-    else if(s==="missing") statusEl.textContent = "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)";
-    else statusEl.textContent = "Bereit";
+  const playBtn = player.querySelector("#playBtn");
+  const stopBtn = player.querySelector("#stopBtn");
+  const seekBar = player.querySelector("#seekBar");
+  const seekCurrentEl = player.querySelector("#seekCurrent");
+  const seekTotalEl = player.querySelector("#seekTotal");
+  const formatTime = (t)=>{
+    if(!isFinite(t) || t<0) t = 0;
+    const m = Math.floor(t/60), s = Math.floor(t%60);
+    return m + ":" + (s<10? "0":"") + s;
   };
-  player.querySelector("#playBtn").addEventListener("click", ()=>{
-    playHymnAudio(hymn.id, state.currentLang, state.speed, setStatus);
+  let userIsSeeking = false;
+  const thisKey = hymn.id + "_" + state.currentLang;
+  const setStatus = (s)=>{
+    if(s==="loading"){ statusEl.textContent = "Lädt …"; playBtn.textContent = "▶"; }
+    else if(s==="playing"){ statusEl.textContent = "Spielt ab …"; playBtn.textContent = "⏸"; }
+    else if(s==="paused"){ statusEl.textContent = "Pausiert"; playBtn.textContent = "▶"; }
+    else if(s==="missing"){ statusEl.textContent = "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)"; playBtn.textContent = "▶"; }
+    else { statusEl.textContent = "Bereit"; playBtn.textContent = "▶"; }
+  };
+  const setTime = (cur, dur)=>{
+    if(userIsSeeking) return;
+    seekCurrentEl.textContent = formatTime(cur);
+    seekTotalEl.textContent = formatTime(dur);
+    seekBar.value = dur>0 ? Math.round((cur/dur)*1000) : 0;
+  };
+  // Falls dieselbe Aufnahme (gleiche Antwort + Sprache) schon läuft/pausiert ist (z. B. weil
+  // der Nutzer zwischendurch nur den Selbst-geübt-Haken gesetzt hat und die Seite neu
+  // gezeichnet wurde), spiegelt die Anzeige direkt deren aktuellen Zustand statt "Bereit".
+  if(currentAudioKey === thisKey && currentAudioEl){
+    setStatus(currentAudioEl.paused ? "paused" : "playing");
+    setTime(currentAudioEl.currentTime, currentAudioEl.duration || 0);
+  }
+  playBtn.addEventListener("click", ()=>{
+    if(currentAudioKey === thisKey && currentAudioEl){
+      if(currentAudioEl.paused) currentAudioEl.play().catch(()=>{});
+      else currentAudioEl.pause();
+    } else {
+      playHymnAudio(hymn.id, state.currentLang, state.speed, { onStatus: setStatus, onTime: setTime });
+    }
+  });
+  stopBtn.addEventListener("click", ()=>{
+    stopHymnAudio();
+    setStatus("idle");
+    setTime(0, 0);
+  });
+  seekBar.addEventListener("input", ()=>{ userIsSeeking = true; });
+  seekBar.addEventListener("change", ()=>{
+    if(currentAudioKey === thisKey && currentAudioEl && isFinite(currentAudioEl.duration)){
+      currentAudioEl.currentTime = (seekBar.value/1000) * currentAudioEl.duration;
+    }
+    userIsSeeking = false;
   });
   player.querySelector("#speedRow").addEventListener("click",(e)=>{
     const b = e.target.closest("button"); if(!b) return;
     state.speed = parseFloat(b.dataset.s);
     player.querySelectorAll("#speedRow button").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
-    if(currentAudioEl) currentAudioEl.playbackRate = state.speed;
+    if(currentAudioKey === thisKey && currentAudioEl) currentAudioEl.playbackRate = state.speed;
   });
   wrap.appendChild(player);
 
