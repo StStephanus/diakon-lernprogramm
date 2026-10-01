@@ -732,11 +732,12 @@ function playPlaceholderTone(speed){
 }
 
 /* Echte Aufnahme aus Supabase Storage (Bucket "audio").
-   Erwartetes Dateischema: {hymnId}-{lang}.mp4 ODER {hymnId}-{lang}.mp3, z. B. s1h2-de.mp4 / s1h2-de.mp3
-   Es wird zuerst .mp4 versucht, dann .mp3, damit beide Formate gemischt abgelegt werden können. */
+   Erwartetes Dateischema: {hymnId}-{lang}.mp4 ODER {hymnId}-{lang}.mp3 ODER {hymnId}-{lang}.m4a,
+   z. B. s1h2-de.mp4 / s1h2-de.mp3 / s1h2-de.m4a
+   Es werden die Formate der Reihe nach durchprobiert, damit sie gemischt abgelegt werden können. */
 let currentAudioEl = null;
 let currentAudioSourceNode = null;
-const AUDIO_EXTENSIONS = ["mp4", "mp3"];
+const AUDIO_EXTENSIONS = ["mp4", "mp3", "m4a"];
 function getAudioUrl(hymnId, lang, ext){
   return `${SUPABASE_URL}/storage/v1/object/public/Audios/${hymnId}-${lang}.${ext}`;
 }
