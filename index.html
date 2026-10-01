@@ -862,14 +862,14 @@ function renderOnboardingModal(){
       <li>Es gibt drei <strong>Stufen</strong>, die sich nach deinem Alter richten: Stufe 1 (unter 12 Jahren), Stufe 2 (12 bis 20 Jahre) und Stufe 3 (ab 20 Jahren). Deine Stufe wird automatisch aus deinem Geburtsdatum berechnet.</li>
       <li>Du siehst in jeder Station <strong>alle</strong> Antworten — auch die höherer Stufen. Antworten, die noch nicht zu deiner Stufe gehören, sind mit einem Schloss-Symbol markiert und können noch nicht geöffnet werden.</li>
       <li>Sobald du älter wirst oder deine aktuelle Stufe vollständig gelernt hast, schaltet sich die nächste Stufe automatisch frei — du bekommst dann eine Mitteilung dazu.</li>
-      <li>Innerhalb deiner freigeschalteten Antworten gibt es <strong>Pflicht-Antworten</strong> (nötig fürs Zertifikat deiner Stufe) und <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte). Ein paar wenige Antworten sind für alle komplett freiwillig und werden erst ab Stufe 3 als solche angezeigt.</li>
+      <li>In Stufe 1 und 2 müssen alle freigeschalteten Antworten gelernt werden. Erst in <strong>Stufe 3</strong> gibt es zusätzlich zu den <strong>Pflicht-Antworten</strong> auch ein paar wenige komplett <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte).</li>
       <li>Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.</li>
       <li>Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.</li>
       <li>Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.</li>
-      <li>Es reicht, jede Pflicht-Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.</li>
+      <li>Es reicht, jede Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.</li>
       <li><strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.</li>
-      <li>Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du ein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf. Erwachsene (Stufe 3) erhalten nach Abschluss aller Pflicht-Antworten das grosse <strong>Zertifikat</strong>.</li>
-      <li>Für die besondere <strong>Belohnung</strong> müsst ihr alle freigeschalteten Antworten — Pflicht <em>und</em> freiwillig — in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen.</li>
+      <li>Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du dein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf.</li>
+      <li>Für die besondere <strong>Belohnung</strong> müsst ihr alle eure freigeschalteten Antworten in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen (ab Stufe 3 zählen dazu auch die freiwilligen Antworten).</li>
     </ul>
     <button class="btn" id="onboardOk">${state.profile.onboarded ? "Schliessen" : "Verstanden, los geht's"}</button>
   `;
@@ -942,7 +942,6 @@ function renderBody(){
   }
   if(state.view==="hymn") return renderHymn();
   if(state.view==="station") return renderStation();
-  if(state.view==="zertifikat") return renderCertificate();
   if(state.view==="stufenzertifikat") return renderStufenZertifikat();
   return renderHome();
 }
@@ -1100,7 +1099,6 @@ function renderDiakonAuthGate(){
 function renderHome(){
   const wrap = document.createElement("div");
   const stufe = state.profile.stufe;
-  const certDone = allMandatoryCertified(stufe);
   const rewardDone = allHymnsCertified(stufe);
   const intro = document.createElement("div");
   intro.innerHTML = `<h2 class="serif" style="font-size:24px;">Hallo ${state.profile.name}</h2>
@@ -1113,32 +1111,18 @@ function renderHome(){
     banner.innerHTML = `<span style="font-size:14px;">🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!</span>`;
     wrap.appendChild(banner);
   }
-  if(certDone){
+  // Zertifikat: nur die jeweils höchste abgeschlossene Stufe wird gezeigt —
+  // das Zertifikat der nächsten Stufe ersetzt das der vorherigen.
+  const hoechsteAbgeschlosseneStufe = [3,2,1].find(t => tierFullyCertified(t));
+  if(hoechsteAbgeschlosseneStufe){
     const banner = document.createElement("div");
     banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;";
-    banner.innerHTML = `<span style="font-size:14px;">Alle Pflicht-Antworten bestätigt — dein Zertifikat ist bereit.</span>`;
+    banner.innerHTML = `<span style="font-size:14px;">Alle Pflicht-Antworten der Stufe ${hoechsteAbgeschlosseneStufe} bestätigt — dein Zertifikat ist bereit.</span>`;
     const btn = document.createElement("button");
-    btn.className = "btn"; btn.style.margin="0"; btn.textContent = "Zertifikat ansehen";
-    btn.addEventListener("click", ()=>{ state.view="zertifikat"; render(); });
+    btn.className = "btn"; btn.style.margin="0"; btn.textContent = `Stufe ${hoechsteAbgeschlosseneStufe}-Zertifikat ansehen`;
+    btn.addEventListener("click", ()=>{ state.stufenZertifikatStufe = hoechsteAbgeschlosseneStufe; state.view = "stufenzertifikat"; render(); });
     banner.appendChild(btn);
     wrap.appendChild(banner);
-  }
-
-  // Frühere Stufen-Zertifikate zum erneuten Ansehen (Stufe 1/2, falls bereits abgeschlossen)
-  const abgeschlosseneStufen = [1,2].filter(t => t < stufe && tierFullyCertified(t));
-  if(abgeschlosseneStufen.length){
-    const box = document.createElement("div");
-    box.style.cssText = "margin-top:14px; padding:12px 16px; background:#F3F1EA; border:1px solid var(--line); border-radius:6px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;";
-    box.innerHTML = `<span style="font-size:13px; color:var(--muted);">Deine früheren Stufen-Zertifikate:</span>`;
-    abgeschlosseneStufen.forEach(t=>{
-      const btn = document.createElement("button");
-      btn.className = "btn secondary";
-      btn.style.margin = "0";
-      btn.textContent = `Stufe ${t}-Zertifikat`;
-      btn.addEventListener("click", ()=>{ state.stufenZertifikatStufe = t; state.view = "stufenzertifikat"; render(); });
-      box.appendChild(btn);
-    });
-    wrap.appendChild(box);
   }
 
   const list = document.createElement("div");
@@ -1150,10 +1134,21 @@ function renderHome(){
     const voluntCount = voluntaryHymns(s, stufe).length;
     const voluntCertCount = stationVoluntCertifiedCount(s, stufe);
     const voluntDone = stationVoluntSelfDoneCount(s, stufe);
-    const metaText = mandCount>0
-      ? `${certCount}/${mandCount} Pflicht-Antworten bestätigt (${done} selbst geübt)` + (voluntCount>0 ? ` · ${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "")
-      : (voluntCount>0 ? `${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "");
-    const stationDone = mandCount>0 ? certCount===mandCount : (voluntCount>0 && voluntCertCount===voluntCount);
+    let metaText, stationDone;
+    if(stufe < 3){
+      // Stufe 1 und 2 kennen keine "Pflicht/freiwillig"-Unterscheidung — jede freigeschaltete Antwort
+      // dieser Stufe muss gelernt werden, daher einfach "X von Y Antworten".
+      const totalCount = mandCount + voluntCount;
+      const totalCert = certCount + voluntCertCount;
+      const totalDone = done + voluntDone;
+      metaText = totalCount>0 ? `${totalCert}/${totalCount} Antworten bestätigt (${totalDone} selbst geübt)` : "";
+      stationDone = totalCount>0 && totalCert===totalCount;
+    } else {
+      metaText = mandCount>0
+        ? `${certCount}/${mandCount} Pflicht-Antworten bestätigt (${done} selbst geübt)` + (voluntCount>0 ? ` · ${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "")
+        : (voluntCount>0 ? `${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "");
+      stationDone = mandCount>0 ? certCount===mandCount : (voluntCount>0 && voluntCertCount===voluntCount);
+    }
     const row = document.createElement("div");
     row.className = "station-row";
     row.innerHTML = `
@@ -1385,38 +1380,6 @@ function renderHymn(){
     certInfo.textContent = `Auf ${currentLangLabel} noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort in dieser Sprache vorzusingen.`;
   }
   wrap.appendChild(certInfo);
-
-  return wrap;
-}
-
-function renderCertificate(){
-  const wrap = document.createElement("div");
-  const crumb = document.createElement("div");
-  crumb.className = "crumb";
-  crumb.textContent = "← Zurück";
-  crumb.addEventListener("click", ()=>{ state.view="home"; render(); });
-  wrap.appendChild(crumb);
-
-  const cert = document.createElement("div");
-  cert.className = "certificate";
-  const dates = Object.values(state.certified).map(c=>c.date).filter(Boolean).sort();
-  const lastDate = dates.length? dates[dates.length-1] : new Date().toLocaleDateString("de-CH");
-  cert.innerHTML = `
-    <div class="kicker">KOPTISCH-ORTHODOXE KIRCHE ZÜRICH</div>
-    <h2 class="serif">Zertifikat</h2>
-    <div style="font-size:14px; color:var(--muted); margin-top:10px;">verliehen an</div>
-    <div class="name">${state.profile.name}</div>
-    <div class="desc">hat alle ${STATIONS.length} Stationen der liturgischen Diakonenantworten erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist berechtigt, als Diakon am Altar zu dienen.</div>
-    <div class="date">Abgeschlossen am ${lastDate}</div>
-  `;
-  wrap.appendChild(cert);
-
-  const printBtn = document.createElement("button");
-  printBtn.className = "btn secondary";
-  printBtn.style.marginTop = "18px";
-  printBtn.textContent = "Drucken / als PDF speichern";
-  printBtn.addEventListener("click", ()=> window.print());
-  wrap.appendChild(printBtn);
 
   return wrap;
 }
