@@ -420,7 +420,7 @@ const STATIONS = [
         cop:{text:null, translit:"Amin, Amin, Epros eveksasti!"},
         ar:{text:"Amin, Amin, Sallo!", translit:null},
       }},
-      {id:"s4h16", title:"Sotis Amin", difficulty:"leicht", tier:1, mandatory:true, content:{
+      {id:"s4h16", title:"Sotis Amin", difficulty:"leicht", tier:2, mandatory:true, content:{
         de:{text:"In Wahrheit hast du uns erlöst mit deinem Geiste, Amen", translit:null},
         cop:{text:null, translit:"Soties amin keto ebnevmati so, Amin"},
         ar:{text:"Chalesto Hakkan uamaAa roHeka. Amin", translit:null},
@@ -1174,7 +1174,14 @@ function renderHome(){
       const totalCount = mandCount + voluntCount;
       const totalCert = certCount + voluntCertCount;
       const totalDone = done + voluntDone;
-      metaText = totalCount>0 ? `${totalCert}/${totalCount} Antworten bestätigt (${totalDone} selbst geübt)` : "";
+      if(totalCount>0){
+        metaText = `${totalCert}/${totalCount} Antworten bestätigt (${totalDone} selbst geübt)`;
+      } else if(s.hymns.length>0){
+        const minTier = Math.min(...s.hymns.map(h=>h.tier));
+        metaText = `Diese Antworten werden erst ab Stufe ${minTier} freigeschaltet.`;
+      } else {
+        metaText = "";
+      }
       stationDone = totalCount>0 && totalCert===totalCount;
     } else {
       metaText = mandCount>0
