@@ -14,11 +14,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Pi-Eklom" />
 <style>
-  @font-face{
-    font-family:"CS Avva Shenouda";
-    src:url("CS_Avva_Shenouda.ttf") format("truetype");
-    font-display:swap;
-  }
   :root{
     --ink:#241C15;
     --parchment:#F3ECDA;
@@ -56,17 +51,12 @@
     border-bottom:3px solid var(--gold);
   }
   header.top .crest{
-    width:62px;height:62px;flex:none; object-fit:cover;
+    width:110px;height:110px;flex:none; object-fit:cover;
     border:2px solid var(--gold); box-shadow:0 1px 4px rgba(0,0,0,.35);
   }
   header.top .titles{display:flex;align-items:flex-start;gap:14px;}
   header.top h1{font-size:23px;letter-spacing:.2px;color:var(--parchment); line-height:1.15;}
   header.top h1.app-title{font-size:34px; letter-spacing:.3px; color:var(--gold-light); font-weight:700;}
-  .coptic-title{
-    font-family:"CS Avva Shenouda", "Cormorant Garamond", serif;
-    font-size:40px; line-height:1; color:var(--gold-light); font-weight:400;
-  }
-  .coptic-sub{font-size:14px; color:var(--gold-light); margin-top:2px; font-style:italic; opacity:.9;}
   header.top .sub{font-size:12.5px;color:var(--gold-light);margin-top:5px; line-height:1.4;}
   .role-switch{
     display:flex; border:1px solid var(--gold); border-radius:999px; overflow:hidden; flex:none;
@@ -1011,8 +1001,6 @@ function renderHeader(){
       <button id="infoBtn" class="info-btn" title="Wie funktioniert das?" style="position:absolute; top:0; right:0; display:${state.role==='diakon' && state.profile ? 'flex':'none'}; visibility:${state.role==='diakon' && state.profile ? 'visible':'hidden'};">i</button>
           <img class="crest" src="logo-round.png" alt="Pi-Eklom" style="border-radius:50%;" />
       <div>
-        <h1 class="coptic-title" style="overflow-wrap:break-word;">Pi,lom</h1>
-        <div class="coptic-sub">Pi-Eklom</div>
         <div class="sub" style="font-size:15px; margin-top:4px;">Lernprogramm: Antworten eines koptischen Diakons</div>
         <div class="sub">Koptisch-Orthodoxe Kirche in der Deutschschweiz</div>
       </div>
