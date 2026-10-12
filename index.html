@@ -124,10 +124,13 @@
     display:flex; align-items:center; gap:16px; text-align:left; width:100%;
     background:rgba(255,255,255,.06); border:1px solid var(--gold); color:var(--parchment);
     padding:16px 16px; cursor:pointer; font-family:"Source Sans 3",sans-serif;
-    transition:background .15s ease, transform .15s ease;
+    transition:background .12s ease, transform .12s ease, box-shadow .12s ease;
   }
   header.top .tile:hover, header.top .tile:focus-visible{background:rgba(217,189,132,.18); outline:none;}
-  header.top .tile:active{transform:scale(.99);}
+  header.top .tile:active{
+    transform:scale(.965); background:rgba(217,189,132,.28);
+    box-shadow:0 0 0 1px var(--gold-light), 0 0 16px rgba(217,189,132,.35);
+  }
   header.top .tile-icon{flex:none; width:46px; height:46px; color:var(--gold-light); display:flex; align-items:center; justify-content:center;}
   header.top .tile-icon svg{width:100%; height:100%;}
   header.top .tile-text{display:flex; flex-direction:column; gap:4px; min-width:0;}
@@ -399,6 +402,33 @@
   header.top.landing{padding-top:calc(18px + env(safe-area-inset-top, 0px));}
   header.top.compact{padding-top:calc(28px + env(safe-area-inset-top, 0px));}
   header.top .info-corner{top:calc(10px + env(safe-area-inset-top, 0px));}
+  /* Übergänge und Rückmeldung beim Antippen */
+  .app{overflow-x:hidden; overflow-x:clip;}
+  @keyframes navFwd{from{opacity:0; transform:translateX(26px);} to{opacity:1; transform:none;}}
+  @keyframes navBack{from{opacity:0; transform:translateX(-26px);} to{opacity:1; transform:none;}}
+  @keyframes stIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+  main.nav-fwd{animation:navFwd .28s cubic-bezier(.2,.8,.2,1) both;}
+  main.nav-back{animation:navBack .28s cubic-bezier(.2,.8,.2,1) both;}
+  .st-in{animation:stIn .34s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i, 0) * 45ms + 60ms);}
+  .station-row, .hymn-row, .diakon-pick, .lang-tab, .btn{transition:background .12s ease, transform .12s ease;}
+  .station-row:active, .hymn-row:active, .diakon-pick:active{background:rgba(173,127,53,.14); transform:scale(.985);}
+  .lang-tab:active, .btn:active{transform:scale(.96);}
+  @media (prefers-reduced-motion: reduce){
+    main.nav-fwd, main.nav-back, .st-in{animation:none;}
+    .station-row, .hymn-row, .diakon-pick, .lang-tab, .btn, header.top .tile{transition:none;}
+    .station-row:active, .hymn-row:active, .diakon-pick:active, .lang-tab:active, .btn:active, header.top .tile:active{transform:none;}
+  }
+  /* Bibelverse: geschwungene Klammer mit Kreuz, Vers kursiv, Quelle klein */
+  .vers{text-align:center; margin:26px auto 8px; max-width:36ch;}
+  .vers-brace{display:block; width:min(190px, 60%); height:auto; margin:0 auto; color:var(--gold);}
+  .vers-text{font-family:"Cormorant Garamond", serif; font-style:italic; font-size:20px; line-height:1.45; margin-top:8px; color:var(--burgundy); text-wrap:balance;}
+  .vers-quelle{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; margin-top:10px; color:var(--muted);}
+  .vers.on-dark .vers-brace{color:var(--gold);}
+  .vers.on-dark .vers-text{color:var(--gold-light);}
+  .vers.on-dark .vers-quelle{color:var(--parchment); opacity:.75;}
+  header.top .title-frame .vers{margin:14px auto 4px;}
+  .text-block .vers{margin:26px auto;}
+  .text-block .schluss{font-style:italic; color:#8A6221; text-align:center; margin:26px 0 0;}
 </style>
 </head>
 <body>
@@ -796,7 +826,38 @@ async function loadAllDiakone(){
 /* ---------------- Theorie ----------------
    Die Texte sind noch Platzhalter. Zum Befüllen einfach bei "text" den echten Text eintragen
    (Absätze mit einer Leerzeile trennen). Die "id" nie ändern, sonst geht der Fortschritt verloren. */
+/* ---------------- Bibelverse ----------------
+   Schlachter 2000 (Psalmen) bzw. der von euch gelieferte Wortlaut (Apostelgeschichte). */
+const BRACE_SVG = '<svg class="vers-brace" viewBox="0 -8 200 36" aria-hidden="true"><path d="M4 26 C4 16 14 15 30 15 H84 C94 15 98 12 100 6 C102 12 106 15 116 15 H170 C186 15 196 16 196 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path transform="translate(94,-6) scale(.6)" d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>';
+const VERSE = {
+  ps84_5:   { text: "Wohl denen, die in deinem Haus wohnen; sie preisen dich allezeit!", quelle: "Psalm 84,5 · Schlachter 2000" },
+  ps122_1:  { text: "Ich freue mich an denen, die zu mir sagen: Lasst uns zum Haus des HERRN gehen!", quelle: "Psalm 122,1 · Schlachter 2000" },
+  ps26_8:   { text: "HERR, ich habe lieb die Stätte deines Hauses und den Ort, da deine Herrlichkeit wohnt!", quelle: "Psalm 26,8 · Schlachter 2000" },
+  ps119_105:{ text: "Dein Wort ist meines Fußes Leuchte und ein Licht auf meinem Weg.", quelle: "Psalm 119,105 · Schlachter 2000" },
+  ps47_7:   { text: "Lobsingt Gott, lobsingt! Lobsingt unserem König, lobsingt!", quelle: "Psalm 47,7 · Schlachter 2000" },
+  apg6_3:   { text: "Seht euch nach sieben Männern aus eurer Mitte um, die ein gutes Zeugnis haben und voll Heiligen Geistes und Weisheit sind; die wollen wir für diesen Dienst einsetzen", quelle: "Apostelgeschichte 6,3" },
+};
+const HAUPTMENU_VERSE = [VERSE.ps84_5, VERSE.ps122_1, VERSE.ps26_8];
+const hauptmenuVers = HAUPTMENU_VERSE[Math.floor(Math.random() * HAUPTMENU_VERSE.length)]; // pro Öffnen ein anderer
+function versHtml(v, variante){
+  return `<div class="vers ${variante}">${BRACE_SVG}<div class="vers-text">„${v.text}“</div><div class="vers-quelle">${v.quelle}</div></div>`;
+}
+function versEl(v, variante){
+  const d = document.createElement("div");
+  d.innerHTML = versHtml(v, variante);
+  return d.firstElementChild;
+}
+
+/* Kapitel-Inhalt: entweder "text" (Absätze durch Leerzeile getrennt) oder "blocks" in der gewünschten Reihenfolge:
+   { typ:"text", text:"…" } · { typ:"vers", text:"…", quelle:"…" } · { typ:"schluss", text:"…" } */
 const THEORIE = [
+  { id: "theorie-stephanus", title: "Der Hl. Stephanus: Erzdiakon und erster Märtyrer", blocks: [
+      { typ: "text", text: "" },
+      { typ: "vers", text: "Und als alle, die im Hohen Rat saßen, ihn anblickten, sahen sie sein Angesicht wie das Angesicht eines Engels.", quelle: "Apostelgeschichte 6,15" },
+      { typ: "text", text: "" },
+      { typ: "vers", text: "Herr, rechne ihnen diese Sünde nicht an! Und nachdem er das gesagt hatte, entschlief er.", quelle: "Apostelgeschichte 7,60" },
+      { typ: "schluss", text: "Möge der Segen seiner Gebete mit uns sein, und Ehre sei unserem Herrn in Ewigkeit, Amen." },
+  ]},
   { id: "theorie-liturgien", title: "Die verschiedenen Liturgien", text: "" },
   { id: "theorie-aufbau",    title: "Der Aufbau einer Liturgie",   text: "" },
   { id: "theorie-aufgaben",  title: "Die Aufgaben eines Diakons",  text: "" },
@@ -1028,6 +1089,18 @@ function playHymnAudio(hymnId, lang, callbacks){
 /* ---------------- Rendering ---------------- */
 const root = document.getElementById("app");
 
+/* ---------------- Übergänge ----------------
+   Tiefe der Seiten: tiefer hinein = von rechts hereinschieben, zurück = von links.
+   Der Kopf bleibt stehen, nur der Inhalt bewegt sich. */
+const VIEW_TIEFE = { "menu":0, "home":1, "theorie":1, "pruefer-home":1, "station":2, "theorie-kapitel":2, "stufenzertifikat":2, "pruefer-station":2, "hymn":3 };
+let zuletztGezeigteView = null;
+function staffeln(liste){
+  Array.from(liste).forEach((el, i)=>{
+    el.style.setProperty("--i", Math.min(i, 9));
+    el.classList.add("st-in");
+  });
+}
+
 function render(){
   // Die Aufnahme darf nie im Hintergrund weiterlaufen: sobald die Hymnen-Seite verlassen
   // wird (oder auf eine andere Sprache derselben Antwort gewechselt wird), wird sie gestoppt.
@@ -1035,11 +1108,26 @@ function render(){
   if(currentAudioKey !== null && currentAudioKey !== erwarteterAudioKey){
     stopHymnAudio();
   }
+  const tiefeNeu = VIEW_TIEFE[state.view] ?? 1;
+  const tiefeAlt = zuletztGezeigteView === null ? null : (VIEW_TIEFE[zuletztGezeigteView] ?? 1);
+  const richtung = (zuletztGezeigteView !== null && zuletztGezeigteView !== state.view)
+    ? (tiefeNeu >= tiefeAlt ? "fwd" : "back") : null;
+  zuletztGezeigteView = state.view;
   root.innerHTML = "";
   root.appendChild(renderHeader());
   const main = document.createElement("main");
   main.appendChild(renderBody());
-  if(!(state.role==="diakon" && state.profile && state.view==="menu")) root.appendChild(main);
+  const istLanding = state.role==="diakon" && state.profile && state.view==="menu";
+  if(!istLanding) root.appendChild(main);
+  if(richtung){
+    window.scrollTo(0,0);
+    if(istLanding){
+      staffeln(root.querySelectorAll("header .welcome, header .tile"));
+    } else {
+      main.classList.add(richtung==="fwd" ? "nav-fwd" : "nav-back");
+      staffeln(main.querySelectorAll(".station-row, .hymn-row, .diakon-pick, .approve-row"));
+    }
+  }
 
   if(state.role==="diakon" && state.profile && state.pendingPromotion){
     root.appendChild(renderPromotionModal());
@@ -1196,6 +1284,8 @@ function renderHeader(){
         <div class="church-name">Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz</div>`;
     if(landing){
       innen += `
+        <div class="orn-line">${CROSS_SVG}</div>
+        ${versHtml(VERSE.apg6_3, "on-dark")}
         <div class="welcome">
           <h2 class="serif">Herzlich willkommen zu Pi-Eklom, ${state.profile.vorname}</h2>
           <p>Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.</p>
@@ -1215,7 +1305,8 @@ function renderHeader(){
               <span class="tile-sub">Die liturgischen Antworten eines Diakons lernen</span>
             </span>
           </button>
-        </div>`;
+        </div>
+        ${versHtml(hauptmenuVers, "on-dark")}`;
     }
     kopf = `<div class="title-frame">${FRAME_CORNERS}${innen}</div>`;
   }
@@ -1289,6 +1380,7 @@ function renderTheorie(){
     row.addEventListener("click", ()=>{ state.currentKapitelId = k.id; state.view="theorie-kapitel"; render(); window.scrollTo(0,0); });
     wrap.appendChild(row);
   });
+  wrap.appendChild(versEl(VERSE.ps119_105, "on-light"));
   return wrap;
 }
 
@@ -1310,7 +1402,14 @@ function renderTheorieKapitel(){
 
   const textBlock = document.createElement("div");
   textBlock.className = "text-block";
-  if(k.text && k.text.trim()){
+  if(k.blocks){
+    textBlock.innerHTML = k.blocks.map(b => {
+      if(b.typ === "vers") return versHtml(b, "on-light");
+      if(b.typ === "schluss") return `<p class="schluss">${b.text}</p>`;
+      if(!b.text || !b.text.trim()) return `<p style="color:var(--muted); font-style:italic;">Hier folgt der Text der Geschichte.</p>`;
+      return b.text.trim().split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("");
+    }).join("");
+  } else if(k.text && k.text.trim()){
     textBlock.innerHTML = k.text.trim().split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("");
   } else {
     textBlock.innerHTML = `<p style="color:var(--muted); font-style:italic;">Der Text zu diesem Thema folgt in Kürze.</p>`;
@@ -1649,6 +1748,7 @@ function renderHome(){
     list.appendChild(row);
   });
   wrap.appendChild(list);
+  wrap.appendChild(versEl(VERSE.ps47_7, "on-light"));
 
   const note = document.createElement("div");
   note.className = "footnote";
@@ -2188,6 +2288,9 @@ document.getElementById("installBannerBtn").addEventListener("click", async ()=>
   await deferredInstallPrompt.userChoice;
   deferredInstallPrompt = null;
 });
+
+/* iOS zeigt :active (Einsinken beim Antippen) nur, wenn ein Touch-Listener existiert */
+document.addEventListener("touchstart", function(){}, {passive:true});
 
 /* ---------------- Start ---------------- */
 async function init(){
