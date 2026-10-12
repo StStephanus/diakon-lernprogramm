@@ -860,9 +860,10 @@ const STATIONS = [
         de:{text:"Betet für den vollkommen Frieden, für die Liebe und für die reinen, apostolischen Küsse", translit:null},
         ar:{text:"Sallo men agl al-salam alkamel ual-maHabba ualkobla altahira alrasolejja", translit:null},
       }},
-      {id:"s4h2", title:"Aspazesti", difficulty:"schwer", tier:3, mandatory:true, content:{
+      {id:"s4h2", title:"Aspazesti", titleAr:"قبلوا بعضكم بعضاً", difficulty:"schwer", tier:3, mandatory:true, content:{
         de:{text:"Grüßt einander mit einem heiligen Kuss Herr, erbarme dich, Herr, erbarme dich, Herr, erbarme dich. Ja, o Herr, Jesus Christus, der der Sohn Gottes ist, erhöre uns und erbarme dich unser. Tretet heran, tretet heran nach der Vorschrift. Steht in Ehrfurcht und schaut nach Osten. Wir sind aufmerksam.", translit:null},
-        ar:{text:"Kabbelo baAdakom baAdan bekoblaten mokaddasa, jarabbo erHam, jarabbo erHam, jarabbo erHam; naAam jarabb allazi houa JasuAa almasieH ebno allah esmaAna ua erHamna, takaddamo Ala haza alrasm, kefo bereAdaten ue ela alschark enzoro, nonset.", translit:null},
+        ar:{text:"Kabbelo baAdakom baAdan bekoblaten mokaddasa, jarabbo erHam, jarabbo erHam, jarabbo erHam; naAam jarabb allazi houa JasuAa almasieH ebno allah esmaAna ua erHamna, takaddamo Ala haza alrasm, kefo bereAdaten ue ela alschark enzoro, nonset.", translit:null,
+          script:"قبِّلوا بعضَكُمْ بعضاً بقُبلةٍ مقدسةٍ.\nيا ربُّ إرحَم،\nيا ربُّ إرحَم،\nيا ربُّ إرحَم.\nنعم يا ربُّ،\nالذي هو يسوعُ المسيحُ إبنُ اللهِ، إسمعْنا وإرحّمْنا.\nتقدموا على الرسمِ،\nقفوا برعدةٍ،\nوإلى الشرق أنظروا.\nننصِتْ."},   // script = arabische Schrift: wird nur im arabischen Modus gezeigt
       }},
       {id:"s4h3", title:"Wer sitzt, stehe auf", difficulty:"leicht", tier:1, mandatory:true, content:{
         de:{text:"Wer sitzt, stehe auf!", translit:null},
@@ -1242,7 +1243,10 @@ async function loadAllDiakone(){
    Einfach zwischen die Anführungszeichen schreiben. Leer = es erscheint ein Platzhalter. */
 /* Titel der Antworten: vorerst in allen Sprachen genau wie im Deutschen (true = übersetzen). */
 const TRANSLATE_HYMN_TITLES = false;
-function hymnTitle(h){ return TRANSLATE_HYMN_TITLES ? T(h.title) : h.title; }
+function hymnTitle(h){
+  if(UI_LANG === "ar" && isLoc() && h.titleAr) return h.titleAr;   // arabischer Titel nur im arabischen Modus
+  return TRANSLATE_HYMN_TITLES ? T(h.title) : h.title;
+}
 
 const HYMN_WO = {
   s1h1: "",   // Epi Eprosevki Estasite
@@ -2728,9 +2732,14 @@ function renderHymn(){
   wrap.appendChild(readTools());
   const textBlock = document.createElement("div");
   textBlock.className = "text-block";
-  const mainText = content.text || content.translit || "";
+  let mainText = content.text || content.translit || "";
+  let mainIsHtml = !!content.html;
+  if(UI_LANG === "ar" && isLoc() && content.script){   // arabische Schrift nur im arabischen Modus, sonst Franko-Arabisch
+    mainText = content.script.split("\n").map(l => l.replace(/&/g,"&amp;").replace(/</g,"&lt;")).join("<br>");
+    mainIsHtml = true;
+  }
   textBlock.dir = /[\u0600-\u06FF]/.test(mainText) ? "rtl" : "ltr";   // echte arabische Schrift läuft von rechts nach links
-  if(content.html){ textBlock.innerHTML = mainText; } else { textBlock.textContent = mainText; }
+  if(mainIsHtml){ textBlock.innerHTML = mainText; } else { textBlock.textContent = mainText; }
   wrap.appendChild(textBlock);
 
   const selfRow = document.createElement("div");
