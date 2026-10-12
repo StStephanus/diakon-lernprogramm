@@ -118,7 +118,7 @@
   header.top.landing .book-title{font-size:30px; margin-top:12px;}
   header.top .welcome{margin-top:20px;}
   header.top .welcome h2{font-size:25px; line-height:1.15; color:var(--gold-light); text-wrap:balance;}
-  header.top .welcome p{font-size:14.5px; line-height:1.6; color:var(--parchment); margin:10px auto 0; max-width:46ch; opacity:.92;}
+  header.top .welcome p{font-size:17px; line-height:1.6; color:var(--parchment); margin:12px auto 0; max-width:42ch; opacity:.95;}
   header.top .tiles{display:flex; flex-direction:column; gap:12px; margin-top:22px;}
   header.top .tile{
     display:flex; align-items:center; gap:16px; text-align:left; width:100%;
@@ -418,15 +418,20 @@
     .station-row, .hymn-row, .diakon-pick, .lang-tab, .btn, header.top .tile{transition:none;}
     .station-row:active, .hymn-row:active, .diakon-pick:active, .lang-tab:active, .btn:active, header.top .tile:active{transform:none;}
   }
-  /* Bibelverse: geschwungene Klammer mit Kreuz, Vers kursiv, Quelle klein */
-  .vers{text-align:center; margin:26px auto 8px; max-width:36ch;}
-  .vers-brace{display:block; width:min(190px, 60%); height:auto; margin:0 auto; color:var(--gold);}
+  /* Bibelverse: geschwungene Klammer (so breit wie der Vers) mit Kreuz, Vers kursiv, Quelle klein */
+  .vers{text-align:center; margin:28px auto 8px; width:fit-content; max-width:min(34ch, calc(100% - 28px));}
+  .vers-brace{position:relative; height:16px; margin:0 -14px; color:var(--gold);}
+  .vers-brace-line{display:block; width:100%; height:100%;}
+  .vers-cross{position:absolute; left:50%; top:-4px; width:13px; height:13px; margin-left:-6.5px;}
   .vers-text{font-family:"Cormorant Garamond", serif; font-style:italic; font-size:20px; line-height:1.45; margin-top:8px; color:var(--burgundy); text-wrap:balance;}
   .vers-quelle{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; margin-top:10px; color:var(--muted);}
   .vers.on-dark .vers-brace{color:var(--gold);}
   .vers.on-dark .vers-text{color:var(--gold-light);}
   .vers.on-dark .vers-quelle{color:var(--parchment); opacity:.75;}
-  header.top .title-frame .vers{margin:14px auto 4px;}
+  .vers.klein{width:100%; max-width:none; margin-top:12px;}
+  .vers.klein .vers-text{font-size:14.5px; line-height:1.5; margin-top:0;}
+  .vers.klein .vers-quelle{font-size:10px; margin-top:8px;}
+  header.top .title-frame .vers{margin-bottom:4px;}
   .text-block .vers{margin:26px auto;}
   .text-block .schluss{font-style:italic; color:#8A6221; text-align:center; margin:26px 0 0;}
 </style>
@@ -828,7 +833,7 @@ async function loadAllDiakone(){
    (Absätze mit einer Leerzeile trennen). Die "id" nie ändern, sonst geht der Fortschritt verloren. */
 /* ---------------- Bibelverse ----------------
    Schlachter 2000 (Psalmen) bzw. der von euch gelieferte Wortlaut (Apostelgeschichte). */
-const BRACE_SVG = '<svg class="vers-brace" viewBox="0 -8 200 36" aria-hidden="true"><path d="M4 26 C4 16 14 15 30 15 H84 C94 15 98 12 100 6 C102 12 106 15 116 15 H170 C186 15 196 16 196 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path transform="translate(94,-6) scale(.6)" d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>';
+const BRACE_SVG = '<div class="vers-brace"><svg class="vers-brace-line" viewBox="0 0 200 16" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M2 15 C2 7 10 7 26 7 H84 C94 7 98 5 100 2 C102 5 106 7 116 7 H174 C190 7 198 7 198 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><svg class="vers-cross" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg></div>';
 const VERSE = {
   ps84_5:   { text: "Wohl denen, die in deinem Haus wohnen; sie preisen dich allezeit!", quelle: "Psalm 84,5 · Schlachter 2000" },
   ps122_1:  { text: "Ich freue mich an denen, die zu mir sagen: Lasst uns zum Haus des HERRN gehen!", quelle: "Psalm 122,1 · Schlachter 2000" },
@@ -839,8 +844,8 @@ const VERSE = {
 };
 const HAUPTMENU_VERSE = [VERSE.ps84_5, VERSE.ps122_1, VERSE.ps26_8];
 const hauptmenuVers = HAUPTMENU_VERSE[Math.floor(Math.random() * HAUPTMENU_VERSE.length)]; // pro Öffnen ein anderer
-function versHtml(v, variante){
-  return `<div class="vers ${variante}">${BRACE_SVG}<div class="vers-text">„${v.text}“</div><div class="vers-quelle">${v.quelle}</div></div>`;
+function versHtml(v, variante, mitKlammer = true){
+  return `<div class="vers ${variante}">${mitKlammer ? BRACE_SVG : ""}<div class="vers-text">„${v.text}“</div><div class="vers-quelle">${v.quelle}</div></div>`;
 }
 function versEl(v, variante){
   const d = document.createElement("div");
@@ -1285,7 +1290,7 @@ function renderHeader(){
     if(landing){
       innen += `
         <div class="orn-line">${CROSS_SVG}</div>
-        ${versHtml(VERSE.apg6_3, "on-dark")}
+        ${versHtml(VERSE.apg6_3, "on-dark klein", false)}
         <div class="welcome">
           <h2 class="serif">Herzlich willkommen zu Pi-Eklom, ${state.profile.vorname}</h2>
           <p>Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.</p>
