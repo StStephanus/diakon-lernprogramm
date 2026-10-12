@@ -1240,6 +1240,10 @@ async function loadAllDiakone(){
 /* ---------------- Wo in der Liturgie? ----------------
    Pro Antwort ein kurzer Satz, an welcher Stelle der Liturgie sie gesungen wird.
    Einfach zwischen die Anführungszeichen schreiben. Leer = es erscheint ein Platzhalter. */
+/* Titel der Antworten: vorerst in allen Sprachen genau wie im Deutschen (true = übersetzen). */
+const TRANSLATE_HYMN_TITLES = false;
+function hymnTitle(h){ return TRANSLATE_HYMN_TITLES ? T(h.title) : h.title; }
+
 const HYMN_WO = {
   s1h1: "",   // Epi Eprosevki Estasite
   s1h2: "",   // Epros Eveksaste
@@ -1337,9 +1341,9 @@ I18N.ar = {
  "Koptisch-Orthodoxe Kirche in der Deutschschweiz": "الكنيسة القبطية الأرثوذكسية في سويسرا الألمانية",
  "Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz": "الكنيسة القبطية الأرثوذكسية<br>في سويسرا الألمانية",
  "Herzlich willkommen zu Pi-Eklom, {name}": "أهلاً بيك في بي إكلوم يا {name}",
- "Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.": "هنا هتلاقي كل اللي محتاج تتعلّمه كشمّاس. في <strong>النظري</strong> هتقرا الليتورجيا متقسّمة إزاي وإيه مهام الشمّاس. وفي <strong>برنامج التعلّم</strong> هتتمرّن على المرادات وتخلّي الممتحِن يأكّدها لك. تقدر تفتح الاتنين في أي وقت.",
+ "Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.": "هنا هتلاقي كل اللي محتاج تتعلّمه كشمّاس. في <strong>النظري</strong> هتقرا القداس متقسّم إزاي وإيه مهام الشمّاس. وفي <strong>برنامج التعلّم</strong> هتتمرّن على المرادات وتخلّي الممتحِن يأكّدها لك. تقدر تفتح الاتنين في أي وقت.",
  "Theorie": "النظري",
- "Die Liturgie verstehen": "فهم الليتورجيا",
+ "Die Liturgie verstehen": "فهم القداس",
  "Lernprogramm": "برنامج التعلّم",
  "Die liturgischen Antworten eines Diakons lernen": "تعلّم مرادات الشمّاس الطقسية",
  "Dunkler Modus": "الوضع الداكن",
@@ -1353,8 +1357,8 @@ I18N.ar = {
  "Zurück": "رجوع",
  "Sprache": "اللغة",
  "Der Hl. Stephanus:<br>Erzdiakon und erster Märtyrer": "القديس إستفانوس:<br>رئيس الشمامسة وأول الشهداء",
- "Die verschiedenen Liturgien": "الليتورجيات المختلفة",
- "Der Aufbau einer Liturgie": "ترتيب الليتورجيا",
+ "Die verschiedenen Liturgien": "القداسات المختلفة",
+ "Der Aufbau einer Liturgie": "ترتيب القداس",
  "Die Zusammensetzung des Altars": "مكوّنات المذبح",
  "Die Aufgaben eines Diakons": "مهام الشمّاس",
  "Möge der Segen seiner Gebete mit uns sein, und Ehre sei unserem Herrn in Ewigkeit, Amen.": "بركة صلواته تكون معانا، والمجد لربنا إلى الأبد، آمين.",
@@ -1382,7 +1386,7 @@ I18N.ar = {
  "Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.": "لما تتمرّن على مرد بلغة معيّنة، تقدر تعلّم عليه لنفسك، وده في الأول مجرد ملاحظة شخصية.",
  "Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.": "لما تبقى جاهز، روح لـ<strong>ممتحِن</strong> في الكنيسة ورتّل له المرد. هو هيأكّده في التطبيق على طول، وهتشوف ده على موبايلك كمان.",
  "Es reicht, jede Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.": "كفاية تتعلّم كل مرد بـ<strong>لغة واحدة</strong> بس، مش لازم تعرف التلاتة.",
- "<strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.": "<strong>مهم:</strong> حتى لو مرد واحد من مستواك اتأكّد، ما ينفعش ترتّله في الليتورجيا إلا بعد ما تتعلّم وتتأكّد لك <strong>كل</strong> المرادات الإجبارية في مستواك الحالي، مش قبل كده.",
+ "<strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.": "<strong>مهم:</strong> حتى لو مرد واحد من مستواك اتأكّد، ما ينفعش ترتّله في القداس إلا بعد ما تتعلّم وتتأكّد لك <strong>كل</strong> المرادات الإجبارية في مستواك الحالي، مش قبل كده.",
  "Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du dein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf.": "أول ما كل مرد إجباري في مستواك يتأكّد، هتاخد <strong>شهادة المستوى</strong> وتنتقل للمستوى اللي بعده.",
  "Für die besondere <strong>Belohnung</strong> müsst ihr alle eure freigeschalteten Antworten in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen (ab Stufe 3 zählen dazu auch die freiwilligen Antworten).": "عشان تاخد <strong>المكافأة</strong> الخاصة لازم كل المرادات المفتوحة عندك تتأكّد بـ<strong>كل</strong> اللغات المتاحة (من المستوى 3 بتدخل فيها كمان المرادات الاختيارية).",
  "Alles Gute zum Geburtstag!": "كل سنة وانت طيب!",
@@ -1390,7 +1394,7 @@ I18N.ar = {
  "Verstanden": "تمام",
  "Stufe {n} abgeschlossen!": "خلّصت المستوى {n}!",
  "Du hast alle Pflicht-Antworten der Stufe {n} erfolgreich vor einem Prüfer vorgetragen. Herzlichen Glückwunsch! Du steigst jetzt offiziell in <strong>Stufe {stufe}</strong> auf — ab sofort sind neue Antworten für dich freigeschaltet.": "رتّلت كل المرادات الإجبارية في المستوى {n} قدّام الممتحِن بنجاح. مبروك! بقيت رسمياً في <strong>المستوى {stufe}</strong>، ومرادات جديدة اتفتحت لك من دلوقتي.",
- "Denk daran: Eine Antwort deiner Stufe darfst du in der Liturgie erst vorsingen, sobald du die <strong>ganze Stufe</strong> gelernt hast — nicht schon, sobald du eine einzelne Antwort kannst.": "افتكر: ما ينفعش ترتّل مرد من مستواك في الليتورجيا إلا بعد ما تتعلّم <strong>المستوى كله</strong>، مش أول ما تعرف مرد واحد.",
+ "Denk daran: Eine Antwort deiner Stufe darfst du in der Liturgie erst vorsingen, sobald du die <strong>ganze Stufe</strong> gelernt hast — nicht schon, sobald du eine einzelne Antwort kannst.": "افتكر: ما ينفعش ترتّل مرد من مستواك في القداس إلا بعد ما تتعلّم <strong>المستوى كله</strong>، مش أول ما تعرف مرد واحد.",
  "Stufen-Zertifikat ansehen": "شوف شهادة المستوى",
  "Weiter": "كمّل",
  "Willkommen": "أهلاً بيك",
@@ -1443,7 +1447,7 @@ I18N.ar = {
  "Spezielle Anlässe": "مناسبات خاصة",
  "Die Kürzel zeigen, in welcher Sprache du eine Antwort schon geübt hast.": "الرموز بتوضّح إنت اتمرّنت على المرد بأنهي لغة.",
  "Was ist das hier?": "إيه ده؟",
- "Diese Antworten zählen zu den grundlegendsten Antworten eines Diakons und kommen in der koptischen Liturgie an mehreren Stellen vor. Übe sie gut, denn du wirst sie oft brauchen.": "المرادات دي من أهم مرادات الشمّاس، وبتتكرر في أكتر من مكان في الليتورجيا القبطية. اتمرّن عليها كويس، لأنك هتحتاجها كتير.",
+ "Diese Antworten zählen zu den grundlegendsten Antworten eines Diakons und kommen in der koptischen Liturgie an mehreren Stellen vor. Übe sie gut, denn du wirst sie oft brauchen.": "المرادات دي من أهم مرادات الشمّاس، وبتتكرر في أكتر من مكان في القداس القبطي. اتمرّن عليها كويس، لأنك هتحتاجها كتير.",
  "Inhalte folgen bald": "المحتوى جاي قريب",
  "Die Antworten für diese Station werden noch ergänzt.": "مرادات القسم ده هتتضاف قريب.",
  "🔒 ab Stufe {n}": "🔒 من المستوى {n}",
@@ -1458,9 +1462,9 @@ I18N.ar = {
  "{lang} — selbst geübt": "{lang} — اتمرّنت عليه بنفسك",
  "Noch gesperrt": "لسه مقفول",
  "Diese Antwort gehört zu Stufe {n} — sie wird freigeschaltet, sobald du diese Stufe erreichst.": "المرد ده من المستوى {n} — هيتفتح أول ما توصل للمستوى ده.",
- "Wo in der Liturgie?": "في أنهي مكان في الليتورجيا؟",
- "Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird.": "هنا قريب هتلاقي المرد ده بيتقال في أنهي مكان في الليتورجيا.",
- "Wird an mehreren Stellen der Liturgie gesungen.": "بيتقال في أكتر من مكان في الليتورجيا.",
+ "Wo in der Liturgie?": "في أنهي مكان في القداس؟",
+ "Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird.": "هنا قريب هتلاقي المرد ده بيتقال في أنهي مكان في القداس.",
+ "Wird an mehreren Stellen der Liturgie gesungen.": "بيتقال في أكتر من مكان في القداس.",
  "Diese Antwort wird bei uns nur in {langs} gesungen.": "المرد ده بنقوله عندنا بـ{langs} بس.",
  " und ": " و",
  "Aufnahme anhören": "اسمع التسجيل",
@@ -1497,7 +1501,7 @@ I18N.ar = {
  "KOPTISCH-ORTHODOXE KIRCHE ZÜRICH": "الكنيسة القبطية الأرثوذكسية — زيورخ",
  "Diakonenzertifikat der Stufe {n}": "شهادة الشمّاس — المستوى {n}",
  "verliehen an": "تُمنح إلى",
- "hat alle Pflicht-Antworten der <strong>{stufe}</strong> (Altersgruppe {alter}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.": "أتمّ بنجاح ترتيل كل المرادات الإجبارية في <strong>{stufe}</strong> (الفئة العمرية: {alter}) أمام مسؤول من الكنيسة، وبذلك يحق له ترتيل هذه المرادات في الليتورجيا من الآن.",
+ "hat alle Pflicht-Antworten der <strong>{stufe}</strong> (Altersgruppe {alter}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.": "أتمّ بنجاح ترتيل كل المرادات الإجبارية في <strong>{stufe}</strong> (الفئة العمرية: {alter}) أمام مسؤول من الكنيسة، وبذلك يحق له ترتيل هذه المرادات في القداس من الآن.",
  "Abgeschlossen am {date}": "تاريخ الإتمام: {date}",
  "Stufe 1": "المستوى 1",
  "Stufe 2": "المستوى 2",
@@ -2543,7 +2547,7 @@ function renderStation(){
       row.className = "hymn-row locked";
       row.innerHTML = `
         <div class="hymn-title-group">
-          <span class="hymn-title">${T(h.title)}</span>
+          <span class="hymn-title">${hymnTitle(h)}</span>
           <div class="lock-badge">${T("🔒 ab Stufe {n}", {n:h.tier})}</div>
         </div>
       `;
@@ -2565,7 +2569,7 @@ function renderStation(){
     const voluntBadge = h.mandatory===false ? `<div class="volunt-badge">${T("freiwillig")}</div>` : "";
     row.innerHTML = `
       <div class="hymn-title-group">
-        <span class="hymn-title">${T(h.title)}</span>
+        <span class="hymn-title">${hymnTitle(h)}</span>
         ${diffBadge}
         ${voluntBadge}
       </div>
@@ -2605,7 +2609,7 @@ function renderHymn(){
   const title = document.createElement("h2");
   title.className = "serif";
   title.style.fontSize = "24px";
-  title.textContent = T(hymn.title);
+  title.textContent = hymnTitle(hymn);
   titleRow.appendChild(title);
   if(hymn.difficulty){
     const diffSpan = document.createElement("span");
