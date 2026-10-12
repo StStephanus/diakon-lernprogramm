@@ -101,6 +101,48 @@
     text-decoration:underline; cursor:pointer; white-space:nowrap;
   }
 
+
+  /* Startseite (Hauptmenü): der Rahmen füllt die ganze Seite */
+  header.top.landing{min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:18px 16px 24px;}
+  header.top.landing .title-frame{padding:26px 16px 22px;}
+  header.top.landing .crest{width:min(150px, 44vw); height:min(150px, 44vw);}
+  header.top.landing .book-title{font-size:30px; margin-top:12px;}
+  header.top .welcome{margin-top:20px;}
+  header.top .welcome h2{font-size:25px; line-height:1.15; color:var(--gold-light); text-wrap:balance;}
+  header.top .welcome p{font-size:14.5px; line-height:1.6; color:var(--parchment); margin:10px auto 0; max-width:46ch; opacity:.92;}
+  header.top .tiles{display:flex; flex-direction:column; gap:12px; margin-top:22px;}
+  header.top .tile{
+    display:flex; align-items:center; gap:16px; text-align:left; width:100%;
+    background:rgba(255,255,255,.06); border:1px solid var(--gold); color:var(--parchment);
+    padding:16px 16px; cursor:pointer; font-family:"Source Sans 3",sans-serif;
+    transition:background .15s ease, transform .15s ease;
+  }
+  header.top .tile:hover, header.top .tile:focus-visible{background:rgba(217,189,132,.18); outline:none;}
+  header.top .tile:active{transform:scale(.99);}
+  header.top .tile-icon{flex:none; width:46px; height:46px; color:var(--gold-light); display:flex; align-items:center; justify-content:center;}
+  header.top .tile-icon svg{width:100%; height:100%;}
+  header.top .tile-text{display:flex; flex-direction:column; gap:4px; min-width:0;}
+  header.top .tile-title{font-size:23px; line-height:1.1; color:var(--gold-light); font-weight:600;}
+  header.top .tile-sub{font-size:13px; color:var(--parchment); opacity:.85; line-height:1.4;}
+  header.top .ctrl-row{display:flex; align-items:center; gap:12px; justify-content:center;}
+
+  /* Kopf innerhalb der Bereiche: Logo links, Text rechts, goldene Linie */
+  header.top.compact{padding:14px 16px 14px;}
+  header.top .compact-head{display:flex; align-items:center; gap:14px; text-align:left; width:100%;}
+  header.top.compact .crest{width:96px; height:96px; margin:0; flex:none;}
+  header.top .compact-text{min-width:0; flex:1;}
+  header.top .compact-title{font-size:27px; line-height:1.05; color:var(--gold-light);}
+  header.top .compact-line{height:1px; background:var(--gold); margin:8px 0;}
+  header.top .compact-text .church-name{font-size:10px; letter-spacing:.14em;}
+  header.top.compact .top-row{gap:12px;}
+
+  /* Titel des Bereichs unter dem Kopf */
+  .section-title{text-align:center; margin:2px 0 18px;}
+  .section-title h2{font-size:27px; line-height:1.15; color:var(--burgundy); text-wrap:balance; margin:2px 0;}
+  .orn-line.dark{display:flex; align-items:center; gap:10px; max-width:220px; margin:6px auto; color:var(--gold);}
+  .orn-line.dark:before,.orn-line.dark:after{content:""; flex:1; height:1px; background:var(--gold);}
+  .orn-line.dark svg{width:10px; height:10px;}
+
   main{padding:22px 20px 60px;}
 
   .crumb{
@@ -522,7 +564,9 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let state = {
   role: "diakon", // "diakon" | "pruefer"
   profile: null,  // {id, name, vorname, nachname, email}
-  view: "home",   // home | station | hymn | pruefer-home | pruefer-station | zertifikat
+  view: "menu",   // menu | home | station | hymn | theorie | theorie-kapitel | pruefer-home | pruefer-station | stufenzertifikat
+  currentKapitelId: null,
+  showTheorieInfo: false,
   currentStationId: null,
   currentHymnId: null,
   currentLang: "de",
@@ -650,6 +694,7 @@ async function loginAccount(vorname, nachname, password){
 
 async function logoutAccount(){
   await sb.auth.signOut();
+  state.view = "menu";
   state.profile = null;
   state.progress = {};
   state.certified = {};
@@ -701,6 +746,19 @@ async function loadAllDiakone(){
   const { data, error } = await sb.from("profiles").select("id, vorname, nachname, geburtsdatum, stufe").order("nachname");
   return (!error && data) ? data : [];
 }
+
+/* ---------------- Theorie ----------------
+   Die Texte sind noch Platzhalter. Zum Befüllen einfach bei "text" den echten Text eintragen
+   (Absätze mit einer Leerzeile trennen). Die "id" nie ändern, sonst geht der Fortschritt verloren. */
+const THEORIE = [
+  { id: "theorie-liturgien", title: "Die verschiedenen Liturgien", text: "" },
+  { id: "theorie-aufbau",    title: "Der Aufbau einer Liturgie",   text: "" },
+  { id: "theorie-aufgaben",  title: "Die Aufgaben eines Diakons",  text: "" },
+];
+const THEORIE_INFO_KEY = "_theorie_info"; // Merker "Hinweis schon gesehen", wird wie ein Fortschrittseintrag gespeichert
+function theorieGelernt(id){ return !!(state.progress[id] && state.progress[id].de); }
+function theorieGelerntCount(){ return THEORIE.filter(k => theorieGelernt(k.id)).length; }
+function theorieInfoGesehen(){ return !!(state.progress[THEORIE_INFO_KEY] && state.progress[THEORIE_INFO_KEY].de); }
 
 /* ---------------- Hilfsfunktionen ---------------- */
 function findStation(id){ return STATIONS.find(s=>s.id===id); }
@@ -935,12 +993,14 @@ function render(){
   root.appendChild(renderHeader());
   const main = document.createElement("main");
   main.appendChild(renderBody());
-  root.appendChild(main);
+  if(!(state.role==="diakon" && state.profile && state.view==="menu")) root.appendChild(main);
 
   if(state.role==="diakon" && state.profile && state.pendingPromotion){
     root.appendChild(renderPromotionModal());
-  } else if(state.role==="diakon" && state.profile && (!state.profile.onboarded || state.showOnboardingManually)){
+  } else if(state.role==="diakon" && state.profile && ((state.view==="home" && !state.profile.onboarded) || state.showOnboardingManually)){
     root.appendChild(renderOnboardingModal());
+  } else if(state.role==="diakon" && state.profile && ((state.view==="theorie" && !theorieInfoGesehen()) || state.showTheorieInfo)){
+    root.appendChild(renderTheorieModal());
   }
 }
 
@@ -1014,38 +1074,120 @@ function renderOnboardingModal(){
   return overlay;
 }
 
+function renderTheorieModal(){
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  const box = document.createElement("div");
+  box.className = "modal-box";
+  const firstTime = !theorieInfoGesehen();
+  box.innerHTML = `
+    <h2 class="serif">Die Theorie</h2>
+    <p style="color:var(--muted); font-size:14px; margin-top:4px;">Kurz erklärt:</p>
+    <ul>
+      <li>Auch die <strong>Theorie</strong> gehört zu deiner Ausbildung und wird <strong>ebenfalls abgefragt</strong>.</li>
+      <li>Bei jedem Unterthema kannst du für dich ankreuzen, dass du es <strong>gelesen und gelernt</strong> hast. Das ist, wie bei den Antworten, nur dein persönlicher Fortschritt.</li>
+      <li>Das Info-Zeichen <strong>i</strong> oben bringt dich jederzeit wieder zu diesem Hinweis.</li>
+    </ul>
+    <button class="btn" id="theorieOk">${firstTime ? "Verstanden, los geht's" : "Schliessen"}</button>
+  `;
+  overlay.appendChild(box);
+  box.querySelector("#theorieOk").addEventListener("click", async ()=>{
+    state.showTheorieInfo = false;
+    if(firstTime) await setProgress(THEORIE_INFO_KEY, "de", true);
+    render();
+  });
+  return overlay;
+}
+
+const CROSS_SVG = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>';
+const FRAME_CORNERS = ["c-a","c-b","c-d","c-e"].map(c => `<svg class="corner ${c}" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>`).join("");
+const ICON_BOOK = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 11c-4-3-10-4-17-4v28c7 0 13 1 17 4 4-3 10-4 17-4V7c-7 0-13 1-17 4z M24 11v28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+const ICON_NOTE = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 36V10l20-4v26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="13" cy="36" rx="5.5" ry="4.2" fill="none" stroke="currentColor" stroke-width="2.4"/><ellipse cx="33" cy="32" rx="5.5" ry="4.2" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
+
+function isDiakonSection(){ return ["home","station","hymn","stufenzertifikat"].includes(state.view); }
+function isTheorieSection(){ return ["theorie","theorie-kapitel"].includes(state.view); }
+
 function renderHeader(){
   const h = document.createElement("header");
-  h.className = "top";
-  h.innerHTML = `
-    <div class="top-row" style="align-items:center; text-align:center; position:relative;">
-      <div class="title-frame">
-        <svg class="corner c-a" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
-        <svg class="corner c-b" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
-        <svg class="corner c-d" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
-        <svg class="corner c-e" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
-        <button id="infoBtn" class="info-btn" title="Wie funktioniert das?" style="position:absolute; top:12px; right:12px; display:${state.role==='diakon' && state.profile ? 'flex':'none'}; visibility:${state.role==='diakon' && state.profile ? 'visible':'hidden'};">i</button>
+  const diakonEingeloggt = state.role==="diakon" && !!state.profile;
+  const landing = diakonEingeloggt && state.view==="menu";
+  const compact = diakonEingeloggt && !landing;
+  h.className = "top" + (landing ? " landing" : "") + (compact ? " compact" : "");
+
+  let kopf;
+  if(compact){
+    kopf = `
+      <div class="compact-head">
+        <img class="crest" src="logo-round.png" alt="Pi-Eklom" />
+        <div class="compact-text">
+          <div class="compact-title serif">Das Handbuch eines Diakons</div>
+          <div class="compact-line"></div>
+          <div class="church-name">Koptisch-Orthodoxe Kirche in der Deutschschweiz</div>
+        </div>
+      </div>`;
+  } else {
+    let innen = `
         <img class="crest" src="logo-round.png" alt="Pi-Eklom" />
         <div class="book-title serif">Das Handbuch<br>eines Diakons</div>
-        <div class="orn-line"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg></div>
-        <div class="church-name">Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz</div>
-      </div>
-      <div class="role-switch" id="roleSwitch">
-        <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
-        <button data-role="pruefer" class="${state.role==='pruefer'?'active':''}">Prüfer</button>
+        <div class="orn-line">${CROSS_SVG}</div>
+        <div class="church-name">Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz</div>`;
+    if(landing){
+      innen += `
+        <div class="welcome">
+          <h2 class="serif">Herzlich willkommen zu Pi-Eklom, ${state.profile.vorname}</h2>
+          <p>Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.</p>
+        </div>
+        <div class="tiles">
+          <button class="tile" id="tileTheorie">
+            <span class="tile-icon">${ICON_BOOK}</span>
+            <span class="tile-text">
+              <span class="tile-title serif">Theorie</span>
+              <span class="tile-sub">Die Liturgie verstehen · ${theorieGelerntCount()} von ${THEORIE.length} gelernt</span>
+            </span>
+          </button>
+          <button class="tile" id="tileAntworten">
+            <span class="tile-icon">${ICON_NOTE}</span>
+            <span class="tile-text">
+              <span class="tile-title serif">Lernprogramm: Antworten eines Diakons</span>
+              <span class="tile-sub">Antworten üben und vom Prüfer bestätigen lassen</span>
+            </span>
+          </button>
+        </div>`;
+    }
+    kopf = `<div class="title-frame">${FRAME_CORNERS}${innen}</div>`;
+  }
+
+  const zeigeInfo = compact;
+  h.innerHTML = `
+    <div class="top-row" style="align-items:center; text-align:center; position:relative;">
+      ${kopf}
+      <div class="ctrl-row">
+        <div class="role-switch" id="roleSwitch">
+          <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
+          <button data-role="pruefer" class="${state.role==='pruefer'?'active':''}">Prüfer</button>
+        </div>
+        ${zeigeInfo ? `<button id="infoBtn" class="info-btn" title="Wie funktioniert das?">i</button>` : ""}
       </div>
       <span id="logoutSlot"></span>
     </div>
   `;
   const infoBtn = h.querySelector("#infoBtn");
   if(infoBtn){
-    infoBtn.addEventListener("click", ()=>{ state.showOnboardingManually = true; render(); });
+    infoBtn.addEventListener("click", ()=>{
+      if(isTheorieSection()) state.showTheorieInfo = true; else state.showOnboardingManually = true;
+      render();
+    });
   }
+  const tT = h.querySelector("#tileTheorie");
+  if(tT) tT.addEventListener("click", ()=>{ state.view = "theorie"; render(); window.scrollTo(0,0); });
+  const tA = h.querySelector("#tileAntworten");
+  if(tA) tA.addEventListener("click", ()=>{ state.view = "home"; render(); window.scrollTo(0,0); });
+
   h.querySelector("#roleSwitch").addEventListener("click", async (e)=>{
     const btn = e.target.closest("button"); if(!btn) return;
     state.role = btn.dataset.role;
     state.authError = "";
-    state.view = state.role==="pruefer" ? "pruefer-home" : "home";
+    state.view = state.role==="pruefer" ? "pruefer-home" : "menu";
     if(state.role==="pruefer" && state.prueferAuthenticated) state.allDiakone = await loadAllDiakone();
     render();
   });
@@ -1068,6 +1210,82 @@ function renderHeader(){
   return h;
 }
 
+function sectionTitle(text){
+  const d = document.createElement("div");
+  d.className = "section-title";
+  d.innerHTML = `<div class="orn-line dark">${CROSS_SVG}</div><h2 class="serif">${text}</h2><div class="orn-line dark">${CROSS_SVG}</div>`;
+  return d;
+}
+
+function renderTheorie(){
+  const wrap = document.createElement("div");
+  const crumb = document.createElement("div");
+  crumb.className = "crumb";
+  crumb.textContent = "← Hauptmenü";
+  crumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
+  wrap.appendChild(crumb);
+  wrap.appendChild(sectionTitle("Theorie"));
+  THEORIE.forEach((k, i)=>{
+    const done = theorieGelernt(k.id);
+    const row = document.createElement("div");
+    row.className = "station-row";
+    row.innerHTML = `
+      <div class="station-num">${i+1}</div>
+      <div class="station-body">
+        <div class="station-title">${k.title}</div>
+        <div class="station-meta">${done ? "Gelesen und gelernt" : "Noch nicht gelernt"}</div>
+      </div>
+      ${done ? `<div class="badge done">Gelernt</div>` : ""}
+    `;
+    row.addEventListener("click", ()=>{ state.currentKapitelId = k.id; state.view="theorie-kapitel"; render(); window.scrollTo(0,0); });
+    wrap.appendChild(row);
+  });
+  return wrap;
+}
+
+function renderTheorieKapitel(){
+  const k = THEORIE.find(x => x.id === state.currentKapitelId);
+  const wrap = document.createElement("div");
+  const crumb = document.createElement("div");
+  crumb.className = "crumb";
+  crumb.textContent = "← Theorie";
+  crumb.addEventListener("click", ()=>{ state.view="theorie"; render(); });
+  wrap.appendChild(crumb);
+  if(!k){ state.view = "theorie"; return renderTheorie(); }
+
+  const title = document.createElement("h2");
+  title.className = "serif";
+  title.style.fontSize = "26px";
+  title.textContent = k.title;
+  wrap.appendChild(title);
+
+  const textBlock = document.createElement("div");
+  textBlock.className = "text-block";
+  if(k.text && k.text.trim()){
+    textBlock.innerHTML = k.text.trim().split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("");
+  } else {
+    textBlock.innerHTML = `<p style="color:var(--muted); font-style:italic;">Der Text zu diesem Thema folgt in Kürze.</p>`;
+  }
+  wrap.appendChild(textBlock);
+
+  const gelernt = theorieGelernt(k.id);
+  const selfRow = document.createElement("div");
+  selfRow.className = "self-learn-row";
+  selfRow.innerHTML = `
+    <div>
+      <div style="font-weight:600; font-size:15px;">Ich habe das gelesen und gelernt</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">Nur dein persönlicher Fortschritt.</div>
+    </div>
+    <div class="toggle ${gelernt?'on':''}" id="selfToggle"><div class="knob"></div></div>
+  `;
+  selfRow.querySelector("#selfToggle").addEventListener("click", async ()=>{
+    await setProgress(k.id, "de", !gelernt);
+    render();
+  });
+  wrap.appendChild(selfRow);
+  return wrap;
+}
+
 function renderBody(){
   if(state.role==="pruefer"){
     if(!state.prueferAuthenticated) return renderPrueferGate();
@@ -1077,6 +1295,9 @@ function renderBody(){
   if(!state.profile){
     return renderDiakonAuthGate();
   }
+  if(state.view==="menu") return document.createElement("div");
+  if(state.view==="theorie") return renderTheorie();
+  if(state.view==="theorie-kapitel") return renderTheorieKapitel();
   if(state.view==="hymn") return renderHymn();
   if(state.view==="station") return renderStation();
   if(state.view==="stufenzertifikat") return renderStufenZertifikat();
@@ -1242,6 +1463,12 @@ function renderHome(){
   const wrap = document.createElement("div");
   const stufe = state.profile.stufe;
   const rewardDone = allHymnsCertified(stufe);
+  const hauptCrumb = document.createElement("div");
+  hauptCrumb.className = "crumb";
+  hauptCrumb.textContent = "← Hauptmenü";
+  hauptCrumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
+  wrap.appendChild(hauptCrumb);
+  wrap.appendChild(sectionTitle("Lernprogramm: Antworten eines Diakons"));
   const intro = document.createElement("div");
   intro.innerHTML = `<h2 class="serif" style="font-size:24px;">Hallo ${state.profile.name}</h2>
     <p style="color:var(--muted); margin-top:6px; font-size:14px;">Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.</p>`;
