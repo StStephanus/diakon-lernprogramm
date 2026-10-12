@@ -1143,15 +1143,15 @@ const ICON_NOTE = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 36V1
 function isDiakonSection(){ return ["home","station","hymn","stufenzertifikat"].includes(state.view); }
 function isTheorieSection(){ return ["theorie","theorie-kapitel"].includes(state.view); }
 
-/* Der Prüfer-Bereich ist nur über den eigenen Link (…/#pruefer) erreichbar, nicht über einen Schalter. */
-function verlassePrueferBereich(){
+/* Prüfer melden sich nur ab (zurück zum Passwort). Einen Wechsel zur Diakon-Ansicht gibt es nicht: dafür gibt es die zwei getrennten Apps/Links. */
+function prueferAbmelden(){
   state.prueferAuthenticated=false; state.prueferPasswordOk=false; state.prueferPasswordInput=""; state.prueferName=""; state.prueferLand=null; state.prueferStadt=null;
-  state.role = "diakon"; state.view = "menu"; state.authError = "";
-  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+  state.role = "pruefer"; state.view = "pruefer-home"; state.authError = ""; state.prueferError = "";
   render();
 }
+/* Der Prüfer-Bereich ist nur über den eigenen Link (…/#pruefer) erreichbar, nicht über einen Schalter. */
 async function pruefeUrlHash(){
-  if(location.hash === "#pruefer"){
+  if(location.hash === "#pruefer" || window.IST_PRUEFER_APP){
     state.role = "pruefer"; state.view = "pruefer-home"; state.authError = "";
     if(state.prueferAuthenticated) state.allDiakone = await loadAllDiakone();
   } else if(state.role === "pruefer"){
@@ -1241,17 +1241,11 @@ function renderHeader(){
   if(state.role==="pruefer" && state.prueferAuthenticated){
     const out = document.createElement("span");
     out.className = "logout-link";
-    out.textContent = "Prüfer-Bereich verlassen";
-    out.addEventListener("click", ()=>{ verlassePrueferBereich(); });
+    out.textContent = "Abmelden";
+    out.addEventListener("click", ()=>{ prueferAbmelden(); });
     logoutSlot.appendChild(out);
   }
-  if(state.role==="pruefer" && !state.prueferAuthenticated){
-    const out = document.createElement("span");
-    out.className = "logout-link";
-    out.textContent = "Zur Diakon-Ansicht";
-    out.addEventListener("click", ()=>{ verlassePrueferBereich(); });
-    logoutSlot.appendChild(out);
-  }
+
   return h;
 }
 
