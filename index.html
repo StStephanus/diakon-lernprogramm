@@ -563,7 +563,17 @@ const TOTAL_HYMNS = STATIONS.reduce((n,s)=>n+s.hymns.length,0);
    In der echten App sollte jeder Prüfer einen eigenen Zugang haben,
    statt sich ein gemeinsames Passwort zu teilen. */
 const PRUEFER_PASSWORD = "Diakonenkurs2026";
-const PRUEFER_NAMES = ["Markus Salib", "Amir Mikail"];
+/* Länder und Städte. Neue Stadt oder neues Land (z. B. Deutschland): hier einfach ergänzen. */
+const LAENDER = [
+  { name: "Schweiz",    staedte: ["Zürich", "Biel/Bern", "Basel"] },
+  { name: "Österreich", staedte: ["Wien", "Graz", "Salzburg", "Schärding", "Feldkirch"] },
+];
+/* Prüfer pro Stadt. Städte ohne Eintrag bekommen ein Namensfeld zum Eintippen. */
+const PRUEFER_NAMES_BY_STADT = {
+  "Zürich": ["Markus Salib", "Amir Mikail"],
+};
+function PRUEFER_NAMEN_FUER(stadt){ return PRUEFER_NAMES_BY_STADT[stadt] || []; }
+function staedteVon(land){ const l = LAENDER.find(x=>x.name===land); return l ? l.staedte : []; }
 
 /* ---------------- Supabase-Verbindung ---------------- */
 const SUPABASE_URL = "https://jyznqbklhmetwezcwwnu.supabase.co";
@@ -593,6 +603,8 @@ let state = {
   prueferPasswordInput: "",
   prueferError: "",
   prueferName: "",
+  prueferLand: null,
+  prueferStadt: null,
   showOnboardingManually: false,
   pendingPromotion: null, // {type:"geburtstag"|"lernfortschritt", stufe:2|3} -- löst Glückwunsch-Overlay aus
   stufenZertifikatStufe: null, // 1 oder 2 -- welches Stufen-Zertifikat gerade angezeigt wird
@@ -659,6 +671,8 @@ async function loadProfile(){
     name: data.vorname + " " + data.nachname,
     onboarded: !!data.onboarded,
     geburtsdatum: data.geburtsdatum,
+    land: data.land || null,
+    stadt: data.stadt || null,
     stufe: effectiveStufe,
   };
 }
@@ -669,14 +683,14 @@ async function markOnboarded(){
   await sb.from("profiles").update({ onboarded: true }).eq("id", state.profile.id);
 }
 
-async function registerAccount(vorname, nachname, password, geburtsdatum){
+async function registerAccount(vorname, nachname, password, geburtsdatum, land, stadt){
   const email = generateInternalEmail(vorname, nachname);
   const { data, error } = await sb.auth.signUp({ email, password });
   if(error) return { error: error.message };
   const user = data.user;
   if(!user) return { error: "Registrierung fehlgeschlagen. Bitte erneut versuchen." };
   const initialStufe = ageStufeFromBirthdate(geburtsdatum);
-  const { error: profileError } = await sb.from("profiles").insert({ id: user.id, vorname, nachname, email, geburtsdatum, stufe: initialStufe });
+  const { error: profileError } = await sb.from("profiles").insert({ id: user.id, vorname, nachname, email, geburtsdatum, stufe: initialStufe, land, stadt });
   if(profileError) return { error: profileError.message };
   return { error: null };
 }
@@ -753,7 +767,9 @@ async function deleteDiakon(userId){
 }
 
 async function loadAllDiakone(){
-  const { data, error } = await sb.from("profiles").select("id, vorname, nachname, geburtsdatum, stufe").order("nachname");
+  // Ein Prüfer sieht nur die Diakone seiner gewählten Stadt.
+  if(!state.prueferStadt) return [];
+  const { data, error } = await sb.from("profiles").select("id, vorname, nachname, geburtsdatum, stufe, land, stadt").eq("stadt", state.prueferStadt).order("nachname");
   return (!error && data) ? data : [];
 }
 
@@ -1119,7 +1135,7 @@ function isTheorieSection(){ return ["theorie","theorie-kapitel"].includes(state
 
 /* Der Prüfer-Bereich ist nur über den eigenen Link (…/#pruefer) erreichbar, nicht über einen Schalter. */
 function verlassePrueferBereich(){
-  state.prueferAuthenticated=false; state.prueferPasswordOk=false; state.prueferPasswordInput=""; state.prueferName="";
+  state.prueferAuthenticated=false; state.prueferPasswordOk=false; state.prueferPasswordInput=""; state.prueferName=""; state.prueferLand=null; state.prueferStadt=null;
   state.role = "diakon"; state.view = "menu"; state.authError = "";
   try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
   render();
@@ -1355,23 +1371,67 @@ function renderPrueferGate(){
     return wrap;
   }
 
-  // Schritt 2: Wer bist du?
-  const nameButtons = PRUEFER_NAMES.map(n=>`<button class="btn secondary" style="display:block; width:100%; margin-top:10px;" data-name="${n}">${n}</button>`).join("");
-  wrap.innerHTML = `
-    <h2 class="serif" style="font-size:26px;">Wer bestätigt gerade?</h2>
-    <p>Wähle deinen Namen, damit Bestätigungen zugeordnet werden können.</p>
-    <div id="nameBtns">${nameButtons}</div>
-  `;
-  wrap.querySelectorAll("#nameBtns button").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      state.prueferName = btn.dataset.name;
-      state.prueferAuthenticated = true;
-      state.view = "pruefer-home";
-      state.allDiakone = await loadAllDiakone();
-      render();
-      maybeShowInstallBanner();
+  // Schritt 2: Land
+  if(!state.prueferLand){
+    wrap.innerHTML = `
+      <h2 class="serif" style="font-size:26px;">Welches Land?</h2>
+      <p>Du siehst danach nur die Diakone der gewählten Stadt.</p>
+      <div id="landBtns">${LAENDER.map(l=>`<button class="btn secondary" style="display:block; width:100%; margin-top:10px;" data-land="${l.name}">${l.name}</button>`).join("")}</div>
+    `;
+    wrap.querySelectorAll("#landBtns button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ state.prueferLand = btn.dataset.land; render(); });
     });
-  });
+    return wrap;
+  }
+
+  // Schritt 3: Stadt
+  if(!state.prueferStadt){
+    wrap.innerHTML = `
+      <h2 class="serif" style="font-size:26px;">Welche Stadt?</h2>
+      <p>${state.prueferLand}</p>
+      <div id="stadtBtns">${staedteVon(state.prueferLand).map(s=>`<button class="btn secondary" style="display:block; width:100%; margin-top:10px;" data-stadt="${s}">${s}</button>`).join("")}</div>
+      <div class="crumb" id="landZurueck" style="margin-top:22px;">Land ändern</div>
+    `;
+    wrap.querySelectorAll("#stadtBtns button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ state.prueferStadt = btn.dataset.stadt; render(); });
+    });
+    wrap.querySelector("#landZurueck").addEventListener("click", ()=>{ state.prueferLand = null; render(); });
+    return wrap;
+  }
+
+  // Schritt 4: Wer bist du?
+  const namen = PRUEFER_NAMEN_FUER(state.prueferStadt);
+  const weiter = async (name)=>{
+    state.prueferName = name;
+    state.prueferAuthenticated = true;
+    state.view = "pruefer-home";
+    state.allDiakone = await loadAllDiakone();
+    render();
+    maybeShowInstallBanner();
+  };
+  if(namen.length){
+    wrap.innerHTML = `
+      <h2 class="serif" style="font-size:26px;">Wer bestätigt gerade?</h2>
+      <p>${state.prueferStadt}: Wähle deinen Namen, damit Bestätigungen zugeordnet werden können.</p>
+      <div id="nameBtns">${namen.map(n=>`<button class="btn secondary" style="display:block; width:100%; margin-top:10px;" data-name="${n}">${n}</button>`).join("")}</div>
+      <div class="crumb" id="stadtZurueck" style="margin-top:22px;">Stadt ändern</div>
+    `;
+    wrap.querySelectorAll("#nameBtns button").forEach(btn=>{
+      btn.addEventListener("click", ()=>weiter(btn.dataset.name));
+    });
+  } else {
+    wrap.innerHTML = `
+      <h2 class="serif" style="font-size:26px;">Wer bestätigt gerade?</h2>
+      <p>${state.prueferStadt}: Gib deinen Namen ein, damit Bestätigungen zugeordnet werden können.</p>
+      <div class="field"><label>Dein Name</label><input type="text" id="prueferNameInput" placeholder="Vorname Nachname" /></div>
+      <button class="btn" id="prueferNameGo">Weiter</button>
+      <div class="crumb" id="stadtZurueck" style="margin-top:22px;">Stadt ändern</div>
+    `;
+    const go = ()=>{ const v = wrap.querySelector("#prueferNameInput").value.trim(); if(v) weiter(v); };
+    wrap.querySelector("#prueferNameGo").addEventListener("click", go);
+    wrap.querySelector("#prueferNameInput").addEventListener("keydown", (e)=>{ if(e.key==="Enter") go(); });
+  }
+  wrap.querySelector("#stadtZurueck").addEventListener("click", ()=>{ state.prueferStadt = null; render(); });
   return wrap;
 }
 
@@ -1406,25 +1466,42 @@ function renderDiakonAuthGate(){
         <div class="field"><label>Nachname</label><input type="text" id="regNachname" /></div>
       </div>
       <div class="field"><label>Geburtsdatum</label><input type="date" id="regGeburtsdatum" /></div>
+      <div class="field-row">
+        <div class="field"><label>Land</label>
+          <select id="regLand"><option value="">Bitte wählen</option>${LAENDER.map(l=>`<option value="${l.name}">${l.name}</option>`).join("")}</select></div>
+        <div class="field"><label>Stadt</label>
+          <select id="regStadt" disabled><option value="">Zuerst Land wählen</option></select></div>
+      </div>
       <div class="field"><label>Passwort</label><input type="password" id="regPassword" /></div>
       <button class="btn" id="regBtn">Registrieren</button>
       ${state.authError ? `<div class="error-text">${state.authError}</div>` : ""}
     `;
     wrap.appendChild(form);
+    const regLand = wrap.querySelector("#regLand");
+    const regStadt = wrap.querySelector("#regStadt");
+    regLand.addEventListener("change", ()=>{
+      const st = staedteVon(regLand.value);
+      regStadt.innerHTML = st.length
+        ? `<option value="">Bitte wählen</option>` + st.map(s=>`<option value="${s}">${s}</option>`).join("")
+        : `<option value="">Zuerst Land wählen</option>`;
+      regStadt.disabled = st.length===0;
+    });
     const regBtn = wrap.querySelector("#regBtn");
     regBtn.addEventListener("click", async ()=>{
       const vorname = wrap.querySelector("#regVorname").value.trim();
       const nachname = wrap.querySelector("#regNachname").value.trim();
       const geburtsdatum = wrap.querySelector("#regGeburtsdatum").value;
       const password = wrap.querySelector("#regPassword").value;
-      if(!vorname || !nachname || !geburtsdatum || !password){
+      const land = regLand.value;
+      const stadt = regStadt.value;
+      if(!vorname || !nachname || !geburtsdatum || !password || !land || !stadt){
         state.authError = "Bitte alle Felder ausfüllen."; render(); return;
       }
       if(password.length < 6){
         state.authError = "Das Passwort muss mindestens 6 Zeichen haben."; render(); return;
       }
       regBtn.disabled = true; regBtn.textContent = "Registriere …";
-      const result = await registerAccount(vorname, nachname, password, geburtsdatum);
+      const result = await registerAccount(vorname, nachname, password, geburtsdatum, land, stadt);
       if(result.error){
         state.authError = result.error; render(); return;
       }
@@ -1871,8 +1948,13 @@ function renderStufenZertifikat(){
 /* ---------------- Prüfer-Ansicht ---------------- */
 function renderPrueferHome(){
   const wrap = document.createElement("div");
-  wrap.innerHTML = `<h2 class="serif" style="font-size:24px;">Diakone</h2>
-    <p style="color:var(--muted); font-size:14px; margin-top:6px;">Wähle einen Diakon aus, um Stationen zu bestätigen.</p>`;
+  wrap.innerHTML = `<h2 class="serif" style="font-size:24px;">Diakone in ${state.prueferStadt}</h2>
+    <p style="color:var(--muted); font-size:14px; margin-top:6px;">${state.prueferLand} · Wähle einen Diakon aus, um Stationen zu bestätigen.</p>
+    <div class="crumb" id="stadtWechseln" style="margin-top:14px; margin-bottom:0;">Stadt wechseln</div>`;
+  wrap.querySelector("#stadtWechseln").addEventListener("click", ()=>{
+    state.prueferAuthenticated = false; state.prueferName = ""; state.prueferLand = null; state.prueferStadt = null;
+    state.view = "pruefer-home"; render();
+  });
   const list = document.createElement("div");
   list.style.marginTop = "16px";
   if(state.allDiakone.length===0){
