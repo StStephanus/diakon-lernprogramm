@@ -23,6 +23,9 @@
 })();
 </script>
 <style>
+  #toast{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 64px); transform:translate(-50%,10px); background:var(--midnight); color:#fff; padding:9px 16px; border-radius:20px; font-size:14px; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:1000; }
+  #toast.show{ opacity:.95; transform:translate(-50%,0); }
+  #offlineBanner{ position:fixed; left:0; right:0; bottom:0; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:var(--burgundy); color:#fff; text-align:center; font-size:13px; z-index:999; }
   :root{
     --ink:#241C15;
     --parchment:#F3ECDA;
@@ -779,22 +782,88 @@ async function logoutAccount(){
   state.certified = {};
 }
 
+/* ---------------- Offline-Speicher für den Fortschritt ----------------
+   Ohne Netz wird der Fortschritt auf dem Gerät gesammelt und später automatisch übertragen. */
+const PENDING_KEY = "pe_pending_progress";
+const PCACHE_KEY = "pe_progress_cache_";
+function lsGet(k, fallback){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function getPending(){ return lsGet(PENDING_KEY, []); }
+function addPending(entry){
+  const list = getPending().filter(e => !(e.user_id===entry.user_id && e.hymn_id===entry.hymn_id && e.lang===entry.lang));
+  list.push(entry); lsSet(PENDING_KEY, list);
+}
+function isNetworkError(error){
+  return !navigator.onLine || (error && /fetch|network|load failed|timeout/i.test(error.message || ""));
+}
+let toastTimer = null;
+function showToast(text){
+  let t = document.getElementById("toast");
+  if(!t){ t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t); }
+  t.textContent = text; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove("show"), 2000);
+}
+function updateOfflineBanner(){
+  let b = document.getElementById("offlineBanner");
+  const n = getPending().length;
+  if(navigator.onLine && n === 0){ if(b) b.remove(); return; }
+  if(!b){ b = document.createElement("div"); b.id = "offlineBanner"; document.body.appendChild(b); }
+  b.textContent = navigator.onLine
+    ? `${n} Änderung${n===1?"":"en"} werden übertragen …`
+    : "Du bist offline – Fortschritt wird auf diesem Gerät gespeichert.";
+}
+async function flushPending(){
+  if(!navigator.onLine) return;
+  const list = getPending();
+  if(!list.length){ updateOfflineBanner(); return; }
+  const rest = [];
+  for(const e of list){
+    const { error } = await sb.from("progress").upsert(e);
+    if(error && isNetworkError(error)) rest.push(e);
+    else if(error) { /* dauerhafter Fehler: verwerfen, um keine Endlosschleife zu bauen */ }
+  }
+  lsSet(PENDING_KEY, rest);
+  updateOfflineBanner();
+  if(rest.length === 0) showToast("Fortschritt übertragen ✓");
+}
+window.addEventListener("online", ()=>{ updateOfflineBanner(); flushPending(); });
+window.addEventListener("offline", ()=>{ updateOfflineBanner(); });
+
 async function loadProgress(){
   if(!state.profile) return;
-  const { data, error } = await sb.from("progress").select("hymn_id, lang, learned").eq("user_id", state.profile.id);
+  await flushPending();
+  const uid = state.profile.id;
+  const { data, error } = await sb.from("progress").select("hymn_id, lang, learned").eq("user_id", uid);
   state.progress = {};
   if(!error && data){
     data.forEach(row => {
       if(!state.progress[row.hymn_id]) state.progress[row.hymn_id] = {};
       state.progress[row.hymn_id][row.lang] = row.learned;
     });
+  } else {
+    state.progress = lsGet(PCACHE_KEY + uid, {});   // offline: zuletzt bekannter Stand
   }
+  // Noch nicht übertragene Änderungen darüberlegen
+  getPending().filter(e => e.user_id === uid).forEach(e=>{
+    if(!state.progress[e.hymn_id]) state.progress[e.hymn_id] = {};
+    state.progress[e.hymn_id][e.lang] = e.learned;
+  });
+  lsSet(PCACHE_KEY + uid, state.progress);
 }
 
 async function setProgress(hymnId, lang, learned){
   if(!state.progress[hymnId]) state.progress[hymnId] = {};
   state.progress[hymnId][lang] = learned;
-  await sb.from("progress").upsert({ user_id: state.profile.id, hymn_id: hymnId, lang, learned });
+  const uid = state.profile.id;
+  lsSet(PCACHE_KEY + uid, state.progress);
+  const entry = { user_id: uid, hymn_id: hymnId, lang, learned };
+  if(!navigator.onLine){ addPending(entry); updateOfflineBanner(); showToast("Offline gespeichert"); return; }
+  let error = null;
+  try{ ({ error } = await sb.from("progress").upsert(entry)); }catch(e){ error = e; }
+  if(!error){ showToast("Gespeichert ✓"); return; }
+  if(isNetworkError(error)){ addPending(entry); updateOfflineBanner(); showToast("Offline gespeichert"); }
+  else showToast("Speichern fehlgeschlagen");
 }
 
 async function loadCertified(userId){
@@ -819,6 +888,17 @@ async function deleteDiakon(userId){
   await sb.from("certifications").delete().eq("user_id", userId);
   await sb.from("progress").delete().eq("user_id", userId);
   await sb.from("profiles").delete().eq("id", userId);
+}
+
+async function resetDiakonPassword(userId, newPassword){
+  try{
+    const { data, error } = await sb.functions.invoke("reset-password", {
+      body: { userId, newPassword, prueferPassword: state.prueferPwKept || "" }
+    });
+    if(error) return { ok:false, msg:"Die Verbindung zur Funktion ist fehlgeschlagen. Ist sie in Supabase eingerichtet?" };
+    if(data && data.error) return { ok:false, msg:data.error };
+    return { ok:true };
+  }catch(e){ return { ok:false, msg:"Unbekannter Fehler beim Zurücksetzen." }; }
 }
 
 async function loadAllDiakone(){
@@ -1477,6 +1557,7 @@ function renderPrueferGate(){
     const submit = ()=>{
       if(pwInput.value === PRUEFER_PASSWORD){
         state.prueferPasswordOk = true;
+        state.prueferPwKept = pwInput.value;
         state.prueferError = "";
       } else {
         state.prueferError = "Falsches Passwort.";
@@ -2086,9 +2167,11 @@ function renderPrueferHome(){
     const fullName = u.vorname+" "+u.nachname;
     const row = document.createElement("div");
     row.className = "diakon-pick";
+    row.style.flexWrap = "wrap";
     row.innerHTML = `
       <span class="diakon-open" style="flex:1; cursor:pointer;">${fullName}</span>
       <span class="diakon-open" style="color:var(--muted); font-size:13px; cursor:pointer;">öffnen →</span>
+      <span class="diakon-pw" style="flex-basis:100%; margin-top:8px; color:var(--midnight); font-size:13px; text-decoration:underline; cursor:pointer;">Passwort zurücksetzen</span>
       <span class="diakon-delete" style="color:var(--burgundy); font-size:13px; text-decoration:underline; cursor:pointer; margin-left:14px; white-space:nowrap;">Löschen</span>
     `;
     row.querySelectorAll(".diakon-open").forEach(el=>{
@@ -2105,6 +2188,14 @@ function renderPrueferHome(){
         state.view = "pruefer-station";
         render();
       });
+    });
+    row.querySelector(".diakon-pw").addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const pw = prompt(`Neues Passwort für "${fullName}" (mindestens 6 Zeichen):`);
+      if(pw === null) return;
+      if(pw.length < 6){ alert("Das Passwort muss mindestens 6 Zeichen haben."); return; }
+      const r = await resetDiakonPassword(u.id, pw);
+      alert(r.ok ? `Passwort für "${fullName}" wurde geändert. Teile es dem Diakon mit; er kann es nach der Anmeldung nutzen.` : r.msg);
     });
     row.querySelector(".diakon-delete").addEventListener("click", async (e)=>{
       e.stopPropagation();
@@ -2308,6 +2399,7 @@ async function init(){
       await checkLernfortschrittPromotion();
   }
   render();
+  updateOfflineBanner();
   maybeShowInstallBanner();
 }
 init();
