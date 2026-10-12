@@ -420,7 +420,7 @@
   }
   /* Bibelverse: geschwungene Klammer (so breit wie der Vers) mit Kreuz, Vers kursiv, Quelle klein */
   .vers{text-align:center; margin:28px auto 8px; width:fit-content; max-width:min(34ch, calc(100% - 28px));}
-  .vers-brace{position:relative; height:16px; margin:0 -14px; color:var(--gold);}
+  .vers-brace{position:relative; height:16px; width:min(100%, 250px); margin:0 auto; color:var(--gold);}
   .vers-brace-line{display:block; width:100%; height:100%;}
   .vers-cross{position:absolute; left:50%; top:-4px; width:13px; height:13px; margin-left:-6.5px;}
   .vers-text{font-family:"Cormorant Garamond", serif; font-style:italic; font-size:20px; line-height:1.45; margin-top:8px; color:var(--burgundy); text-wrap:balance;}
@@ -429,7 +429,7 @@
   .vers.on-dark .vers-text{color:var(--gold-light);}
   .vers.on-dark .vers-quelle{color:var(--parchment); opacity:.75;}
   .vers.klein{width:100%; max-width:none; margin-top:12px;}
-  .vers.klein .vers-text{font-size:14.5px; line-height:1.5; margin-top:0;}
+  .vers.klein .vers-text{color:#fff; font-size:14.5px; line-height:1.5; margin-top:0;}
   .vers.klein .vers-quelle{font-size:10px; margin-top:8px;}
   header.top .title-frame .vers{margin-bottom:4px;}
   .text-block .vers{margin:26px auto;}
@@ -856,7 +856,7 @@ function versEl(v, variante){
 /* Kapitel-Inhalt: entweder "text" (Absätze durch Leerzeile getrennt) oder "blocks" in der gewünschten Reihenfolge:
    { typ:"text", text:"…" } · { typ:"vers", text:"…", quelle:"…" } · { typ:"schluss", text:"…" } */
 const THEORIE = [
-  { id: "theorie-stephanus", title: "Der Hl. Stephanus: Erzdiakon und erster Märtyrer", blocks: [
+  { id: "theorie-stephanus", title: "Der Hl. Stephanus:<br>Erzdiakon und erster Märtyrer", blocks: [
       { typ: "text", text: "" },
       { typ: "vers", text: "Und als alle, die im Hohen Rat saßen, ihn anblickten, sahen sie sein Angesicht wie das Angesicht eines Engels.", quelle: "Apostelgeschichte 6,15" },
       { typ: "text", text: "" },
@@ -1401,8 +1401,8 @@ function renderTheorieKapitel(){
 
   const title = document.createElement("h2");
   title.className = "serif";
-  title.style.fontSize = "26px";
-  title.textContent = k.title;
+  title.style.fontSize = "24px";
+  title.innerHTML = k.title;
   wrap.appendChild(title);
 
   const textBlock = document.createElement("div");
