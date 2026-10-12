@@ -127,13 +127,14 @@
   header.top .ctrl-row{display:flex; align-items:center; gap:12px; justify-content:center;}
 
   /* Kopf innerhalb der Bereiche: Logo links, Text rechts, goldene Linie */
-  header.top.compact{padding:14px 16px 14px;}
-  header.top .compact-head{display:flex; align-items:center; gap:14px; text-align:left; width:100%;}
-  header.top.compact .crest{width:96px; height:96px; margin:0; flex:none;}
+  header.top.compact{padding:28px 16px 14px;}
+  header.top .info-corner{position:absolute; top:10px; right:12px; display:flex; z-index:2;}
+  header.top .compact-head{display:flex; align-items:center; gap:12px; text-align:left; width:100%;}
+  header.top.compact .crest{width:76px; height:76px; margin:0; flex:none;}
   header.top .compact-text{min-width:0; flex:1;}
-  header.top .compact-title{font-size:27px; line-height:1.05; color:var(--gold-light);}
-  header.top .compact-line{height:1px; background:var(--gold); margin:8px 0;}
-  header.top .compact-text .church-name{font-size:10px; letter-spacing:.14em;}
+  header.top .compact-title{font-size:clamp(15px, 5.3vw, 26px); line-height:1.1; color:var(--gold-light); white-space:nowrap;}
+  header.top .compact-line{height:1px; background:var(--gold); margin:7px 0;}
+  header.top .compact-text .church-name{font-size:clamp(8px, 2.7vw, 12px); letter-spacing:.04em; text-transform:none; white-space:nowrap; line-height:1.3;}
   header.top.compact .top-row{gap:12px;}
 
   /* Titel des Bereichs unter dem Kopf */
@@ -1107,6 +1108,23 @@ const ICON_NOTE = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M18 36V1
 function isDiakonSection(){ return ["home","station","hymn","stufenzertifikat"].includes(state.view); }
 function isTheorieSection(){ return ["theorie","theorie-kapitel"].includes(state.view); }
 
+/* Der Prüfer-Bereich ist nur über den eigenen Link (…/#pruefer) erreichbar, nicht über einen Schalter. */
+function verlassePrueferBereich(){
+  state.prueferAuthenticated=false; state.prueferPasswordOk=false; state.prueferPasswordInput=""; state.prueferName="";
+  state.role = "diakon"; state.view = "menu"; state.authError = "";
+  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+  render();
+}
+async function pruefeUrlHash(){
+  if(location.hash === "#pruefer"){
+    state.role = "pruefer"; state.view = "pruefer-home"; state.authError = "";
+    if(state.prueferAuthenticated) state.allDiakone = await loadAllDiakone();
+  } else if(state.role === "pruefer"){
+    state.role = "diakon"; state.view = "menu";
+  }
+}
+window.addEventListener("hashchange", async ()=>{ await pruefeUrlHash(); render(); });
+
 function renderHeader(){
   const h = document.createElement("header");
   const diakonEingeloggt = state.role==="diakon" && !!state.profile;
@@ -1142,14 +1160,14 @@ function renderHeader(){
             <span class="tile-icon">${ICON_BOOK}</span>
             <span class="tile-text">
               <span class="tile-title serif">Theorie</span>
-              <span class="tile-sub">Die Liturgie verstehen · ${theorieGelerntCount()} von ${THEORIE.length} gelernt</span>
+              <span class="tile-sub">Die Liturgie verstehen</span>
             </span>
           </button>
           <button class="tile" id="tileAntworten">
             <span class="tile-icon">${ICON_NOTE}</span>
             <span class="tile-text">
-              <span class="tile-title serif">Lernprogramm: Antworten eines Diakons</span>
-              <span class="tile-sub">Antworten üben und vom Prüfer bestätigen lassen</span>
+              <span class="tile-title serif">Lernprogramm</span>
+              <span class="tile-sub">Die liturgischen Antworten eines Diakons lernen</span>
             </span>
           </button>
         </div>`;
@@ -1159,15 +1177,9 @@ function renderHeader(){
 
   const zeigeInfo = compact;
   h.innerHTML = `
+    ${zeigeInfo ? `<button id="infoBtn" class="info-btn info-corner" title="Wie funktioniert das?">i</button>` : ""}
     <div class="top-row" style="align-items:center; text-align:center; position:relative;">
       ${kopf}
-      <div class="ctrl-row">
-        <div class="role-switch" id="roleSwitch">
-          <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
-          <button data-role="pruefer" class="${state.role==='pruefer'?'active':''}">Prüfer</button>
-        </div>
-        ${zeigeInfo ? `<button id="infoBtn" class="info-btn" title="Wie funktioniert das?">i</button>` : ""}
-      </div>
       <span id="logoutSlot"></span>
     </div>
   `;
@@ -1183,15 +1195,6 @@ function renderHeader(){
   const tA = h.querySelector("#tileAntworten");
   if(tA) tA.addEventListener("click", ()=>{ state.view = "home"; render(); window.scrollTo(0,0); });
 
-  h.querySelector("#roleSwitch").addEventListener("click", async (e)=>{
-    const btn = e.target.closest("button"); if(!btn) return;
-    state.role = btn.dataset.role;
-    state.authError = "";
-    state.view = state.role==="pruefer" ? "pruefer-home" : "menu";
-    if(state.role==="pruefer" && state.prueferAuthenticated) state.allDiakone = await loadAllDiakone();
-    render();
-  });
-
   const logoutSlot = h.querySelector("#logoutSlot");
   if(state.role==="diakon" && state.profile){
     const out = document.createElement("span");
@@ -1204,7 +1207,14 @@ function renderHeader(){
     const out = document.createElement("span");
     out.className = "logout-link";
     out.textContent = "Prüfer-Bereich verlassen";
-    out.addEventListener("click", ()=>{ state.prueferAuthenticated=false; state.prueferPasswordOk=false; state.prueferPasswordInput=""; state.prueferName=""; render(); });
+    out.addEventListener("click", ()=>{ verlassePrueferBereich(); });
+    logoutSlot.appendChild(out);
+  }
+  if(state.role==="pruefer" && !state.prueferAuthenticated){
+    const out = document.createElement("span");
+    out.className = "logout-link";
+    out.textContent = "Zur Diakon-Ansicht";
+    out.addEventListener("click", ()=>{ verlassePrueferBereich(); });
     logoutSlot.appendChild(out);
   }
   return h;
@@ -1468,7 +1478,7 @@ function renderHome(){
   hauptCrumb.textContent = "← Hauptmenü";
   hauptCrumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
   wrap.appendChild(hauptCrumb);
-  wrap.appendChild(sectionTitle("Lernprogramm: Antworten eines Diakons"));
+  wrap.appendChild(sectionTitle("Lernprogramm"));
   const intro = document.createElement("div");
   intro.innerHTML = `<h2 class="serif" style="font-size:24px;">Hallo ${state.profile.name}</h2>
     <p style="color:var(--muted); margin-top:6px; font-size:14px;">Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.</p>`;
@@ -2077,6 +2087,7 @@ document.getElementById("installBannerBtn").addEventListener("click", async ()=>
 /* ---------------- Start ---------------- */
 async function init(){
   root.innerHTML = `<div style="padding:60px 20px; text-align:center; color:var(--muted);">Lädt …</div>`;
+  await pruefeUrlHash();
   await loadProfile();
   if(state.profile){
     await loadProgress();
