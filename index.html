@@ -123,7 +123,9 @@
   .lang-switch{display:inline-flex; border:1px solid var(--gold); border-radius:999px; overflow:hidden;}
   .lang-switch button{background:transparent; border:none; color:var(--on-dark); font-family:"Source Sans 3",sans-serif; font-size:13px; letter-spacing:.06em; padding:7px 16px; cursor:pointer;}
   .lang-switch button.on{background:var(--gold); color:#1C2B44; font-weight:600;}
-  .slot-row{display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:2px;}
+  #logoutSlot{display:block; width:100%;}
+  .slot-row{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:2px; width:100%;}
+  .slot-row .lang-switch{margin-left:auto;}
   /* Hinweiskästchen */
   .info-box{margin-top:14px; padding:12px 14px; border-left:3px solid var(--gold); background:var(--tint-gold); border-radius:4px; font-size:14px; line-height:1.55;}
   .info-box .ib-title{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; font-weight:600;}
@@ -221,7 +223,7 @@
   header.top .info-corner{position:absolute; top:10px; right:12px; display:flex; z-index:2;}
   header.top .compact-head{display:flex; align-items:center; justify-content:center; gap:12px; text-align:left; width:100%;}
   header.top.compact .crest{width:76px; height:76px; margin:0; flex:none;}
-  header.top .compact-text{min-width:0; flex:0 1 auto; width:max-content; max-width:calc(100% - 88px);}
+  header.top .compact-text{min-width:0; flex:none; width:min(calc(100% - 88px), 290px);}
   header.top .compact-title{font-size:clamp(15px, 5.3vw, 26px); line-height:1.1; color:var(--gold-light); white-space:nowrap;}
   header.top .compact-line{height:1px; background:var(--gold); margin:7px 0;}
   header.top .compact-text .church-name{font-size:clamp(8px, 2.7vw, 12px); letter-spacing:.04em; text-transform:none; white-space:nowrap; line-height:1.3;}
@@ -1783,8 +1785,8 @@ function renderHeader(){
     else {
       const row = document.createElement("div");
       row.className = "slot-row";
-      row.appendChild(langSwitch());
       row.appendChild(out);
+      row.appendChild(langSwitch());
       logoutSlot.appendChild(row);
     }
   }
