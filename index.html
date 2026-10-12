@@ -129,9 +129,9 @@
   /* Kopf innerhalb der Bereiche: Logo links, Text rechts, goldene Linie */
   header.top.compact{padding:28px 16px 14px;}
   header.top .info-corner{position:absolute; top:10px; right:12px; display:flex; z-index:2;}
-  header.top .compact-head{display:flex; align-items:center; gap:12px; text-align:left; width:100%;}
+  header.top .compact-head{display:flex; align-items:center; justify-content:center; gap:12px; text-align:left; width:100%;}
   header.top.compact .crest{width:76px; height:76px; margin:0; flex:none;}
-  header.top .compact-text{min-width:0; flex:1;}
+  header.top .compact-text{min-width:0; flex:0 1 auto; width:max-content; max-width:calc(100% - 88px);}
   header.top .compact-title{font-size:clamp(15px, 5.3vw, 26px); line-height:1.1; color:var(--gold-light); white-space:nowrap;}
   header.top .compact-line{height:1px; background:var(--gold); margin:7px 0;}
   header.top .compact-text .church-name{font-size:clamp(8px, 2.7vw, 12px); letter-spacing:.04em; text-transform:none; white-space:nowrap; line-height:1.3;}
@@ -147,10 +147,19 @@
   main{padding:22px 20px 60px;}
 
   .crumb{
-    font-size:13px; color:var(--muted); margin-bottom:14px; cursor:pointer;
-    display:flex; align-items:center; gap:6px;
+    display:inline-flex; align-items:center; gap:9px; max-width:100%;
+    margin:3px 3px 20px; padding:7px 15px 7px 11px; cursor:pointer;
+    border:1px solid var(--gold); outline:1px solid var(--gold); outline-offset:2px;
+    background:rgba(173,127,53,.07); color:var(--burgundy);
+    font-family:"Cormorant Garamond",serif; font-weight:600; font-size:17px; line-height:1.2;
+    transition:background .15s ease, color .15s ease;
   }
-  .crumb:hover{color:var(--burgundy);}
+  .crumb::before{
+    content:""; flex:none; width:7px; height:7px; margin-left:3px;
+    border-left:2px solid var(--gold); border-bottom:2px solid var(--gold); transform:rotate(45deg);
+  }
+  .crumb:hover, .crumb:active{background:var(--burgundy); color:var(--gold-light);}
+  .crumb:hover::before, .crumb:active::before{border-color:var(--gold-light);}
 
   /* Profile gate */
   .profile-gate{padding:40px 4px;}
@@ -1231,7 +1240,7 @@ function renderTheorie(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "← Hauptmenü";
+  crumb.textContent = "Hauptmenü";
   crumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
   wrap.appendChild(crumb);
   wrap.appendChild(sectionTitle("Theorie"));
@@ -1258,7 +1267,7 @@ function renderTheorieKapitel(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "← Theorie";
+  crumb.textContent = "Theorie";
   crumb.addEventListener("click", ()=>{ state.view="theorie"; render(); });
   wrap.appendChild(crumb);
   if(!k){ state.view = "theorie"; return renderTheorie(); }
@@ -1475,7 +1484,7 @@ function renderHome(){
   const rewardDone = allHymnsCertified(stufe);
   const hauptCrumb = document.createElement("div");
   hauptCrumb.className = "crumb";
-  hauptCrumb.textContent = "← Hauptmenü";
+  hauptCrumb.textContent = "Hauptmenü";
   hauptCrumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
   wrap.appendChild(hauptCrumb);
   wrap.appendChild(sectionTitle("Lernprogramm"));
@@ -1563,7 +1572,7 @@ function renderStation(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "← Alle Stationen";
+  crumb.textContent = "Alle Stationen";
   crumb.addEventListener("click", ()=>{ state.view="home"; render(); });
   wrap.appendChild(crumb);
 
@@ -1643,7 +1652,7 @@ function renderHymn(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "← " + station.title;
+  crumb.textContent = "" + station.title;
   crumb.addEventListener("click", ()=>{ state.view="station"; render(); });
   wrap.appendChild(crumb);
 
@@ -1813,7 +1822,7 @@ function renderStufenZertifikat(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "← Zurück";
+  crumb.textContent = "Zurück";
   crumb.addEventListener("click", ()=>{ state.view="home"; state.stufenZertifikatStufe=null; render(); });
   wrap.appendChild(crumb);
 
@@ -1914,7 +1923,7 @@ function renderPrueferStation(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "← Alle Diakone";
+  crumb.textContent = "Alle Diakone";
   crumb.addEventListener("click", ()=>{ state.view="pruefer-home"; render(); });
   wrap.appendChild(crumb);
 
