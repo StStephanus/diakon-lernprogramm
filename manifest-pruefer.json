@@ -1,0 +1,39 @@
+{
+  "id": "pi-eklom-pruefer",
+  "name": "Pi-Eklom Prüfer",
+  "short_name": "Prüfer",
+  "description": "Prüfer-Bereich von Pi-Eklom – Koptisch-Orthodoxe Kirche in der Deutschschweiz",
+  "start_url": "./index.html#pruefer",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1C2B44",
+  "theme_color": "#1C2B44",
+  "lang": "de-CH",
+  "icons": [
+    {
+      "src": "icon-pruefer-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-pruefer-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-pruefer-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-pruefer-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
