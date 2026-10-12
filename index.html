@@ -50,9 +50,30 @@
     position:relative;
     border-bottom:3px solid var(--gold);
   }
+  header.top{padding:16px 16px 18px;}
   header.top .crest{
-    width:110px;height:110px;flex:none; object-fit:cover;
-    border:2px solid var(--gold); box-shadow:0 1px 4px rgba(0,0,0,.35);
+    width:min(190px, 58vw);height:min(190px, 58vw);flex:none; object-fit:cover; border-radius:50%;
+    border:2px solid var(--gold); display:block; margin:0 auto;
+  }
+  header.top .title-frame{
+    position:relative; width:100%; border:1px solid var(--gold); outline:1px solid var(--gold); outline-offset:3px;
+    padding:22px 14px 18px; margin:4px 0;
+  }
+  header.top .corner{position:absolute; width:14px; height:14px; color:var(--gold-light); background:var(--burgundy);}
+  header.top .corner.c-a{top:-8px; left:-8px;}
+  header.top .corner.c-b{top:-8px; right:-8px;}
+  header.top .corner.c-d{bottom:-8px; left:-8px;}
+  header.top .corner.c-e{bottom:-8px; right:-8px;}
+  header.top .book-title{
+    font-size:34px; line-height:1.05; color:var(--gold-light); margin-top:16px; text-wrap:balance;
+  }
+  header.top .orn-line{
+    display:flex; align-items:center; gap:10px; max-width:260px; margin:10px auto; color:var(--gold);
+  }
+  header.top .orn-line:before, header.top .orn-line:after{content:""; flex:1; height:1px; background:var(--gold);}
+  header.top .orn-line svg{width:11px; height:11px;}
+  header.top .church-name{
+    font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-light); line-height:1.6;
   }
   header.top .titles{display:flex;align-items:flex-start;gap:14px;}
   header.top h1{font-size:23px;letter-spacing:.2px;color:var(--parchment); line-height:1.15;}
@@ -998,11 +1019,16 @@ function renderHeader(){
   h.className = "top";
   h.innerHTML = `
     <div class="top-row" style="align-items:center; text-align:center; position:relative;">
-      <button id="infoBtn" class="info-btn" title="Wie funktioniert das?" style="position:absolute; top:0; right:0; display:${state.role==='diakon' && state.profile ? 'flex':'none'}; visibility:${state.role==='diakon' && state.profile ? 'visible':'hidden'};">i</button>
-          <img class="crest" src="logo-round.png" alt="Pi-Eklom" style="border-radius:50%;" />
-      <div>
-        <div class="sub" style="font-size:15px; margin-top:4px;">Lernprogramm: Antworten eines koptischen Diakons</div>
-        <div class="sub">Koptisch-Orthodoxe Kirche in der Deutschschweiz</div>
+      <div class="title-frame">
+        <svg class="corner c-a" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
+        <svg class="corner c-b" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
+        <svg class="corner c-d" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
+        <svg class="corner c-e" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg>
+        <button id="infoBtn" class="info-btn" title="Wie funktioniert das?" style="position:absolute; top:12px; right:12px; display:${state.role==='diakon' && state.profile ? 'flex':'none'}; visibility:${state.role==='diakon' && state.profile ? 'visible':'hidden'};">i</button>
+        <img class="crest" src="logo-round.png" alt="Pi-Eklom" />
+        <div class="book-title serif">Das Handbuch<br>eines Diakons</div>
+        <div class="orn-line"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 1h4v7h7v4h-7v7H8v-7H1V8h7z" fill="currentColor"/></svg></div>
+        <div class="church-name">Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz</div>
       </div>
       <div class="role-switch" id="roleSwitch">
         <button data-role="diakon" class="${state.role==='diakon'?'active':''}">Diakon</button>
