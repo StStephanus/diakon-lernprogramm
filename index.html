@@ -17,7 +17,7 @@
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;500;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Eigene Startbilder für die installierte App auf dem iPhone (kein weisses Aufblitzen) -->
 <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1320x2868.png" />
 <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1206x2622.png" />
@@ -118,6 +118,34 @@
   .theme-toggle:active{transform:scale(.96); background:rgba(173,127,53,.2);}
   html[data-theme="dark"] .text-block{color:#FFFFFF;}
   html[lang="en"] header.top .compact-text .church-name{white-space:normal;}
+  /* ===== ARABISCH: ANFANG (CSS) ===== */
+  html[dir="rtl"] body{font-family:"Noto Naskh Arabic","Source Sans 3",sans-serif; line-height:1.75;}
+  html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3, html[dir="rtl"] .serif, html[dir="rtl"] .vers-text, html[dir="rtl"] .text-block, html[dir="rtl"] header.top .book-title, html[dir="rtl"] .tile-title, html[dir="rtl"] .compact-title{font-family:"Amiri","Noto Naskh Arabic",serif; font-style:normal;}
+  html[dir="rtl"] *{letter-spacing:normal !important; text-transform:none !important;}
+  html[dir="rtl"] .vers-text{font-size:22px; line-height:1.7;}
+  html[dir="rtl"] header.top .compact-title{font-size:clamp(17px, 5.8vw, 28px);}
+  html[dir="rtl"] header.top .book-title{font-size:38px; line-height:1.3;}
+  html[dir="rtl"] header.top .compact-head{text-align:right;}
+  html[dir="rtl"] header.top .info-corner{right:auto; left:12px;}
+  html[dir="rtl"] .read-tools .rt-label{margin-right:0; margin-left:auto;}
+  html[dir="rtl"] .info-box{border-left:0; border-right:3px solid var(--gold);}
+  html[dir="rtl"] .crumb::before{margin-left:0; margin-right:3px; transform:rotate(225deg);}
+  html[dir="rtl"] .auth-tab{margin-right:0; margin-left:18px;}
+  html[dir="rtl"] .modal-box ul{padding-left:0; padding-right:20px;}
+  html[dir="rtl"] main.nav-fwd{animation-name:navFwdR;}
+  html[dir="rtl"] main.nav-back{animation-name:navBackR;}
+  @keyframes navFwdR{from{opacity:0; transform:translateX(-26px);} to{opacity:1; transform:none;}}
+  @keyframes navBackR{from{opacity:0; transform:translateX(26px);} to{opacity:1; transform:none;}}
+  html[dir="rtl"] .seek-row, html[dir="rtl"] .lang-switch, html[dir="rtl"] input[type="password"], html[dir="rtl"] input[type="date"]{direction:ltr;}
+  html[dir="rtl"] .toggle{direction:ltr;}
+  html[dir="rtl"] .text-block{text-align:start;}
+  html[dir="rtl"] .text-block p[style], html[dir="rtl"] .info-box .ib-body, html[dir="rtl"] .text-block .schluss, html[dir="rtl"] .vers.klein .vers-text{font-style:normal !important;}
+  /* ===== ARABISCH: ENDE (CSS) ===== */
+  .nav-row{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .nav-row .crumb{margin-bottom:20px;}
+  .nav-row .lang-switch{margin-top:4px; flex:none; border-color:var(--gold); }
+  .nav-row .lang-switch button{color:var(--ink);}
+  .nav-row .lang-switch button.on{color:#1C2B44;}
   .landing-tools{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:22px;}
   .landing-tools .theme-toggle{margin:0;}
   .lang-switch{display:inline-flex; border:1px solid var(--gold); border-radius:999px; overflow:hidden;}
@@ -726,10 +754,10 @@ const I18N = { en: {
 } };
 let UI_LANG = "de";
 try{ const sv = localStorage.getItem("pe_lang"); if(sv && I18N[sv]) UI_LANG = sv; }catch(e){}
-function isEn(){ return UI_LANG === "en" && !(typeof state !== "undefined" && state.role === "pruefer"); }
+function isLoc(){ return UI_LANG !== "de" && !(typeof state !== "undefined" && state.role === "pruefer"); }
 function T(s, params){
   let out = s;
-  if(isEn() && I18N.en[s] !== undefined) out = I18N.en[s];
+  if(isLoc() && I18N[UI_LANG] && I18N[UI_LANG][s] !== undefined) out = I18N[UI_LANG][s];
   if(params) out = out.replace(/\{(\w+)\}/g, (m,k)=> params[k] !== undefined ? params[k] : m);
   return out;
 }
@@ -1272,10 +1300,10 @@ VERSE.apg6_3.en   = { text: "Therefore select from among you, brothers, seven me
 const HAUPTMENU_VERSE = [VERSE.ps84_5, VERSE.ps122_1, VERSE.ps26_8];
 const hauptmenuVers = HAUPTMENU_VERSE[Math.floor(Math.random() * HAUPTMENU_VERSE.length)]; // pro Öffnen ein anderer
 function versHtml(v, variante, mitKlammer = true){
-  const e = (isEn() && v.en) ? v.en : v;
-  const q = isEn() && v.en ? ["“","”"] : ["„","“"];
-  const txt = (isEn() && v.en) ? e.text : `${q[0]}${e.text}${q[1]}`;
-  return `<div class="vers ${variante}">${mitKlammer ? BRACE_SVG : ""}<div class="vers-text">${(isEn() && v.en) ? q[0] + txt + q[1] : txt}</div><div class="vers-quelle">${e.quelle}</div></div>`;
+  const loc = (isLoc() && v[UI_LANG]) ? v[UI_LANG] : null;
+  const e = loc || v;
+  const q = loc ? (UI_LANG === "ar" ? ["«","»"] : ["“","”"]) : ["„","“"];
+  return `<div class="vers ${variante}">${mitKlammer ? BRACE_SVG : ""}<div class="vers-text">${q[0]}${e.text}${q[1]}</div><div class="vers-quelle">${e.quelle}</div></div>`;
 }
 function versEl(v, variante){
   const d = document.createElement("div");
@@ -1300,6 +1328,204 @@ const THEORIE = [
 ];
 THEORIE[0].blocks[1].en = { text: "All who sat in the council, fastening their eyes on him, saw his face like it was the face of an angel.", quelle: "Acts 6:15 · WEB" };
 THEORIE[0].blocks[3].en = { text: "Lord, don’t hold this sin against them! When he had said this, he fell asleep.", quelle: "Acts 7:60 · WEB" };
+/* ===== ARABISCH (ägyptisch): ANFANG — dieser ganze Block kann gelöscht werden, dann ist Arabisch wieder weg (zusammen mit dem CSS-Block "ARABISCH" oben) ===== */
+I18N.ar = {
+ "Das Handbuch eines Diakons": "دليل الشماس",
+ "Das Handbuch<br>eines Diakons": "دليل<br>الشماس",
+ "Koptisch-Orthodoxe Kirche in der Deutschschweiz": "الكنيسة القبطية الأرثوذكسية في سويسرا الألمانية",
+ "Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz": "الكنيسة القبطية الأرثوذكسية<br>في سويسرا الألمانية",
+ "Herzlich willkommen zu Pi-Eklom, {name}": "أهلاً بيك في بي إكلوم يا {name}",
+ "Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.": "هنا هتلاقي كل اللي محتاج تتعلّمه كشمّاس. في <strong>النظري</strong> هتقرا الليتورجيا متقسّمة إزاي وإيه مهام الشمّاس. وفي <strong>برنامج التعلّم</strong> هتتمرّن على المرادات وتخلّي الممتحِن يأكّدها لك. تقدر تفتح الاتنين في أي وقت.",
+ "Theorie": "النظري",
+ "Die Liturgie verstehen": "فهم الليتورجيا",
+ "Lernprogramm": "برنامج التعلّم",
+ "Die liturgischen Antworten eines Diakons lernen": "تعلّم مرادات الشمّاس الطقسية",
+ "Dunkler Modus": "الوضع الداكن",
+ "Heller Modus": "الوضع الفاتح",
+ "Lesen": "القراءة",
+ "Schrift kleiner": "تصغير الخط",
+ "Schrift grösser": "تكبير الخط",
+ "Wie funktioniert das?": "إزاي ده بيشتغل؟",
+ "Abmelden": "تسجيل الخروج",
+ "Hauptmenü": "القائمة الرئيسية",
+ "Zurück": "رجوع",
+ "Sprache": "اللغة",
+ "Der Hl. Stephanus:<br>Erzdiakon und erster Märtyrer": "القديس إستفانوس:<br>رئيس الشمامسة وأول الشهداء",
+ "Die verschiedenen Liturgien": "الليتورجيات المختلفة",
+ "Der Aufbau einer Liturgie": "ترتيب الليتورجيا",
+ "Die Zusammensetzung des Altars": "مكوّنات المذبح",
+ "Die Aufgaben eines Diakons": "مهام الشمّاس",
+ "Möge der Segen seiner Gebete mit uns sein, und Ehre sei unserem Herrn in Ewigkeit, Amen.": "بركة صلواته تكون معانا، والمجد لربنا إلى الأبد، آمين.",
+ "Gelesen und gelernt": "اتقرا واتعلّم",
+ "Noch nicht gelernt": "لسه ما اتعلّمش",
+ "Gelernt": "اتعلّم",
+ "Hier folgt der Text der Geschichte.": "نص القصة هيتضاف هنا.",
+ "Der Text zu diesem Thema folgt in Kürze.": "نص الموضوع ده هيتضاف قريب.",
+ "Ich habe das gelesen und gelernt": "أنا قريت ده واتعلّمته",
+ "Nur dein persönlicher Fortschritt.": "ده تقدّمك الشخصي بس.",
+ "Die Theorie": "النظري",
+ "Kurz erklärt:": "شرح بسيط:",
+ "Auch die <strong>Theorie</strong> gehört zu deiner Ausbildung und wird <strong>ebenfalls abgefragt</strong>.": "<strong>النظري</strong> كمان جزء من تدريبك، و<strong>هيتسألوك فيه كمان</strong>.",
+ "Bei jedem Unterthema kannst du für dich ankreuzen, dass du es <strong>gelesen und gelernt</strong> hast. Das ist, wie bei den Antworten, nur dein persönlicher Fortschritt.": "في كل موضوع تقدر تعلّم إنك <strong>قريته واتعلّمته</strong>. وزي المرادات، ده تقدّمك الشخصي بس.",
+ "Das Info-Zeichen <strong>i</strong> oben bringt dich jederzeit wieder zu diesem Hinweis.": "علامة المعلومات <strong>i</strong> اللي فوق بترجّعك للتنبيه ده في أي وقت.",
+ "Verstanden, los geht's": "تمام، يلا نبدأ",
+ "Schliessen": "إغلاق",
+ "Willkommen im Lernprogramm!": "أهلاً بيك في برنامج التعلّم!",
+ "Kurz erklärt, wie alles funktioniert:": "شرح بسيط لطريقة الشغل:",
+ "Es gibt drei <strong>Stufen</strong>, die sich nach deinem Alter richten: Stufe 1 (unter 12 Jahren), Stufe 2 (12 bis 20 Jahre) und Stufe 3 (ab 20 Jahren). Deine Stufe wird automatisch aus deinem Geburtsdatum berechnet.": "فيه تلات <strong>مستويات</strong> على حسب سنّك: المستوى 1 (أقل من 12 سنة)، والمستوى 2 (من 12 لـ 20 سنة)، والمستوى 3 (من 20 سنة وطالع). مستواك بيتحسب أوتوماتيك من تاريخ ميلادك.",
+ "Du siehst in jeder Station <strong>alle</strong> Antworten — auch die höherer Stufen. Antworten, die noch nicht zu deiner Stufe gehören, sind mit einem Schloss-Symbol markiert und können noch nicht geöffnet werden.": "في كل قسم بتشوف <strong>كل</strong> المرادات، حتى بتاعة المستويات الأعلى. المرادات اللي لسه مش من مستواك عليها علامة قفل ومش هتقدر تفتحها دلوقتي.",
+ "Sobald du älter wirst oder deine aktuelle Stufe vollständig gelernt hast, schaltet sich die nächste Stufe automatisch frei — du bekommst dann eine Mitteilung dazu.": "أول ما تكبر أو تخلّص مستواك الحالي كله، المستوى اللي بعده بيتفتح لوحده، وهييجيلك إشعار بكده.",
+ "In Stufe 1 und 2 müssen alle freigeschalteten Antworten gelernt werden. Erst in <strong>Stufe 3</strong> gibt es zusätzlich zu den <strong>Pflicht-Antworten</strong> auch ein paar wenige komplett <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte).": "في المستوى 1 و2 لازم تتعلّم كل المرادات المفتوحة. بس في <strong>المستوى 3</strong> فيه، غير <strong>المرادات الإجبارية</strong>، شوية مرادات <strong>اختيارية</strong> خالص (زيادة، لمن يحب).",
+ "Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.": "كل مرد عليه <strong>درجة صعوبة</strong> (سهل/متوسط/صعب) و<strong>اللغات</strong> المتاحة.",
+ "Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.": "لما تتمرّن على مرد بلغة معيّنة، تقدر تعلّم عليه لنفسك، وده في الأول مجرد ملاحظة شخصية.",
+ "Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.": "لما تبقى جاهز، روح لـ<strong>ممتحِن</strong> في الكنيسة ورتّل له المرد. هو هيأكّده في التطبيق على طول، وهتشوف ده على موبايلك كمان.",
+ "Es reicht, jede Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.": "كفاية تتعلّم كل مرد بـ<strong>لغة واحدة</strong> بس، مش لازم تعرف التلاتة.",
+ "<strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.": "<strong>مهم:</strong> حتى لو مرد واحد من مستواك اتأكّد، ما ينفعش ترتّله في الليتورجيا إلا بعد ما تتعلّم وتتأكّد لك <strong>كل</strong> المرادات الإجبارية في مستواك الحالي، مش قبل كده.",
+ "Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du dein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf.": "أول ما كل مرد إجباري في مستواك يتأكّد، هتاخد <strong>شهادة المستوى</strong> وتنتقل للمستوى اللي بعده.",
+ "Für die besondere <strong>Belohnung</strong> müsst ihr alle eure freigeschalteten Antworten in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen (ab Stufe 3 zählen dazu auch die freiwilligen Antworten).": "عشان تاخد <strong>المكافأة</strong> الخاصة لازم كل المرادات المفتوحة عندك تتأكّد بـ<strong>كل</strong> اللغات المتاحة (من المستوى 3 بتدخل فيها كمان المرادات الاختيارية).",
+ "Alles Gute zum Geburtstag!": "كل سنة وانت طيب!",
+ "Mit deinem neuen Alter bist du jetzt in <strong>Stufe {stufe}</strong>. Neue Antworten sind ab sofort für dich freigeschaltet — du findest sie in den Stationen, vorher waren sie dort gesperrt.": "بسنّك الجديد بقيت دلوقتي في <strong>المستوى {stufe}</strong>. مرادات جديدة اتفتحت لك من دلوقتي، هتلاقيها في الأقسام، وكانت قبل كده مقفولة.",
+ "Verstanden": "تمام",
+ "Stufe {n} abgeschlossen!": "خلّصت المستوى {n}!",
+ "Du hast alle Pflicht-Antworten der Stufe {n} erfolgreich vor einem Prüfer vorgetragen. Herzlichen Glückwunsch! Du steigst jetzt offiziell in <strong>Stufe {stufe}</strong> auf — ab sofort sind neue Antworten für dich freigeschaltet.": "رتّلت كل المرادات الإجبارية في المستوى {n} قدّام الممتحِن بنجاح. مبروك! بقيت رسمياً في <strong>المستوى {stufe}</strong>، ومرادات جديدة اتفتحت لك من دلوقتي.",
+ "Denk daran: Eine Antwort deiner Stufe darfst du in der Liturgie erst vorsingen, sobald du die <strong>ganze Stufe</strong> gelernt hast — nicht schon, sobald du eine einzelne Antwort kannst.": "افتكر: ما ينفعش ترتّل مرد من مستواك في الليتورجيا إلا بعد ما تتعلّم <strong>المستوى كله</strong>، مش أول ما تعرف مرد واحد.",
+ "Stufen-Zertifikat ansehen": "شوف شهادة المستوى",
+ "Weiter": "كمّل",
+ "Willkommen": "أهلاً بيك",
+ "Melde dich an oder registriere dich, um deinen persönlichen Lernfortschritt zu speichern.": "سجّل دخولك أو اعمل حساب جديد عشان يتحفظ تقدّمك في التعلّم.",
+ "Anmelden": "تسجيل الدخول",
+ "Registrieren": "حساب جديد",
+ "Vorname": "الاسم الأول",
+ "Nachname": "اسم العيلة",
+ "Geburtsdatum": "تاريخ الميلاد",
+ "Land": "البلد",
+ "Stadt": "المدينة",
+ "Bitte wählen": "اختار",
+ "Zuerst Land wählen": "اختار البلد الأول",
+ "Passwort": "كلمة السر",
+ "Bitte alle Felder ausfüllen.": "لازم تملا كل الخانات.",
+ "Das Passwort muss mindestens 6 Zeichen haben.": "كلمة السر لازم تكون 6 حروف على الأقل.",
+ "Registriere …": "بنسجّلك …",
+ "Bitte Vorname, Nachname und Passwort eingeben.": "اكتب الاسم الأول واسم العيلة وكلمة السر.",
+ "Melde an …": "بندخّلك …",
+ "Name oder Passwort ist falsch.": "الاسم أو كلمة السر غلط.",
+ "Registrierung fehlgeschlagen. Bitte erneut versuchen.": "التسجيل ما نفعش. جرّب تاني.",
+ "Deine Anmeldedaten werden sicher über Supabase verwaltet.": "بيانات دخولك محفوظة بأمان عن طريق Supabase.",
+ "Schweiz": "سويسرا",
+ "Österreich": "النمسا",
+ "Zürich": "زيورخ",
+ "Wien": "فيينا",
+ "Biel/Bern": "بيل/برن",
+ "Basel": "بازل",
+ "Graz": "غراتس",
+ "Salzburg": "سالزبورغ",
+ "Schärding": "شيردينغ",
+ "Feldkirch": "فيلدكيرش",
+ "Hallo {name}": "أهلاً يا {name}",
+ "Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.": "اتمرّن على المرادات بالسرعة اللي تناسبك. ولما تبقى جاهز، روح للممتحِن في الكنيسة ورتّلها له، وهو هيأكّدها لك هنا في التطبيق على طول.",
+ "🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!": "🏅 <strong>كل</strong> المرادات (الإجبارية والاختيارية) اتأكّدت لك فعلاً، برافو عليك!",
+ "Alle Pflicht-Antworten der Stufe {n} bestätigt — dein Zertifikat ist bereit.": "كل المرادات الإجبارية في المستوى {n} اتأكّدت — شهادتك جاهزة.",
+ "Stufe {n}-Zertifikat ansehen": "شوف شهادة المستوى {n}",
+ "{c}/{t} Antworten bestätigt ({d} selbst geübt)": "{c}/{t} مرادات متأكّدة ({d} اتمرّنت عليها بنفسك)",
+ "Diese Antworten werden erst ab Stufe {n} freigeschaltet.": "المرادات دي بتتفتح من المستوى {n}.",
+ "{c}/{t} Pflicht-Antworten bestätigt ({d} selbst geübt)": "{c}/{t} مرادات إجبارية متأكّدة ({d} اتمرّنت عليها بنفسك)",
+ " · {c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)": " · {c}/{t} مرادات اختيارية متأكّدة ({d} اتمرّنت عليها بنفسك)",
+ "{c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)": "{c}/{t} مرادات اختيارية متأكّدة ({d} اتمرّنت عليها بنفسك)",
+ "Fertig": "خلصت",
+ "Alle Antworten sind jederzeit zugänglich. Es reicht, jede Pflicht-Antwort in einer Sprache zu lernen und dem Prüfer vorzusingen — dann erhältst du dein Zertifikat. Für die besondere Belohnung müsst ihr alle Antworten (Pflicht + freiwillig) in allen verfügbaren Sprachen bestätigt bekommen.": "كل المرادات متاحة في أي وقت. كفاية تتعلّم كل مرد إجباري بلغة واحدة وترتّله للممتحِن، وبعدها تاخد شهادتك. وعشان تاخد المكافأة الخاصة لازم كل المرادات (الإجبارية والاختيارية) تتأكّد بكل اللغات المتاحة.",
+ "Alle Stationen": "كل الأقسام",
+ "Wiederkehrende Antworten": "المرادات المتكررة",
+ "Morgen- und Abendweihrauch": "بخور باكر وعشية",
+ "Lammprozession": "دورة الحمل",
+ "Liturgie der Gläubigen": "قداس المؤمنين",
+ "Spezielle Anlässe": "مناسبات خاصة",
+ "Die Kürzel zeigen, in welcher Sprache du eine Antwort schon geübt hast.": "الرموز بتوضّح إنت اتمرّنت على المرد بأنهي لغة.",
+ "Was ist das hier?": "إيه ده؟",
+ "Diese Antworten zählen zu den grundlegendsten Antworten eines Diakons und kommen in der koptischen Liturgie an mehreren Stellen vor. Übe sie gut, denn du wirst sie oft brauchen.": "المرادات دي من أهم مرادات الشمّاس، وبتتكرر في أكتر من مكان في الليتورجيا القبطية. اتمرّن عليها كويس، لأنك هتحتاجها كتير.",
+ "Inhalte folgen bald": "المحتوى جاي قريب",
+ "Die Antworten für diese Station werden noch ergänzt.": "مرادات القسم ده هتتضاف قريب.",
+ "🔒 ab Stufe {n}": "🔒 من المستوى {n}",
+ "freiwillig": "اختياري",
+ "leicht": "سهل",
+ "mittel": "متوسط",
+ "schwer": "صعب",
+ "Deutsch": "الألمانية",
+ "Koptisch": "القبطية",
+ "Arabisch": "العربية",
+ "{lang} — vom Prüfer bestätigt": "{lang} — اتأكّد من الممتحِن",
+ "{lang} — selbst geübt": "{lang} — اتمرّنت عليه بنفسك",
+ "Noch gesperrt": "لسه مقفول",
+ "Diese Antwort gehört zu Stufe {n} — sie wird freigeschaltet, sobald du diese Stufe erreichst.": "المرد ده من المستوى {n} — هيتفتح أول ما توصل للمستوى ده.",
+ "Wo in der Liturgie?": "في أنهي مكان في الليتورجيا؟",
+ "Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird.": "هنا قريب هتلاقي المرد ده بيتقال في أنهي مكان في الليتورجيا.",
+ "Wird an mehreren Stellen der Liturgie gesungen.": "بيتقال في أكتر من مكان في الليتورجيا.",
+ "Diese Antwort wird bei uns nur in {langs} gesungen.": "المرد ده بنقوله عندنا بـ{langs} بس.",
+ " und ": " و",
+ "Aufnahme anhören": "اسمع التسجيل",
+ "Stopp": "إيقاف",
+ "Bereit": "جاهز",
+ "Lädt …": "بيحمّل …",
+ "Spielt ab …": "شغّال …",
+ "Pausiert": "موقوف مؤقتاً",
+ "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)": "مفيش تسجيل للغة دي (صوت تجريبي)",
+ "Ich habe das auf {lang} geübt": "أنا اتمرّنت على ده بـ{lang}",
+ "Nur dein persönlicher Fortschritt für diese Sprache — die offizielle Bestätigung gibt der Prüfer.": "ده تقدّمك الشخصي بس للغة دي — التأكيد الرسمي بيعمله الممتحِن.",
+ "✓ Auf {lang} vom Prüfer bestätigt ({by}, {date}) — du kannst trotzdem jederzeit weiter üben.": "✓ اتأكّد من الممتحِن بـ{lang} ({by}، {date}) — وتقدر تكمّل تمرّن في أي وقت.",
+ "Auf {lang} noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort in dieser Sprache vorzusingen.": "لسه ما اتأكّدش من ممتحِن بـ{lang}. روح لممتحِن في الكنيسة ورتّل له المرد ده باللغة دي.",
+ "Evangeliumsgebet": "أوشية الإنجيل",
+ "Gebet für die Entschlafenen": "أوشية الراقدين",
+ "Gebet für die Kranken": "أوشية المرضى",
+ "Gebet für die Reisenden": "أوشية المسافرين",
+ "Gebet für die Opferdarbringenden": "أوشية القرابين والذين قدّموها",
+ "Gebet für die Gaben": "أوشية القرابين",
+ "Gebet für den Frieden": "أوشية السلامة",
+ "Wer sitzt, stehe auf": "من كان جالساً فليقف",
+ "Schauet nach Osten!": "انظروا إلى الشرق!",
+ "Wir sind aufmerksam!": "نحن منتبهون!",
+ "Verbeugt euch vor Gott": "اسجدوا لله",
+ "Seid aufmerksam, Amen!": "كونوا منتبهين، آمين!",
+ "Gebet für den Kirchenfrieden": "أوشية سلامة الكنيسة",
+ "Gebet für den Patriarchen": "أوشية البطريرك",
+ "Gebet für die Kirchenväter": "أوشية الآباء",
+ "Gebet für den Ort": "أوشية الموضع",
+ "Gebet für die Saaten und Gewässer": "أوشية الزروع والمياه",
+ "Die Leser": "القرّاء",
+ "Amen, Amen, Betet!": "آمين، آمين، صلّوا!",
+ "Endung an Festtagen": "الختام في الأعياد",
+ "KOPTISCH-ORTHODOXE KIRCHE ZÜRICH": "الكنيسة القبطية الأرثوذكسية — زيورخ",
+ "Diakonenzertifikat der Stufe {n}": "شهادة الشمّاس — المستوى {n}",
+ "verliehen an": "تُمنح إلى",
+ "hat alle Pflicht-Antworten der <strong>{stufe}</strong> (Altersgruppe {alter}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.": "أتمّ بنجاح ترتيل كل المرادات الإجبارية في <strong>{stufe}</strong> (الفئة العمرية: {alter}) أمام مسؤول من الكنيسة، وبذلك يحق له ترتيل هذه المرادات في الليتورجيا من الآن.",
+ "Abgeschlossen am {date}": "تاريخ الإتمام: {date}",
+ "Stufe 1": "المستوى 1",
+ "Stufe 2": "المستوى 2",
+ "Stufe 3": "المستوى 3",
+ "unter 12 Jahren": "أقل من 12 سنة",
+ "zwischen 12 und 20 Jahren": "من 12 إلى 20 سنة",
+ "ab 20 Jahren": "20 سنة فأكثر",
+ "Drucken / als PDF speichern": "اطبع / احفظ كـ PDF",
+ "1 Änderung wird übertragen …": "بنبعت تغيير واحد …",
+ "{n} Änderungen werden übertragen …": "بنبعت {n} تغييرات …",
+ "Du bist offline – Fortschritt wird auf diesem Gerät gespeichert.": "انت أوفلاين – تقدّمك بيتحفظ على الجهاز ده.",
+ "Fortschritt übertragen ✓": "التقدّم اتبعت ✓",
+ "Offline gespeichert": "اتحفظ أوفلاين",
+ "Gespeichert ✓": "اتحفظ ✓",
+ "Speichern fehlgeschlagen": "الحفظ ما نفعش",
+ "Diese App auf deinem Handy installieren, für schnelleren Zugriff?": "تحب تنزّل التطبيق ده على موبايلك عشان توصله أسرع؟",
+ "Installieren": "تنزيل",
+ "App installieren: Tippe unten auf \"Teilen\" und dann auf \"Zum Home-Bildschirm\".": "لتنزيل التطبيق: اضغط على «مشاركة» تحت، وبعدين «إضافة إلى الشاشة الرئيسية»."
+};
+VERSE.ps84_5.ar = { text: "طوبى للساكنين في بيتك، أبداً يسبّحونك.", quelle: "مزمور 84:4 · فاندايك" };
+VERSE.ps122_1.ar = { text: "فرحت بالقائلين لي: «إلى بيت الرب نذهب».", quelle: "مزمور 122:1 · فاندايك" };
+VERSE.ps26_8.ar = { text: "يا رب، أحببت مسكن بيتك ومحل سكن مجدك.", quelle: "مزمور 26:8 · فاندايك" };
+VERSE.ps119_105.ar = { text: "سراج لرجلي كلامك ونور لسبيلي.", quelle: "مزمور 119:105 · فاندايك" };
+VERSE.ps47_7.ar = { text: "رنّموا لله رنّموا. رنّموا لملكنا رنّموا.", quelle: "مزمور 47:6 · فاندايك" };
+VERSE.apg6_3.ar = { text: "فانتخبوا أيها الإخوة سبعة رجال منكم مشهوداً لهم، وممتلئين من الروح القدس وحكمة، فنقيمهم على هذه الحاجة.", quelle: "أعمال الرسل 6:3 · فاندايك" };
+THEORIE[0].blocks[1].ar = { text: "فشخص إليه جميع الجالسين في المجمع، ورأوا وجهه كأنه وجه ملاك.", quelle: "أعمال الرسل 6:15 · فاندايك" };
+THEORIE[0].blocks[3].ar = { text: "يا رب، لا تقم لهم هذه الخطية. وإذ قال هذا رقد.", quelle: "أعمال الرسل 7:60 · فاندايك" };
+UI_LANGS.push({code:"ar", label:"AR"});
+try{ if(localStorage.getItem("pe_lang") === "ar") UI_LANG = "ar"; }catch(e){}
+/* ===== ARABISCH: ENDE ===== */
 const THEORIE_INFO_KEY = "_theorie_info"; // Merker "Hinweis schon gesehen", wird wie ein Fortschrittseintrag gespeichert
 function theorieGelernt(id){ return !!(state.progress[id] && state.progress[id].de); }
 function theorieGelerntCount(){ return THEORIE.filter(k => theorieGelernt(k.id)).length; }
@@ -1551,6 +1777,8 @@ function render(){
   const richtung = (zuletztGezeigteView !== null && zuletztGezeigteView !== state.view)
     ? (tiefeNeu >= tiefeAlt ? "fwd" : "back") : null;
   zuletztGezeigteView = state.view;
+  document.documentElement.dir = (UI_LANG === "ar" && state.role !== "pruefer") ? "rtl" : "ltr";
+  document.documentElement.lang = (state.role === "pruefer") ? "de" : UI_LANG;
   root.innerHTML = "";
   root.appendChild(renderHeader());
   const main = document.createElement("main");
@@ -1794,12 +2022,7 @@ function renderHeader(){
     out.textContent = T("Abmelden") + " (" + state.profile.name + ")";
     out.addEventListener("click", async ()=>{ await logoutAccount(); render(); });
     if(landing){ out.classList.add("klein"); logoutSlot.appendChild(out); }
-    else {
-      const row = document.createElement("div");
-      row.className = "slot-row";
-      row.appendChild(langSwitch());
-      logoutSlot.appendChild(row);
-    }
+    else { /* der Sprachschalter steht in den Unterseiten neben dem Zurück-Knopf */ }
   }
   if(state.role==="diakon" && !state.profile){
     const row = document.createElement("div");
@@ -1816,6 +2039,16 @@ function renderHeader(){
   }
 
   return h;
+}
+
+/* Zeile mit dem Zurück-Knopf links und dem Sprachschalter rechts (nur für Diakone) */
+function appendNavRow(wrap, crumb){
+  if(state.role !== "diakon" || !state.profile){ appendNavRow(wrap, crumb); return; }
+  const row = document.createElement("div");
+  row.className = "nav-row";
+  row.appendChild(crumb);
+  row.appendChild(langSwitch());
+  wrap.appendChild(row);
 }
 
 function sectionTitle(text){
@@ -1864,7 +2097,7 @@ function renderTheorie(){
   crumb.className = "crumb";
   crumb.textContent = T("Hauptmenü");
   crumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
-  wrap.appendChild(crumb);
+  appendNavRow(wrap, crumb);
   wrap.appendChild(sectionTitle(T("Theorie")));
   THEORIE.forEach((k, i)=>{
     const done = theorieGelernt(k.id);
@@ -1892,7 +2125,7 @@ function renderTheorieKapitel(){
   crumb.className = "crumb";
   crumb.textContent = T("Theorie");
   crumb.addEventListener("click", ()=>{ state.view="theorie"; render(); });
-  wrap.appendChild(crumb);
+  appendNavRow(wrap, crumb);
   if(!k){ state.view = "theorie"; return renderTheorie(); }
 
   const title = document.createElement("h2");
@@ -2179,7 +2412,7 @@ function renderHome(){
   hauptCrumb.className = "crumb";
   hauptCrumb.textContent = T("Hauptmenü");
   hauptCrumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
-  wrap.appendChild(hauptCrumb);
+  appendNavRow(wrap, hauptCrumb);
   wrap.appendChild(sectionTitle(T("Lernprogramm")));
   const intro = document.createElement("div");
   intro.innerHTML = `<h2 class="serif" style="font-size:24px;">${T("Hallo {name}", {name: state.profile.name})}</h2>
@@ -2268,7 +2501,7 @@ function renderStation(){
   crumb.className = "crumb";
   crumb.textContent = T("Alle Stationen");
   crumb.addEventListener("click", ()=>{ state.view="home"; render(); });
-  wrap.appendChild(crumb);
+  appendNavRow(wrap, crumb);
 
   const title = document.createElement("h2");
   title.className = "serif";
@@ -2321,7 +2554,7 @@ function renderStation(){
     const chips = hymnLangs.map(l=>{
       const done = learnedLangs.includes(l.code);
       const cert = isHymnLangCertified(h.id, l.code);
-      const abbr = l.code==="de"?"DE":(l.code==="cop"?(isEn()?"CO":"KO"):"AR");
+      const abbr = l.code==="de"?"DE":(l.code==="cop"?(isLoc()?"CO":"KO"):"AR");
       const cls = [done?'done':'', cert?'certified':''].filter(Boolean).join(' ');
       const titleTxt = cert ? T("{lang} — vom Prüfer bestätigt", {lang:T(l.label)}) : (done ? T("{lang} — selbst geübt", {lang:T(l.label)}) : T(l.label));
       return `<div class="lang-chip ${cls}" title="${titleTxt}">${abbr}</div>`;
@@ -2355,7 +2588,7 @@ function renderHymn(){
   crumb.className = "crumb";
   crumb.textContent = "" + T(station.title);
   crumb.addEventListener("click", ()=>{ state.view="station"; render(); });
-  wrap.appendChild(crumb);
+  appendNavRow(wrap, crumb);
 
   if(!hymnUnlocked(hymn, state.profile.stufe)){
     const empty = document.createElement("div");
@@ -2490,6 +2723,7 @@ function renderHymn(){
   const textBlock = document.createElement("div");
   textBlock.className = "text-block";
   const mainText = content.text || content.translit || "";
+  textBlock.dir = /[\u0600-\u06FF]/.test(mainText) ? "rtl" : "ltr";   // echte arabische Schrift läuft von rechts nach links
   if(content.html){ textBlock.innerHTML = mainText; } else { textBlock.textContent = mainText; }
   wrap.appendChild(textBlock);
 
@@ -2532,7 +2766,7 @@ function renderStufenZertifikat(){
   crumb.className = "crumb";
   crumb.textContent = T("Zurück");
   crumb.addEventListener("click", ()=>{ state.view="home"; state.stufenZertifikatStufe=null; render(); });
-  wrap.appendChild(crumb);
+  appendNavRow(wrap, crumb);
 
   // Alle Pflicht-Hymnen dieser Stufe einsammeln, um das letzte Bestätigungsdatum zu bestimmen
   const hymnIdsOfStufe = [];
@@ -2648,7 +2882,7 @@ function renderPrueferStation(){
   crumb.className = "crumb";
   crumb.textContent = "Alle Diakone";
   crumb.addEventListener("click", ()=>{ state.view="pruefer-home"; render(); });
-  wrap.appendChild(crumb);
+  appendNavRow(wrap, crumb);
 
   const title = document.createElement("h2");
   title.className = "serif";
