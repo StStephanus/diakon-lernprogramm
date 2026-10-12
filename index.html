@@ -64,6 +64,7 @@
     --muted:#6B6153;
     --on-dark:#F3ECDA;     /* Schrift auf dunklen Flächen */
     --burg-t:#7A2333;      /* Weinrot für Text */
+    --err:#7A2333;
     --paper:#FFFFFF;
     --tint-burg:#F3E4E4;
     --tint-gold:#FBEBD9;
@@ -78,7 +79,7 @@
     color-scheme:dark;
     --ink:#EDE4D0; --parchment:#161B25; --parchment-2:#1F2634; --line:#394152; --muted:#A9A190;
     --sage:#9DB48F; --gold:#C29445; --midnight:#2A3B5C; --midnight-2:#34486E;
-    --burgundy:#65202D; --burg-t:#E8939F; --paper:#222A39;
+    --burgundy:#65202D; --burg-t:#D9BD84; --err:#F2A0A0; --paper:#222A39;
     --tint-burg:#3A2229; --tint-gold:#393020; --tint-neutral:#262D3B; --schluss:#D9BD84;
     --field:#0C1016;
     --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .95 0 0 0 0 .88 0 0 0 0 .70 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .70 0 0 0 0 .62 0 0 0 0 .45 0 0 0 .06 -.02'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
@@ -112,7 +113,9 @@
   .read-tools button{font-family:"Source Sans 3",sans-serif; border:1px solid var(--line); background:var(--paper); color:var(--ink); border-radius:999px; min-width:44px; height:34px; padding:0 12px; font-size:15px; cursor:pointer;}
   .read-tools button:active{transform:scale(.95);}
   .read-tools button[disabled]{opacity:.35; cursor:default;}
-  .read-tools .rt-small{font-size:13px;} .read-tools .rt-big{font-size:19px;}
+  .read-tools .rt-small, .read-tools .rt-big{font-size:22px; line-height:1; padding:0 14px;}
+  .theme-toggle{display:block; margin:22px auto 4px; background:transparent; border:1px solid var(--gold); color:var(--on-dark); border-radius:999px; padding:9px 22px; font-family:"Source Sans 3",sans-serif; font-size:14px; letter-spacing:.04em; cursor:pointer;}
+  .theme-toggle:active{transform:scale(.96); background:rgba(173,127,53,.2);}
   /* Hinweiskästchen */
   .info-box{margin-top:14px; padding:12px 14px; border-left:3px solid var(--gold); background:var(--tint-gold); border-radius:4px; font-size:14px; line-height:1.55;}
   .info-box .ib-title{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; font-weight:600;}
@@ -252,7 +255,7 @@
   .auth-tab.active{color:var(--ink); border-bottom-color:var(--burgundy); font-weight:600;}
   .field-row{display:flex; gap:12px;}
   .field-row .field{flex:1;}
-  .error-text{color:var(--burg-t); font-size:13px; margin-top:10px;}
+  .error-text{color:var(--err); font-size:13px; margin-top:10px;}
   .field{margin-top:22px;}
   .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
   .field input, .field select{
@@ -1499,7 +1502,8 @@ function renderHeader(){
             </span>
           </button>
         </div>
-        ${versHtml(hauptmenuVers, "on-dark")}`;
+        ${versHtml(hauptmenuVers, "on-dark")}
+        <button type="button" class="theme-toggle" id="landingTheme"></button>`;
     }
     kopf = `<div class="title-frame">${FRAME_CORNERS}${innen}</div>`;
   }
@@ -1518,6 +1522,12 @@ function renderHeader(){
       if(isTheorieSection()) state.showTheorieInfo = true; else state.showOnboardingManually = true;
       render();
     });
+  }
+  const lt = h.querySelector("#landingTheme");
+  if(lt){
+    const refreshLt = ()=>{ lt.textContent = isDark() ? "Heller Modus" : "Dunkler Modus"; };
+    refreshLt();
+    lt.addEventListener("click", ()=>{ setDark(!isDark()); refreshLt(); });
   }
   const tT = h.querySelector("#tileTheorie");
   if(tT) tT.addEventListener("click", ()=>{ state.view = "theorie"; render(); window.scrollTo(0,0); });
@@ -1567,14 +1577,14 @@ function readTools(){
   const d = document.createElement("div");
   d.className = "read-tools";
   d.innerHTML = `<span class="rt-label">Lesen</span>
-    <button type="button" class="rt-small" id="rtMinus" aria-label="Schrift kleiner">A−</button>
-    <button type="button" class="rt-big" id="rtPlus" aria-label="Schrift grösser">A+</button>
+    <button type="button" class="rt-small" id="rtMinus" aria-label="Schrift kleiner">−</button>
+    <button type="button" class="rt-big" id="rtPlus" aria-label="Schrift grösser">+</button>
     <button type="button" id="rtTheme"></button>`;
   const minus = d.querySelector("#rtMinus"), plus = d.querySelector("#rtPlus"), th = d.querySelector("#rtTheme");
   const refresh = ()=>{
     const i = getScaleIdx();
     minus.disabled = i <= 0; plus.disabled = i >= TEXT_SCALES.length-1;
-    th.textContent = isDark() ? "☀ Hell" : "☾ Dunkel";
+    th.textContent = isDark() ? "Heller Modus" : "Dunkler Modus";
   };
   minus.addEventListener("click", ()=>{ setScaleIdx(getScaleIdx()-1); refresh(); });
   plus.addEventListener("click", ()=>{ setScaleIdx(getScaleIdx()+1); refresh(); });
@@ -2009,7 +2019,7 @@ function renderStation(){
   if(s.id === "s1"){
     const erkl = document.createElement("div");
     erkl.className = "info-box";
-    erkl.innerHTML = `<span class="ib-title">Was ist das hier?</span>Diese Antworten singst du in der koptischen Liturgie nicht nur an einer einzigen Stelle, sondern an mehreren Stellen und in verschiedenen Gottesdiensten. Damit du sie nicht immer wieder neu suchen musst, sind sie hier alle zusammen gesammelt. Übe sie zuerst gut: Du wirst sie danach fast überall brauchen.`;
+    erkl.innerHTML = `<span class="ib-title">Was ist das hier?</span>Diese Antworten zählen zu den grundlegendsten Antworten eines Diakons und kommen in der koptischen Liturgie an mehreren Stellen vor. Übe sie gut, denn du wirst sie oft brauchen.`;
     wrap.appendChild(erkl);
   }
 
