@@ -117,6 +117,13 @@
   .theme-toggle{display:block; margin:22px auto 4px; background:transparent; border:1px solid var(--gold); color:var(--on-dark); border-radius:999px; padding:9px 22px; font-family:"Source Sans 3",sans-serif; font-size:14px; letter-spacing:.04em; cursor:pointer;}
   .theme-toggle:active{transform:scale(.96); background:rgba(173,127,53,.2);}
   html[data-theme="dark"] .text-block{color:#FFFFFF;}
+  html[lang="en"] header.top .compact-text .church-name{white-space:normal;}
+  .landing-tools{display:flex; flex-direction:column; align-items:center; gap:12px; margin-top:22px;}
+  .landing-tools .theme-toggle{margin:0;}
+  .lang-switch{display:inline-flex; border:1px solid var(--gold); border-radius:999px; overflow:hidden;}
+  .lang-switch button{background:transparent; border:none; color:var(--on-dark); font-family:"Source Sans 3",sans-serif; font-size:13px; letter-spacing:.06em; padding:7px 16px; cursor:pointer;}
+  .lang-switch button.on{background:var(--gold); color:#1C2B44; font-weight:600;}
+  .slot-row{display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:2px;}
   /* Hinweiskästchen */
   .info-box{margin-top:14px; padding:12px 14px; border-left:3px solid var(--gold); background:var(--tint-gold); border-radius:4px; font-size:14px; line-height:1.55;}
   .info-box .ib-title{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; font-weight:600;}
@@ -527,6 +534,225 @@ const LANGS = [
   {code:"ar", label:"Arabisch"},
 ];
 
+
+/* ---------------- Sprache der Oberfläche (i18n) ----------------
+   Deutsch ist die Grundsprache: der deutsche Text selbst ist der Schlüssel.
+   Fehlt eine Übersetzung, erscheint einfach der deutsche Text.
+   Der Prüfer-Bereich bleibt immer Deutsch. */
+const UI_LANGS = [ {code:"de", label:"DE"}, {code:"en", label:"EN"} ];
+const I18N = { en: {
+ "Das Handbuch eines Diakons": "The Deacon's Handbook",
+ "Das Handbuch<br>eines Diakons": "The Deacon's<br>Handbook",
+ "Koptisch-Orthodoxe Kirche in der Deutschschweiz": "Coptic Orthodox Church in German-speaking Switzerland",
+ "Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz": "Coptic Orthodox Church<br>in German-speaking Switzerland",
+ "Herzlich willkommen zu Pi-Eklom, {name}": "Welcome to Pi-Eklom, {name}",
+ "Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.": "Here you will find everything a deacon needs to learn. In the <strong>Theory</strong> section you read how the liturgy is structured and what a deacon's duties are. In the <strong>Learning Programme</strong> you practise the responses and have them confirmed by an examiner. You can open both at any time.",
+ "Theorie": "Theory",
+ "Die Liturgie verstehen": "Understanding the liturgy",
+ "Lernprogramm": "Learning Programme",
+ "Die liturgischen Antworten eines Diakons lernen": "Learn the liturgical responses of a deacon",
+ "Dunkler Modus": "Dark mode",
+ "Heller Modus": "Light mode",
+ "Lesen": "Reading",
+ "Schrift kleiner": "Smaller text",
+ "Schrift grösser": "Larger text",
+ "Wie funktioniert das?": "How does this work?",
+ "Abmelden": "Log out",
+ "Hauptmenü": "Main menu",
+ "Zurück": "Back",
+ "Sprache": "Language",
+ "Der Hl. Stephanus:<br>Erzdiakon und erster Märtyrer": "St. Stephen:<br>Archdeacon and First Martyr",
+ "Die verschiedenen Liturgien": "The Different Liturgies",
+ "Der Aufbau einer Liturgie": "The Structure of a Liturgy",
+ "Die Zusammensetzung des Altars": "The Composition of the Altar",
+ "Die Aufgaben eines Diakons": "The Duties of a Deacon",
+ "Möge der Segen seiner Gebete mit uns sein, und Ehre sei unserem Herrn in Ewigkeit, Amen.": "May the blessing of his prayers be with us, and glory be to our Lord forever. Amen.",
+ "Gelesen und gelernt": "Read and learned",
+ "Noch nicht gelernt": "Not yet learned",
+ "Gelernt": "Learned",
+ "Hier folgt der Text der Geschichte.": "The story will follow here.",
+ "Der Text zu diesem Thema folgt in Kürze.": "The text for this topic will follow shortly.",
+ "Ich habe das gelesen und gelernt": "I have read and learned this",
+ "Nur dein persönlicher Fortschritt.": "Your personal progress only.",
+ "Die Theorie": "The Theory",
+ "Kurz erklärt:": "Briefly explained:",
+ "Auch die <strong>Theorie</strong> gehört zu deiner Ausbildung und wird <strong>ebenfalls abgefragt</strong>.": "The <strong>theory</strong> is also part of your training and <strong>will be examined as well</strong>.",
+ "Bei jedem Unterthema kannst du für dich ankreuzen, dass du es <strong>gelesen und gelernt</strong> hast. Das ist, wie bei den Antworten, nur dein persönlicher Fortschritt.": "For each topic you can tick that you have <strong>read and learned</strong> it. As with the responses, this is only your personal progress.",
+ "Das Info-Zeichen <strong>i</strong> oben bringt dich jederzeit wieder zu diesem Hinweis.": "The info sign <strong>i</strong> at the top brings you back to this note at any time.",
+ "Verstanden, los geht's": "Got it, let's go",
+ "Schliessen": "Close",
+ "Willkommen im Lernprogramm!": "Welcome to the Learning Programme!",
+ "Kurz erklärt, wie alles funktioniert:": "A brief explanation of how everything works:",
+ "Es gibt drei <strong>Stufen</strong>, die sich nach deinem Alter richten: Stufe 1 (unter 12 Jahren), Stufe 2 (12 bis 20 Jahre) und Stufe 3 (ab 20 Jahren). Deine Stufe wird automatisch aus deinem Geburtsdatum berechnet.": "There are three <strong>levels</strong> based on your age: Level 1 (under 12 years), Level 2 (12 to 20 years) and Level 3 (20 years and older). Your level is calculated automatically from your date of birth.",
+ "Du siehst in jeder Station <strong>alle</strong> Antworten — auch die höherer Stufen. Antworten, die noch nicht zu deiner Stufe gehören, sind mit einem Schloss-Symbol markiert und können noch nicht geöffnet werden.": "In every section you see <strong>all</strong> responses — including those of higher levels. Responses that do not belong to your level yet are marked with a lock symbol and cannot be opened yet.",
+ "Sobald du älter wirst oder deine aktuelle Stufe vollständig gelernt hast, schaltet sich die nächste Stufe automatisch frei — du bekommst dann eine Mitteilung dazu.": "As soon as you get older or have fully learned your current level, the next level unlocks automatically — you will then receive a notification.",
+ "In Stufe 1 und 2 müssen alle freigeschalteten Antworten gelernt werden. Erst in <strong>Stufe 3</strong> gibt es zusätzlich zu den <strong>Pflicht-Antworten</strong> auch ein paar wenige komplett <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte).": "In Levels 1 and 2 all unlocked responses must be learned. Only in <strong>Level 3</strong> are there, in addition to the <strong>mandatory responses</strong>, a few completely <strong>optional responses</strong> (extra, for those who wish).",
+ "Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.": "Each response shows a <strong>difficulty level</strong> (easy/medium/hard) and the available <strong>languages</strong>.",
+ "Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.": "When you have practised a response in a language, you can tick it for yourself — for now this is only a personal note.",
+ "Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.": "When you are ready, go to an <strong>examiner</strong> at church and sing the response. They will then confirm it directly in the app — you will see this on your phone too.",
+ "Es reicht, jede Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.": "It is enough to learn each response in <strong>one</strong> language — you do not need to know all three.",
+ "<strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.": "<strong>Important:</strong> Even if a single response of your level is already confirmed, you may only sing it in the liturgy once you have learned and had <strong>all</strong> mandatory responses of your current level confirmed — not before.",
+ "Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du dein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf.": "As soon as every mandatory response of your level is confirmed, you receive your <strong>level certificate</strong> and move up to the next level.",
+ "Für die besondere <strong>Belohnung</strong> müsst ihr alle eure freigeschalteten Antworten in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen (ab Stufe 3 zählen dazu auch die freiwilligen Antworten).": "For the special <strong>reward</strong> you must have all your unlocked responses confirmed in <strong>all</strong> available languages (from Level 3 this also includes the optional responses).",
+ "Alles Gute zum Geburtstag!": "Happy birthday!",
+ "Mit deinem neuen Alter bist du jetzt in <strong>Stufe {stufe}</strong>. Neue Antworten sind ab sofort für dich freigeschaltet — du findest sie in den Stationen, vorher waren sie dort gesperrt.": "With your new age you are now in <strong>Level {stufe}</strong>. New responses are now unlocked for you — you will find them in the sections, where they were previously locked.",
+ "Verstanden": "Understood",
+ "Stufe {n} abgeschlossen!": "Level {n} completed!",
+ "Du hast alle Pflicht-Antworten der Stufe {n} erfolgreich vor einem Prüfer vorgetragen. Herzlichen Glückwunsch! Du steigst jetzt offiziell in <strong>Stufe {stufe}</strong> auf — ab sofort sind neue Antworten für dich freigeschaltet.": "You have successfully presented all mandatory responses of Level {n} to an examiner. Congratulations! You now officially move up to <strong>Level {stufe}</strong> — new responses are now unlocked for you.",
+ "Denk daran: Eine Antwort deiner Stufe darfst du in der Liturgie erst vorsingen, sobald du die <strong>ganze Stufe</strong> gelernt hast — nicht schon, sobald du eine einzelne Antwort kannst.": "Remember: you may only sing a response of your level in the liturgy once you have learned the <strong>entire level</strong> — not as soon as you know a single response.",
+ "Stufen-Zertifikat ansehen": "View level certificate",
+ "Weiter": "Continue",
+ "Willkommen": "Welcome",
+ "Melde dich an oder registriere dich, um deinen persönlichen Lernfortschritt zu speichern.": "Log in or register to save your personal learning progress.",
+ "Anmelden": "Log in",
+ "Registrieren": "Register",
+ "Vorname": "First name",
+ "Nachname": "Last name",
+ "Geburtsdatum": "Date of birth",
+ "Land": "Country",
+ "Stadt": "City",
+ "Bitte wählen": "Please choose",
+ "Zuerst Land wählen": "Choose a country first",
+ "Passwort": "Password",
+ "Bitte alle Felder ausfüllen.": "Please fill in all fields.",
+ "Das Passwort muss mindestens 6 Zeichen haben.": "The password must be at least 6 characters long.",
+ "Registriere …": "Registering …",
+ "Bitte Vorname, Nachname und Passwort eingeben.": "Please enter first name, last name and password.",
+ "Melde an …": "Logging in …",
+ "Name oder Passwort ist falsch.": "Name or password is incorrect.",
+ "Registrierung fehlgeschlagen. Bitte erneut versuchen.": "Registration failed. Please try again.",
+ "Deine Anmeldedaten werden sicher über Supabase verwaltet.": "Your login details are managed securely via Supabase.",
+ "Schweiz": "Switzerland",
+ "Österreich": "Austria",
+ "Zürich": "Zurich",
+ "Wien": "Vienna",
+ "Hallo {name}": "Hello {name}",
+ "Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.": "Practise the responses at your own pace. When you are ready, go to the examiner at church and sing them — they will then confirm them directly here in the app.",
+ "🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!": "🏅 You have really had <strong>all</strong> responses (mandatory + optional) confirmed — especially well done!",
+ "Alle Pflicht-Antworten der Stufe {n} bestätigt — dein Zertifikat ist bereit.": "All mandatory responses of Level {n} confirmed — your certificate is ready.",
+ "Stufe {n}-Zertifikat ansehen": "View Level {n} certificate",
+ "{c}/{t} Antworten bestätigt ({d} selbst geübt)": "{c}/{t} responses confirmed ({d} practised by yourself)",
+ "Diese Antworten werden erst ab Stufe {n} freigeschaltet.": "These responses are unlocked from Level {n}.",
+ "{c}/{t} Pflicht-Antworten bestätigt ({d} selbst geübt)": "{c}/{t} mandatory responses confirmed ({d} practised by yourself)",
+ " · {c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)": " · {c}/{t} optional responses confirmed ({d} practised by yourself)",
+ "{c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)": "{c}/{t} optional responses confirmed ({d} practised by yourself)",
+ "Fertig": "Done",
+ "Alle Antworten sind jederzeit zugänglich. Es reicht, jede Pflicht-Antwort in einer Sprache zu lernen und dem Prüfer vorzusingen — dann erhältst du dein Zertifikat. Für die besondere Belohnung müsst ihr alle Antworten (Pflicht + freiwillig) in allen verfügbaren Sprachen bestätigt bekommen.": "All responses are accessible at any time. It is enough to learn each mandatory response in one language and sing it to the examiner — then you receive your certificate. For the special reward you must have all responses (mandatory + optional) confirmed in all available languages.",
+ "Alle Stationen": "All sections",
+ "Wiederkehrende Antworten": "Recurring Responses",
+ "Morgen- und Abendweihrauch": "Morning and Evening Incense",
+ "Lammprozession": "Lamb Procession",
+ "Liturgie der Gläubigen": "Liturgy of the Faithful",
+ "Spezielle Anlässe": "Special Occasions",
+ "Die Kürzel zeigen, in welcher Sprache du eine Antwort schon geübt hast.": "The abbreviations show in which language you have already practised a response.",
+ "Was ist das hier?": "What is this?",
+ "Diese Antworten zählen zu den grundlegendsten Antworten eines Diakons und kommen in der koptischen Liturgie an mehreren Stellen vor. Übe sie gut, denn du wirst sie oft brauchen.": "These responses are among the most fundamental responses of a deacon and occur at several points in the Coptic liturgy. Practise them well, because you will need them often.",
+ "Inhalte folgen bald": "Content coming soon",
+ "Die Antworten für diese Station werden noch ergänzt.": "The responses for this section will be added soon.",
+ "🔒 ab Stufe {n}": "🔒 from Level {n}",
+ "freiwillig": "optional",
+ "leicht": "easy",
+ "mittel": "medium",
+ "schwer": "hard",
+ "Deutsch": "German",
+ "Koptisch": "Coptic",
+ "Arabisch": "Arabic",
+ "{lang} — vom Prüfer bestätigt": "{lang} — confirmed by the examiner",
+ "{lang} — selbst geübt": "{lang} — practised by yourself",
+ "Noch gesperrt": "Still locked",
+ "Diese Antwort gehört zu Stufe {n} — sie wird freigeschaltet, sobald du diese Stufe erreichst.": "This response belongs to Level {n} — it will be unlocked as soon as you reach this level.",
+ "Wo in der Liturgie?": "Where in the liturgy?",
+ "Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird.": "Soon you will find here at which point of the liturgy this response is sung.",
+ "Wird an mehreren Stellen der Liturgie gesungen.": "Sung at several points in the liturgy.",
+ "Diese Antwort wird bei uns nur in {langs} gesungen.": "We only sing this response in {langs}.",
+ " und ": " and ",
+ "Aufnahme anhören": "Listen to the recording",
+ "Stopp": "Stop",
+ "Bereit": "Ready",
+ "Lädt …": "Loading …",
+ "Spielt ab …": "Playing …",
+ "Pausiert": "Paused",
+ "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)": "No recording available for this language (placeholder tone)",
+ "Ich habe das auf {lang} geübt": "I have practised this in {lang}",
+ "Nur dein persönlicher Fortschritt für diese Sprache — die offizielle Bestätigung gibt der Prüfer.": "Your personal progress for this language only — the official confirmation is given by the examiner.",
+ "✓ Auf {lang} vom Prüfer bestätigt ({by}, {date}) — du kannst trotzdem jederzeit weiter üben.": "✓ Confirmed by the examiner in {lang} ({by}, {date}) — you can still keep practising at any time.",
+ "Auf {lang} noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort in dieser Sprache vorzusingen.": "Not yet confirmed by an examiner in {lang}. Go to an examiner at church to sing this response in this language.",
+ "Evangeliumsgebet": "Prayer of the Gospel",
+ "Gebet für die Entschlafenen": "Prayer for the Departed",
+ "Gebet für die Kranken": "Prayer for the Sick",
+ "Gebet für die Reisenden": "Prayer for Travellers",
+ "Gebet für die Opferdarbringenden": "Prayer for Those Who Bring Offerings",
+ "Gebet für die Gaben": "Prayer for the Offerings",
+ "Gebet für den Frieden": "Prayer for Peace",
+ "Wer sitzt, stehe auf": "Those who are seated, stand up",
+ "Schauet nach Osten!": "Look to the East!",
+ "Wir sind aufmerksam!": "We are attentive!",
+ "Verbeugt euch vor Gott": "Bow down before God",
+ "Seid aufmerksam, Amen!": "Be attentive, Amen!",
+ "Gebet für den Kirchenfrieden": "Prayer for the Peace of the Church",
+ "Gebet für den Patriarchen": "Prayer for the Patriarch",
+ "Gebet für die Kirchenväter": "Prayer for the Church Fathers",
+ "Gebet für den Ort": "Prayer for the Place",
+ "Gebet für die Saaten und Gewässer": "Prayer for the Crops and Waters",
+ "Die Leser": "The Readers",
+ "Amen, Amen, Betet!": "Amen, Amen, Pray!",
+ "Endung an Festtagen": "Ending on Feast Days",
+ "KOPTISCH-ORTHODOXE KIRCHE ZÜRICH": "COPTIC ORTHODOX CHURCH ZURICH",
+ "Diakonenzertifikat der Stufe {n}": "Deacon Certificate, Level {n}",
+ "verliehen an": "awarded to",
+ "hat alle Pflicht-Antworten der <strong>{stufe}</strong> (Altersgruppe {alter}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.": "has successfully presented all mandatory responses of <strong>{stufe}</strong> (age group {alter}) before a person responsible in the parish and is thereby authorised to perform these responses in the liturgy from now on.",
+ "Abgeschlossen am {date}": "Completed on {date}",
+ "Stufe 1": "Level 1",
+ "Stufe 2": "Level 2",
+ "Stufe 3": "Level 3",
+ "unter 12 Jahren": "under 12 years",
+ "zwischen 12 und 20 Jahren": "between 12 and 20 years",
+ "ab 20 Jahren": "20 years and older",
+ "Drucken / als PDF speichern": "Print / save as PDF",
+ "1 Änderung wird übertragen …": "1 change is being synced …",
+ "{n} Änderungen werden übertragen …": "{n} changes are being synced …",
+ "Du bist offline – Fortschritt wird auf diesem Gerät gespeichert.": "You are offline – progress is saved on this device.",
+ "Fortschritt übertragen ✓": "Progress synced ✓",
+ "Offline gespeichert": "Saved offline",
+ "Gespeichert ✓": "Saved ✓",
+ "Speichern fehlgeschlagen": "Saving failed",
+ "Diese App auf deinem Handy installieren, für schnelleren Zugriff?": "Install this app on your phone for faster access?",
+ "Installieren": "Install",
+ "App installieren: Tippe unten auf \"Teilen\" und dann auf \"Zum Home-Bildschirm\".": "Install the app: tap “Share” at the bottom, then “Add to Home Screen”."
+} };
+let UI_LANG = "de";
+try{ const sv = localStorage.getItem("pe_lang"); if(sv && I18N[sv]) UI_LANG = sv; }catch(e){}
+function isEn(){ return UI_LANG === "en" && !(typeof state !== "undefined" && state.role === "pruefer"); }
+function T(s, params){
+  let out = s;
+  if(isEn() && I18N.en[s] !== undefined) out = I18N.en[s];
+  if(params) out = out.replace(/\{(\w+)\}/g, (m,k)=> params[k] !== undefined ? params[k] : m);
+  return out;
+}
+function setUiLang(code){
+  if(!I18N[code] && code !== "de") return;
+  UI_LANG = code;
+  try{ localStorage.setItem("pe_lang", code); }catch(e){}
+  document.documentElement.lang = code;
+  state.authError = "";
+  render();
+  updateOfflineBanner();
+}
+function langSwitch(){
+  const d = document.createElement("div");
+  d.className = "lang-switch";
+  d.setAttribute("role","group");
+  d.setAttribute("aria-label", T("Sprache"));
+  UI_LANGS.forEach(l=>{
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = l.label;
+    if(l.code === UI_LANG) b.className = "on";
+    b.addEventListener("click", ()=>{ if(l.code !== UI_LANG) setUiLang(l.code); });
+    d.appendChild(b);
+  });
+  return d;
+}
+
 const STATIONS = [
   {
     id:"s1", title:"Wiederkehrende Antworten",
@@ -815,7 +1041,7 @@ async function registerAccount(vorname, nachname, password, geburtsdatum, land, 
   const { data, error } = await sb.auth.signUp({ email, password });
   if(error) return { error: error.message };
   const user = data.user;
-  if(!user) return { error: "Registrierung fehlgeschlagen. Bitte erneut versuchen." };
+  if(!user) return { error: T("Registrierung fehlgeschlagen. Bitte erneut versuchen.") };
   const initialStufe = ageStufeFromBirthdate(geburtsdatum);
   const { error: profileError } = await sb.from("profiles").insert({ id: user.id, vorname, nachname, email, geburtsdatum, stufe: initialStufe, land, stadt });
   if(profileError) return { error: profileError.message };
@@ -869,7 +1095,7 @@ let toastTimer = null;
 function showToast(text){
   let t = document.getElementById("toast");
   if(!t){ t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t); }
-  t.textContent = text; t.classList.add("show");
+  t.textContent = T(text); t.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=> t.classList.remove("show"), 2000);
 }
@@ -879,8 +1105,8 @@ function updateOfflineBanner(){
   if(navigator.onLine && n === 0){ if(b) b.remove(); return; }
   if(!b){ b = document.createElement("div"); b.id = "offlineBanner"; document.body.appendChild(b); }
   b.textContent = navigator.onLine
-    ? `${n} Änderung${n===1?"":"en"} werden übertragen …`
-    : "Du bist offline – Fortschritt wird auf diesem Gerät gespeichert.";
+    ? (n===1 ? T("1 Änderung wird übertragen …") : T("{n} Änderungen werden übertragen …", {n}))
+    : T("Du bist offline – Fortschritt wird auf diesem Gerät gespeichert.");
 }
 async function flushPending(){
   if(!navigator.onLine) return;
@@ -1016,7 +1242,7 @@ const HYMN_WO = {
 function hymnWo(hymn, station){
   const t = (HYMN_WO[hymn.id] || "").trim();
   if(t) return t;
-  return station.id === "s1" ? "Wird an mehreren Stellen der Liturgie gesungen." : "";
+  return station.id === "s1" ? T("Wird an mehreren Stellen der Liturgie gesungen.") : "";
 }
 
 /* ---------------- Theorie ----------------
@@ -1033,10 +1259,19 @@ const VERSE = {
   ps47_7:   { text: "Lobsingt Gott, lobsingt! Lobsingt unserem König, lobsingt!", quelle: "Psalm 47,7 · Schlachter 2000" },
   apg6_3:   { text: "Seht euch nach sieben Männern aus eurer Mitte um, die ein gutes Zeugnis haben und voll Heiligen Geistes und Weisheit sind; die wollen wir für diesen Dienst einsetzen", quelle: "Apostelgeschichte 6,3" },
 };
+VERSE.ps84_5.en   = { text: "Blessed are those who dwell in your house. They are always praising you.", quelle: "Psalm 84:4 · WEB" };
+VERSE.ps122_1.en  = { text: "I was glad when they said to me, “Let’s go to the LORD’s house!”", quelle: "Psalm 122:1 · WEB" };
+VERSE.ps26_8.en   = { text: "LORD, I love the habitation of your house, the place where your glory dwells.", quelle: "Psalm 26:8 · WEB" };
+VERSE.ps119_105.en= { text: "Your word is a lamp to my feet, and a light for my path.", quelle: "Psalm 119:105 · WEB" };
+VERSE.ps47_7.en   = { text: "Sing praises to God, sing praises. Sing praises to our King, sing praises.", quelle: "Psalm 47:6 · WEB" };
+VERSE.apg6_3.en   = { text: "Therefore select from among you, brothers, seven men of good report, full of the Holy Spirit and of wisdom, whom we may appoint over this business.", quelle: "Acts 6:3 · WEB" };
 const HAUPTMENU_VERSE = [VERSE.ps84_5, VERSE.ps122_1, VERSE.ps26_8];
 const hauptmenuVers = HAUPTMENU_VERSE[Math.floor(Math.random() * HAUPTMENU_VERSE.length)]; // pro Öffnen ein anderer
 function versHtml(v, variante, mitKlammer = true){
-  return `<div class="vers ${variante}">${mitKlammer ? BRACE_SVG : ""}<div class="vers-text">„${v.text}“</div><div class="vers-quelle">${v.quelle}</div></div>`;
+  const e = (isEn() && v.en) ? v.en : v;
+  const q = isEn() && v.en ? ["“","”"] : ["„","“"];
+  const txt = (isEn() && v.en) ? e.text : `${q[0]}${e.text}${q[1]}`;
+  return `<div class="vers ${variante}">${mitKlammer ? BRACE_SVG : ""}<div class="vers-text">${(isEn() && v.en) ? q[0] + txt + q[1] : txt}</div><div class="vers-quelle">${e.quelle}</div></div>`;
 }
 function versEl(v, variante){
   const d = document.createElement("div");
@@ -1059,6 +1294,8 @@ const THEORIE = [
   { id: "theorie-altar",     title: "Die Zusammensetzung des Altars", text: "" },
   { id: "theorie-aufgaben",  title: "Die Aufgaben eines Diakons",  text: "" },
 ];
+THEORIE[0].blocks[1].en = { text: "All who sat in the council, fastening their eyes on him, saw his face like it was the face of an angel.", quelle: "Acts 6:15 · WEB" };
+THEORIE[0].blocks[3].en = { text: "Lord, don’t hold this sin against them! When he had said this, he fell asleep.", quelle: "Acts 7:60 · WEB" };
 const THEORIE_INFO_KEY = "_theorie_info"; // Merker "Hinweis schon gesehen", wird wie ein Fortschrittseintrag gespeichert
 function theorieGelernt(id){ return !!(state.progress[id] && state.progress[id].de); }
 function theorieGelerntCount(){ return THEORIE.filter(k => theorieGelernt(k.id)).length; }
@@ -1343,17 +1580,17 @@ function renderPromotionModal(){
   box.className = "modal-box";
   if(p.type === "geburtstag"){
     box.innerHTML = `
-      <h2 class="serif">🎂 Alles Gute zum Geburtstag!</h2>
-      <p style="color:var(--muted); font-size:14px; margin-top:4px;">Mit deinem neuen Alter bist du jetzt in <strong>Stufe ${p.stufe}</strong>. Neue Antworten sind ab sofort für dich freigeschaltet — du findest sie in den Stationen, vorher waren sie dort gesperrt.</p>
-      <button class="btn" id="promoOk">Verstanden</button>
+      <h2 class="serif">🎂 ${T("Alles Gute zum Geburtstag!")}</h2>
+      <p style="color:var(--muted); font-size:14px; margin-top:4px;">${T("Mit deinem neuen Alter bist du jetzt in <strong>Stufe {stufe}</strong>. Neue Antworten sind ab sofort für dich freigeschaltet — du findest sie in den Stationen, vorher waren sie dort gesperrt.", {stufe:p.stufe})}</p>
+      <button class="btn" id="promoOk">${T("Verstanden")}</button>
     `;
   } else {
     box.innerHTML = `
-      <h2 class="serif">🎉 Stufe ${p.abgeschlosseneStufe} abgeschlossen!</h2>
-      <p style="color:var(--muted); font-size:14px; margin-top:4px;">Du hast alle Pflicht-Antworten der Stufe ${p.abgeschlosseneStufe} erfolgreich vor einem Prüfer vorgetragen. Herzlichen Glückwunsch! Du steigst jetzt offiziell in <strong>Stufe ${p.stufe}</strong> auf — ab sofort sind neue Antworten für dich freigeschaltet.</p>
-      <p style="color:var(--muted); font-size:13px; margin-top:10px;">Denk daran: Eine Antwort deiner Stufe darfst du in der Liturgie erst vorsingen, sobald du die <strong>ganze Stufe</strong> gelernt hast — nicht schon, sobald du eine einzelne Antwort kannst.</p>
-      <button class="btn secondary" id="promoCert" style="margin-top:10px;">Stufen-Zertifikat ansehen</button>
-      <button class="btn" id="promoOk">Weiter</button>
+      <h2 class="serif">🎉 ${T("Stufe {n} abgeschlossen!", {n:p.abgeschlosseneStufe})}</h2>
+      <p style="color:var(--muted); font-size:14px; margin-top:4px;">${T("Du hast alle Pflicht-Antworten der Stufe {n} erfolgreich vor einem Prüfer vorgetragen. Herzlichen Glückwunsch! Du steigst jetzt offiziell in <strong>Stufe {stufe}</strong> auf — ab sofort sind neue Antworten für dich freigeschaltet.", {n:p.abgeschlosseneStufe, stufe:p.stufe})}</p>
+      <p style="color:var(--muted); font-size:13px; margin-top:10px;">${T("Denk daran: Eine Antwort deiner Stufe darfst du in der Liturgie erst vorsingen, sobald du die <strong>ganze Stufe</strong> gelernt hast — nicht schon, sobald du eine einzelne Antwort kannst.")}</p>
+      <button class="btn secondary" id="promoCert" style="margin-top:10px;">${T("Stufen-Zertifikat ansehen")}</button>
+      <button class="btn" id="promoOk">${T("Weiter")}</button>
     `;
   }
   overlay.appendChild(box);
@@ -1379,22 +1616,22 @@ function renderOnboardingModal(){
   const box = document.createElement("div");
   box.className = "modal-box";
   box.innerHTML = `
-    <h2 class="serif">Willkommen im Lernprogramm!</h2>
-    <p style="color:var(--muted); font-size:14px; margin-top:4px;">Kurz erklärt, wie alles funktioniert:</p>
+    <h2 class="serif">${T("Willkommen im Lernprogramm!")}</h2>
+    <p style="color:var(--muted); font-size:14px; margin-top:4px;">${T("Kurz erklärt, wie alles funktioniert:")}</p>
     <ul>
-      <li>Es gibt drei <strong>Stufen</strong>, die sich nach deinem Alter richten: Stufe 1 (unter 12 Jahren), Stufe 2 (12 bis 20 Jahre) und Stufe 3 (ab 20 Jahren). Deine Stufe wird automatisch aus deinem Geburtsdatum berechnet.</li>
-      <li>Du siehst in jeder Station <strong>alle</strong> Antworten — auch die höherer Stufen. Antworten, die noch nicht zu deiner Stufe gehören, sind mit einem Schloss-Symbol markiert und können noch nicht geöffnet werden.</li>
-      <li>Sobald du älter wirst oder deine aktuelle Stufe vollständig gelernt hast, schaltet sich die nächste Stufe automatisch frei — du bekommst dann eine Mitteilung dazu.</li>
-      <li>In Stufe 1 und 2 müssen alle freigeschalteten Antworten gelernt werden. Erst in <strong>Stufe 3</strong> gibt es zusätzlich zu den <strong>Pflicht-Antworten</strong> auch ein paar wenige komplett <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte).</li>
-      <li>Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.</li>
-      <li>Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.</li>
-      <li>Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.</li>
-      <li>Es reicht, jede Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.</li>
-      <li><strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.</li>
-      <li>Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du dein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf.</li>
-      <li>Für die besondere <strong>Belohnung</strong> müsst ihr alle eure freigeschalteten Antworten in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen (ab Stufe 3 zählen dazu auch die freiwilligen Antworten).</li>
+      <li>${T("Es gibt drei <strong>Stufen</strong>, die sich nach deinem Alter richten: Stufe 1 (unter 12 Jahren), Stufe 2 (12 bis 20 Jahre) und Stufe 3 (ab 20 Jahren). Deine Stufe wird automatisch aus deinem Geburtsdatum berechnet.")}</li>
+      <li>${T("Du siehst in jeder Station <strong>alle</strong> Antworten — auch die höherer Stufen. Antworten, die noch nicht zu deiner Stufe gehören, sind mit einem Schloss-Symbol markiert und können noch nicht geöffnet werden.")}</li>
+      <li>${T("Sobald du älter wirst oder deine aktuelle Stufe vollständig gelernt hast, schaltet sich die nächste Stufe automatisch frei — du bekommst dann eine Mitteilung dazu.")}</li>
+      <li>${T("In Stufe 1 und 2 müssen alle freigeschalteten Antworten gelernt werden. Erst in <strong>Stufe 3</strong> gibt es zusätzlich zu den <strong>Pflicht-Antworten</strong> auch ein paar wenige komplett <strong>freiwillige Antworten</strong> (zusätzlich, wer möchte).")}</li>
+      <li>${T("Jede Antwort zeigt einen <strong>Schwierigkeitsgrad</strong> (leicht/mittel/schwer) und die verfügbaren <strong>Sprachen</strong>.")}</li>
+      <li>${T("Wenn du eine Antwort in einer Sprache geübt hast, kannst du das für dich selbst ankreuzen — das ist erstmal nur eine persönliche Notiz.")}</li>
+      <li>${T("Wenn du bereit bist, geh zu einem <strong>Prüfer</strong> in der Kirche und sing die Antwort vor. Er bestätigt sie dann direkt in der App — das siehst du danach auch auf deinem Handy.")}</li>
+      <li>${T("Es reicht, jede Antwort in <strong>einer</strong> Sprache zu lernen — du musst nicht alle drei können.")}</li>
+      <li>${T("<strong>Wichtig:</strong> Auch wenn eine einzelne Antwort deiner Stufe schon bestätigt ist, darfst du sie in der Liturgie erst vorsingen, sobald du <strong>alle</strong> Pflicht-Antworten deiner aktuellen Stufe gelernt und bestätigt bekommen hast — nicht schon vorher.")}</li>
+      <li>${T("Sobald jede Pflicht-Antwort deiner Stufe bestätigt ist, erhältst du dein <strong>Stufen-Zertifikat</strong> und steigst in die nächste Stufe auf.")}</li>
+      <li>${T("Für die besondere <strong>Belohnung</strong> müsst ihr alle eure freigeschalteten Antworten in <strong>allen</strong> verfügbaren Sprachen bestätigt bekommen (ab Stufe 3 zählen dazu auch die freiwilligen Antworten).")}</li>
     </ul>
-    <button class="btn" id="onboardOk">${state.profile.onboarded ? "Schliessen" : "Verstanden, los geht's"}</button>
+    <button class="btn" id="onboardOk">${state.profile.onboarded ? T("Schliessen") : T("Verstanden, los geht's")}</button>
   `;
   overlay.appendChild(box);
   box.querySelector("#onboardOk").addEventListener("click", async ()=>{
@@ -1412,14 +1649,14 @@ function renderTheorieModal(){
   box.className = "modal-box";
   const firstTime = !theorieInfoGesehen();
   box.innerHTML = `
-    <h2 class="serif">Die Theorie</h2>
-    <p style="color:var(--muted); font-size:14px; margin-top:4px;">Kurz erklärt:</p>
+    <h2 class="serif">${T("Die Theorie")}</h2>
+    <p style="color:var(--muted); font-size:14px; margin-top:4px;">${T("Kurz erklärt:")}</p>
     <ul>
-      <li>Auch die <strong>Theorie</strong> gehört zu deiner Ausbildung und wird <strong>ebenfalls abgefragt</strong>.</li>
-      <li>Bei jedem Unterthema kannst du für dich ankreuzen, dass du es <strong>gelesen und gelernt</strong> hast. Das ist, wie bei den Antworten, nur dein persönlicher Fortschritt.</li>
-      <li>Das Info-Zeichen <strong>i</strong> oben bringt dich jederzeit wieder zu diesem Hinweis.</li>
+      <li>${T("Auch die <strong>Theorie</strong> gehört zu deiner Ausbildung und wird <strong>ebenfalls abgefragt</strong>.")}</li>
+      <li>${T("Bei jedem Unterthema kannst du für dich ankreuzen, dass du es <strong>gelesen und gelernt</strong> hast. Das ist, wie bei den Antworten, nur dein persönlicher Fortschritt.")}</li>
+      <li>${T("Das Info-Zeichen <strong>i</strong> oben bringt dich jederzeit wieder zu diesem Hinweis.")}</li>
     </ul>
-    <button class="btn" id="theorieOk">${firstTime ? "Verstanden, los geht's" : "Schliessen"}</button>
+    <button class="btn" id="theorieOk">${firstTime ? T("Verstanden, los geht's") : T("Schliessen")}</button>
   `;
   overlay.appendChild(box);
   box.querySelector("#theorieOk").addEventListener("click", async ()=>{
@@ -1468,50 +1705,50 @@ function renderHeader(){
       <div class="compact-head">
         <img class="crest" src="logo-round.png" alt="Pi-Eklom" />
         <div class="compact-text">
-          <div class="compact-title serif">Das Handbuch eines Diakons</div>
+          <div class="compact-title serif">${T("Das Handbuch eines Diakons")}</div>
           <div class="compact-line"></div>
-          <div class="church-name">Koptisch-Orthodoxe Kirche in der Deutschschweiz</div>
+          <div class="church-name">${T("Koptisch-Orthodoxe Kirche in der Deutschschweiz")}</div>
         </div>
       </div>`;
   } else {
     let innen = `
         <img class="crest" src="logo-round.png" alt="Pi-Eklom" />
-        <div class="book-title serif">Das Handbuch<br>eines Diakons</div>
+        <div class="book-title serif">${T("Das Handbuch<br>eines Diakons")}</div>
         <div class="orn-line">${CROSS_SVG}</div>
-        <div class="church-name">Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz</div>`;
+        <div class="church-name">${T("Koptisch-Orthodoxe Kirche<br>in der Deutschschweiz")}</div>`;
     if(landing){
       innen += `
         <div class="orn-line">${CROSS_SVG}</div>
         ${versHtml(VERSE.apg6_3, "on-dark klein", false)}
         <div class="welcome">
-          <h2 class="serif">Herzlich willkommen zu Pi-Eklom, ${state.profile.vorname}</h2>
-          <p>Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.</p>
+          <h2 class="serif">${T("Herzlich willkommen zu Pi-Eklom, {name}", {name: state.profile.vorname})}</h2>
+          <p>${T("Hier findest du alles, was du als Diakon lernen sollst. In der <strong>Theorie</strong> liest du, wie die Liturgie aufgebaut ist und welche Aufgaben ein Diakon hat. Im <strong>Lernprogramm</strong> übst du die Antworten und lässt sie vom Prüfer bestätigen. Beides kannst du jederzeit öffnen.")}</p>
         </div>
         <div class="tiles">
           <button class="tile" id="tileTheorie">
             <span class="tile-icon">${ICON_BOOK}</span>
             <span class="tile-text">
-              <span class="tile-title serif">Theorie</span>
-              <span class="tile-sub">Die Liturgie verstehen</span>
+              <span class="tile-title serif">${T("Theorie")}</span>
+              <span class="tile-sub">${T("Die Liturgie verstehen")}</span>
             </span>
           </button>
           <button class="tile" id="tileAntworten">
             <span class="tile-icon">${ICON_NOTE}</span>
             <span class="tile-text">
-              <span class="tile-title serif">Lernprogramm</span>
-              <span class="tile-sub">Die liturgischen Antworten eines Diakons lernen</span>
+              <span class="tile-title serif">${T("Lernprogramm")}</span>
+              <span class="tile-sub">${T("Die liturgischen Antworten eines Diakons lernen")}</span>
             </span>
           </button>
         </div>
         ${versHtml(hauptmenuVers, "on-dark")}
-        <button type="button" class="theme-toggle" id="landingTheme"></button>`;
+        <div class="landing-tools"><button type="button" class="theme-toggle" id="landingTheme"></button><span id="landingLang"></span></div>`;
     }
     kopf = `<div class="title-frame">${FRAME_CORNERS}${innen}</div>`;
   }
 
   const zeigeInfo = compact;
   h.innerHTML = `
-    ${zeigeInfo ? `<button id="infoBtn" class="info-btn info-corner" title="Wie funktioniert das?">i</button>` : ""}
+    ${zeigeInfo ? `<button id="infoBtn" class="info-btn info-corner" title="${T("Wie funktioniert das?")}">i</button>` : ""}
     <div class="top-row" style="align-items:center; text-align:center; position:relative;">
       ${kopf}
       <span id="logoutSlot"></span>
@@ -1526,7 +1763,8 @@ function renderHeader(){
   }
   const lt = h.querySelector("#landingTheme");
   if(lt){
-    const refreshLt = ()=>{ lt.textContent = isDark() ? "Heller Modus" : "Dunkler Modus"; };
+    const refreshLt = ()=>{ lt.textContent = isDark() ? T("Heller Modus") : T("Dunkler Modus"); };
+    h.querySelector("#landingLang").appendChild(langSwitch());
     refreshLt();
     lt.addEventListener("click", ()=>{ setDark(!isDark()); refreshLt(); });
   }
@@ -1539,9 +1777,22 @@ function renderHeader(){
   if(state.role==="diakon" && state.profile){
     const out = document.createElement("span");
     out.className = "logout-link";
-    out.textContent = "Abmelden (" + state.profile.name + ")";
+    out.textContent = T("Abmelden") + " (" + state.profile.name + ")";
     out.addEventListener("click", async ()=>{ await logoutAccount(); render(); });
-    logoutSlot.appendChild(out);
+    if(landing){ logoutSlot.appendChild(out); }
+    else {
+      const row = document.createElement("div");
+      row.className = "slot-row";
+      row.appendChild(langSwitch());
+      row.appendChild(out);
+      logoutSlot.appendChild(row);
+    }
+  }
+  if(state.role==="diakon" && !state.profile){
+    const row = document.createElement("div");
+    row.className = "slot-row";
+    row.appendChild(langSwitch());
+    logoutSlot.appendChild(row);
   }
   if(state.role==="pruefer" && state.prueferAuthenticated){
     const out = document.createElement("span");
@@ -1577,15 +1828,15 @@ function setDark(on){
 function readTools(){
   const d = document.createElement("div");
   d.className = "read-tools";
-  d.innerHTML = `<span class="rt-label">Lesen</span>
-    <button type="button" class="rt-small" id="rtMinus" aria-label="Schrift kleiner">−</button>
-    <button type="button" class="rt-big" id="rtPlus" aria-label="Schrift grösser">+</button>
+  d.innerHTML = `<span class="rt-label">${T("Lesen")}</span>
+    <button type="button" class="rt-small" id="rtMinus" aria-label="${T("Schrift kleiner")}">−</button>
+    <button type="button" class="rt-big" id="rtPlus" aria-label="${T("Schrift grösser")}">+</button>
     <button type="button" id="rtTheme"></button>`;
   const minus = d.querySelector("#rtMinus"), plus = d.querySelector("#rtPlus"), th = d.querySelector("#rtTheme");
   const refresh = ()=>{
     const i = getScaleIdx();
     minus.disabled = i <= 0; plus.disabled = i >= TEXT_SCALES.length-1;
-    th.textContent = isDark() ? "Heller Modus" : "Dunkler Modus";
+    th.textContent = isDark() ? T("Heller Modus") : T("Dunkler Modus");
   };
   minus.addEventListener("click", ()=>{ setScaleIdx(getScaleIdx()-1); refresh(); });
   plus.addEventListener("click", ()=>{ setScaleIdx(getScaleIdx()+1); refresh(); });
@@ -1598,10 +1849,10 @@ function renderTheorie(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "Hauptmenü";
+  crumb.textContent = T("Hauptmenü");
   crumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
   wrap.appendChild(crumb);
-  wrap.appendChild(sectionTitle("Theorie"));
+  wrap.appendChild(sectionTitle(T("Theorie")));
   THEORIE.forEach((k, i)=>{
     const done = theorieGelernt(k.id);
     const row = document.createElement("div");
@@ -1609,10 +1860,10 @@ function renderTheorie(){
     row.innerHTML = `
       <div class="station-num">${i+1}</div>
       <div class="station-body">
-        <div class="station-title">${k.title}</div>
-        <div class="station-meta">${done ? "Gelesen und gelernt" : "Noch nicht gelernt"}</div>
+        <div class="station-title">${T(k.title)}</div>
+        <div class="station-meta">${done ? T("Gelesen und gelernt") : T("Noch nicht gelernt")}</div>
       </div>
-      ${done ? `<div class="badge done">Gelernt</div>` : ""}
+      ${done ? `<div class="badge done">${T("Gelernt")}</div>` : ""}
     `;
     row.addEventListener("click", ()=>{ state.currentKapitelId = k.id; state.view="theorie-kapitel"; render(); window.scrollTo(0,0); });
     wrap.appendChild(row);
@@ -1626,7 +1877,7 @@ function renderTheorieKapitel(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "Theorie";
+  crumb.textContent = T("Theorie");
   crumb.addEventListener("click", ()=>{ state.view="theorie"; render(); });
   wrap.appendChild(crumb);
   if(!k){ state.view = "theorie"; return renderTheorie(); }
@@ -1634,7 +1885,7 @@ function renderTheorieKapitel(){
   const title = document.createElement("h2");
   title.className = "serif";
   title.style.fontSize = "24px";
-  title.innerHTML = k.title;
+  title.innerHTML = T(k.title);
   wrap.appendChild(title);
 
   wrap.appendChild(readTools());
@@ -1643,14 +1894,14 @@ function renderTheorieKapitel(){
   if(k.blocks){
     textBlock.innerHTML = k.blocks.map(b => {
       if(b.typ === "vers") return versHtml(b, "on-light");
-      if(b.typ === "schluss") return `<p class="schluss">${b.text}</p>`;
-      if(!b.text || !b.text.trim()) return `<p style="color:var(--muted); font-style:italic;">Hier folgt der Text der Geschichte.</p>`;
+      if(b.typ === "schluss") return `<p class="schluss">${T(b.text)}</p>`;
+      if(!b.text || !b.text.trim()) return `<p style="color:var(--muted); font-style:italic;">${T("Hier folgt der Text der Geschichte.")}</p>`;
       return b.text.trim().split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("");
     }).join("");
   } else if(k.text && k.text.trim()){
     textBlock.innerHTML = k.text.trim().split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("");
   } else {
-    textBlock.innerHTML = `<p style="color:var(--muted); font-style:italic;">Der Text zu diesem Thema folgt in Kürze.</p>`;
+    textBlock.innerHTML = `<p style="color:var(--muted); font-style:italic;">${T("Der Text zu diesem Thema folgt in Kürze.")}</p>`;
   }
   wrap.appendChild(textBlock);
 
@@ -1659,8 +1910,8 @@ function renderTheorieKapitel(){
   selfRow.className = "self-learn-row";
   selfRow.innerHTML = `
     <div>
-      <div style="font-weight:600; font-size:15px;">Ich habe das gelesen und gelernt</div>
-      <div style="font-size:12px; color:var(--muted); margin-top:2px;">Nur dein persönlicher Fortschritt.</div>
+      <div style="font-weight:600; font-size:15px;">${T("Ich habe das gelesen und gelernt")}</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">${T("Nur dein persönlicher Fortschritt.")}</div>
     </div>
     <div class="toggle ${gelernt?'on':''}" id="selfToggle"><div class="knob"></div></div>
   `;
@@ -1699,7 +1950,7 @@ function renderPrueferGate(){
       <h2 class="serif" style="font-size:26px;">Prüfer-Bereich</h2>
       <p>Dieser Bereich ist nur für Verantwortliche, die Antworten bestätigen dürfen. Bitte Passwort eingeben.</p>
       <div class="field">
-        <label>Passwort</label>
+        <label>${T("Passwort")}</label>
         <input type="password" id="prueferPw" placeholder="Passwort" />
       </div>
       <button class="btn" id="prueferGoBtn">Weiter</button>
@@ -1792,15 +2043,15 @@ function renderDiakonAuthGate(){
   wrap.className = "profile-gate";
 
   const header = document.createElement("div");
-  header.innerHTML = `<h2 class="serif" style="font-size:26px;">Willkommen</h2>
-    <p>Melde dich an oder registriere dich, um deinen persönlichen Lernfortschritt zu speichern.</p>`;
+  header.innerHTML = `<h2 class="serif" style="font-size:26px;">${T("Willkommen")}</h2>
+    <p>${T("Melde dich an oder registriere dich, um deinen persönlichen Lernfortschritt zu speichern.")}</p>`;
   wrap.appendChild(header);
 
   const tabs = document.createElement("div");
   tabs.className = "auth-tabs";
   tabs.innerHTML = `
-    <button class="auth-tab ${state.authTab==='login'?'active':''}" data-tab="login">Anmelden</button>
-    <button class="auth-tab ${state.authTab==='register'?'active':''}" data-tab="register">Registrieren</button>
+    <button class="auth-tab ${state.authTab==='login'?'active':''}" data-tab="login">${T("Anmelden")}</button>
+    <button class="auth-tab ${state.authTab==='register'?'active':''}" data-tab="register">${T("Registrieren")}</button>
   `;
   tabs.addEventListener("click",(e)=>{
     const b = e.target.closest("button"); if(!b) return;
@@ -1814,18 +2065,18 @@ function renderDiakonAuthGate(){
   if(state.authTab === "register"){
     form.innerHTML = `
       <div class="field-row">
-        <div class="field"><label>Vorname</label><input type="text" id="regVorname" /></div>
-        <div class="field"><label>Nachname</label><input type="text" id="regNachname" /></div>
+        <div class="field"><label>${T("Vorname")}</label><input type="text" id="regVorname" /></div>
+        <div class="field"><label>${T("Nachname")}</label><input type="text" id="regNachname" /></div>
       </div>
-      <div class="field"><label>Geburtsdatum</label><input type="date" id="regGeburtsdatum" /></div>
+      <div class="field"><label>${T("Geburtsdatum")}</label><input type="date" id="regGeburtsdatum" /></div>
       <div class="field-row">
-        <div class="field"><label>Land</label>
-          <select id="regLand"><option value="">Bitte wählen</option>${LAENDER.map(l=>`<option value="${l.name}">${l.name}</option>`).join("")}</select></div>
-        <div class="field"><label>Stadt</label>
-          <select id="regStadt" disabled><option value="">Zuerst Land wählen</option></select></div>
+        <div class="field"><label>${T("Land")}</label>
+          <select id="regLand"><option value="">${T("Bitte wählen")}</option>${LAENDER.map(l=>`<option value="${l.name}">${T(l.name)}</option>`).join("")}</select></div>
+        <div class="field"><label>${T("Stadt")}</label>
+          <select id="regStadt" disabled><option value="">${T("Zuerst Land wählen")}</option></select></div>
       </div>
-      <div class="field"><label>Passwort</label><input type="password" id="regPassword" /></div>
-      <button class="btn" id="regBtn">Registrieren</button>
+      <div class="field"><label>${T("Passwort")}</label><input type="password" id="regPassword" /></div>
+      <button class="btn" id="regBtn">${T("Registrieren")}</button>
       ${state.authError ? `<div class="error-text">${state.authError}</div>` : ""}
     `;
     wrap.appendChild(form);
@@ -1834,8 +2085,8 @@ function renderDiakonAuthGate(){
     regLand.addEventListener("change", ()=>{
       const st = staedteVon(regLand.value);
       regStadt.innerHTML = st.length
-        ? `<option value="">Bitte wählen</option>` + st.map(s=>`<option value="${s}">${s}</option>`).join("")
-        : `<option value="">Zuerst Land wählen</option>`;
+        ? `<option value="">${T("Bitte wählen")}</option>` + st.map(s=>`<option value="${s}">${T(s)}</option>`).join("")
+        : `<option value="">${T("Zuerst Land wählen")}</option>`;
       regStadt.disabled = st.length===0;
     });
     const regBtn = wrap.querySelector("#regBtn");
@@ -1847,12 +2098,12 @@ function renderDiakonAuthGate(){
       const land = regLand.value;
       const stadt = regStadt.value;
       if(!vorname || !nachname || !geburtsdatum || !password || !land || !stadt){
-        state.authError = "Bitte alle Felder ausfüllen."; render(); return;
+        state.authError = T("Bitte alle Felder ausfüllen."); render(); return;
       }
       if(password.length < 6){
-        state.authError = "Das Passwort muss mindestens 6 Zeichen haben."; render(); return;
+        state.authError = T("Das Passwort muss mindestens 6 Zeichen haben."); render(); return;
       }
-      regBtn.disabled = true; regBtn.textContent = "Registriere …";
+      regBtn.disabled = true; regBtn.textContent = T("Registriere …");
       const result = await registerAccount(vorname, nachname, password, geburtsdatum, land, stadt);
       if(result.error){
         state.authError = result.error; render(); return;
@@ -1868,11 +2119,11 @@ function renderDiakonAuthGate(){
   } else {
     form.innerHTML = `
       <div class="field-row">
-        <div class="field"><label>Vorname</label><input type="text" id="loginVorname" /></div>
-        <div class="field"><label>Nachname</label><input type="text" id="loginNachname" /></div>
+        <div class="field"><label>${T("Vorname")}</label><input type="text" id="loginVorname" /></div>
+        <div class="field"><label>${T("Nachname")}</label><input type="text" id="loginNachname" /></div>
       </div>
-      <div class="field"><label>Passwort</label><input type="password" id="loginPassword" /></div>
-      <button class="btn" id="loginBtn">Anmelden</button>
+      <div class="field"><label>${T("Passwort")}</label><input type="password" id="loginPassword" /></div>
+      <button class="btn" id="loginBtn">${T("Anmelden")}</button>
       ${state.authError ? `<div class="error-text">${state.authError}</div>` : ""}
     `;
     wrap.appendChild(form);
@@ -1882,12 +2133,12 @@ function renderDiakonAuthGate(){
       const nachname = wrap.querySelector("#loginNachname").value.trim();
       const password = wrap.querySelector("#loginPassword").value;
       if(!vorname || !nachname || !password){
-        state.authError = "Bitte Vorname, Nachname und Passwort eingeben."; render(); return;
+        state.authError = T("Bitte Vorname, Nachname und Passwort eingeben."); render(); return;
       }
-      loginBtn.disabled = true; loginBtn.textContent = "Melde an …";
+      loginBtn.disabled = true; loginBtn.textContent = T("Melde an …");
       const result = await loginAccount(vorname, nachname, password);
       if(result.error){
-        state.authError = "Name oder Passwort ist falsch."; render(); return;
+        state.authError = T("Name oder Passwort ist falsch."); render(); return;
       }
       await loadProfile();
       await loadProgress();
@@ -1901,7 +2152,7 @@ function renderDiakonAuthGate(){
 
   const note = document.createElement("div");
   note.className = "footnote";
-  note.textContent = "Deine Anmeldedaten werden sicher über Supabase verwaltet.";
+  note.textContent = T("Deine Anmeldedaten werden sicher über Supabase verwaltet.");
   wrap.appendChild(note);
 
   return wrap;
@@ -1913,19 +2164,19 @@ function renderHome(){
   const rewardDone = allHymnsCertified(stufe);
   const hauptCrumb = document.createElement("div");
   hauptCrumb.className = "crumb";
-  hauptCrumb.textContent = "Hauptmenü";
+  hauptCrumb.textContent = T("Hauptmenü");
   hauptCrumb.addEventListener("click", ()=>{ state.view="menu"; render(); });
   wrap.appendChild(hauptCrumb);
-  wrap.appendChild(sectionTitle("Lernprogramm"));
+  wrap.appendChild(sectionTitle(T("Lernprogramm")));
   const intro = document.createElement("div");
-  intro.innerHTML = `<h2 class="serif" style="font-size:24px;">Hallo ${state.profile.name}</h2>
-    <p style="color:var(--muted); margin-top:6px; font-size:14px;">Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.</p>`;
+  intro.innerHTML = `<h2 class="serif" style="font-size:24px;">${T("Hallo {name}", {name: state.profile.name})}</h2>
+    <p style="color:var(--muted); margin-top:6px; font-size:14px;">${T("Übe die Antworten in deinem eigenen Tempo. Wenn du bereit bist, geh zum Prüfer in der Kirche und sing sie vor — er bestätigt sie dann direkt hier in der App.")}</p>`;
   wrap.appendChild(intro);
 
   if(rewardDone){
     const banner = document.createElement("div");
     banner.style.cssText = "margin-top:18px; padding:14px 16px; background:var(--tint-gold); border:1px solid var(--gold); border-radius:6px;";
-    banner.innerHTML = `<span style="font-size:14px;">🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!</span>`;
+    banner.innerHTML = `<span style="font-size:14px;">${T("🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!")}</span>`;
     wrap.appendChild(banner);
   }
   // Zertifikat: nur die jeweils höchste abgeschlossene Stufe wird gezeigt —
@@ -1934,9 +2185,9 @@ function renderHome(){
   if(hoechsteAbgeschlosseneStufe){
     const banner = document.createElement("div");
     banner.style.cssText = "margin-top:18px; padding:14px 16px; background:var(--tint-burg); border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;";
-    banner.innerHTML = `<span style="font-size:14px;">Alle Pflicht-Antworten der Stufe ${hoechsteAbgeschlosseneStufe} bestätigt — dein Zertifikat ist bereit.</span>`;
+    banner.innerHTML = `<span style="font-size:14px;">${T("Alle Pflicht-Antworten der Stufe {n} bestätigt — dein Zertifikat ist bereit.", {n: hoechsteAbgeschlosseneStufe})}</span>`;
     const btn = document.createElement("button");
-    btn.className = "btn"; btn.style.margin="0"; btn.textContent = `Stufe ${hoechsteAbgeschlosseneStufe}-Zertifikat ansehen`;
+    btn.className = "btn"; btn.style.margin="0"; btn.textContent = T("Stufe {n}-Zertifikat ansehen", {n: hoechsteAbgeschlosseneStufe});
     btn.addEventListener("click", ()=>{ state.stufenZertifikatStufe = hoechsteAbgeschlosseneStufe; state.view = "stufenzertifikat"; render(); });
     banner.appendChild(btn);
     wrap.appendChild(banner);
@@ -1959,18 +2210,18 @@ function renderHome(){
       const totalCert = certCount + voluntCertCount;
       const totalDone = done + voluntDone;
       if(totalCount>0){
-        metaText = `${totalCert}/${totalCount} Antworten bestätigt (${totalDone} selbst geübt)`;
+        metaText = T("{c}/{t} Antworten bestätigt ({d} selbst geübt)", {c:totalCert, t:totalCount, d:totalDone});
       } else if(s.hymns.length>0){
         const minTier = Math.min(...s.hymns.map(h=>h.tier));
-        metaText = `Diese Antworten werden erst ab Stufe ${minTier} freigeschaltet.`;
+        metaText = T("Diese Antworten werden erst ab Stufe {n} freigeschaltet.", {n:minTier});
       } else {
         metaText = "";
       }
       stationDone = totalCount>0 && totalCert===totalCount;
     } else {
       metaText = mandCount>0
-        ? `${certCount}/${mandCount} Pflicht-Antworten bestätigt (${done} selbst geübt)` + (voluntCount>0 ? ` · ${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "")
-        : (voluntCount>0 ? `${voluntCertCount}/${voluntCount} freiwillige Antworten bestätigt (${voluntDone} selbst geübt)` : "");
+        ? T("{c}/{t} Pflicht-Antworten bestätigt ({d} selbst geübt)", {c:certCount, t:mandCount, d:done}) + (voluntCount>0 ? T(" · {c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)", {c:voluntCertCount, t:voluntCount, d:voluntDone}) : "")
+        : (voluntCount>0 ? T("{c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)", {c:voluntCertCount, t:voluntCount, d:voluntDone}) : "");
       stationDone = mandCount>0 ? certCount===mandCount : (voluntCount>0 && voluntCertCount===voluntCount);
     }
     const row = document.createElement("div");
@@ -1978,10 +2229,10 @@ function renderHome(){
     row.innerHTML = `
       <div class="station-num">${i+1}</div>
       <div class="station-body">
-        <div class="station-title">${s.title}</div>
+        <div class="station-title">${T(s.title)}</div>
         <div class="station-meta">${metaText}</div>
       </div>
-      ${stationDone ? `<div class="badge done">Fertig</div>` : ""}
+      ${stationDone ? `<div class="badge done">${T("Fertig")}</div>` : ""}
     `;
     row.addEventListener("click", ()=>{ state.currentStationId = s.id; state.view="station"; render(); });
     list.appendChild(row);
@@ -1991,7 +2242,7 @@ function renderHome(){
 
   const note = document.createElement("div");
   note.className = "footnote";
-  note.textContent = "Alle Antworten sind jederzeit zugänglich. Es reicht, jede Pflicht-Antwort in einer Sprache zu lernen und dem Prüfer vorzusingen — dann erhältst du dein Zertifikat. Für die besondere Belohnung müsst ihr alle Antworten (Pflicht + freiwillig) in allen verfügbaren Sprachen bestätigt bekommen.";
+  note.textContent = T("Alle Antworten sind jederzeit zugänglich. Es reicht, jede Pflicht-Antwort in einer Sprache zu lernen und dem Prüfer vorzusingen — dann erhältst du dein Zertifikat. Für die besondere Belohnung müsst ihr alle Antworten (Pflicht + freiwillig) in allen verfügbaren Sprachen bestätigt bekommen.");
   wrap.appendChild(note);
 
   return wrap;
@@ -2002,32 +2253,32 @@ function renderStation(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "Alle Stationen";
+  crumb.textContent = T("Alle Stationen");
   crumb.addEventListener("click", ()=>{ state.view="home"; render(); });
   wrap.appendChild(crumb);
 
   const title = document.createElement("h2");
   title.className = "serif";
   title.style.fontSize = "24px";
-  title.textContent = s.title;
+  title.textContent = T(s.title);
   wrap.appendChild(title);
 
   const hint = document.createElement("p");
   hint.style.cssText = "color:var(--muted); font-size:13px; margin-top:4px;";
-  hint.textContent = "Die Kürzel zeigen, in welcher Sprache du eine Antwort schon geübt hast.";
+  hint.textContent = T("Die Kürzel zeigen, in welcher Sprache du eine Antwort schon geübt hast.");
   wrap.appendChild(hint);
 
   if(s.id === "s1"){
     const erkl = document.createElement("div");
     erkl.className = "info-box";
-    erkl.innerHTML = `<span class="ib-title">Was ist das hier?</span>Diese Antworten zählen zu den grundlegendsten Antworten eines Diakons und kommen in der koptischen Liturgie an mehreren Stellen vor. Übe sie gut, denn du wirst sie oft brauchen.`;
+    erkl.innerHTML = `<span class="ib-title">${T("Was ist das hier?")}</span>${T("Diese Antworten zählen zu den grundlegendsten Antworten eines Diakons und kommen in der koptischen Liturgie an mehreren Stellen vor. Übe sie gut, denn du wirst sie oft brauchen.")}`;
     wrap.appendChild(erkl);
   }
 
   if(s.hymns.length===0){
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.innerHTML = `<h3>Inhalte folgen bald</h3><p>Die Antworten für diese Station werden noch ergänzt.</p>`;
+    empty.innerHTML = `<h3>${T("Inhalte folgen bald")}</h3><p>${T("Die Antworten für diese Station werden noch ergänzt.")}</p>`;
     wrap.appendChild(empty);
     return wrap;
   }
@@ -2044,8 +2295,8 @@ function renderStation(){
       row.className = "hymn-row locked";
       row.innerHTML = `
         <div class="hymn-title-group">
-          <span class="hymn-title">${h.title}</span>
-          <div class="lock-badge">🔒 ab Stufe ${h.tier}</div>
+          <span class="hymn-title">${T(h.title)}</span>
+          <div class="lock-badge">${T("🔒 ab Stufe {n}", {n:h.tier})}</div>
         </div>
       `;
       list.appendChild(row);
@@ -2057,16 +2308,16 @@ function renderStation(){
     const chips = hymnLangs.map(l=>{
       const done = learnedLangs.includes(l.code);
       const cert = isHymnLangCertified(h.id, l.code);
-      const abbr = l.code==="de"?"DE":(l.code==="cop"?"KO":"AR");
+      const abbr = l.code==="de"?"DE":(l.code==="cop"?(isEn()?"CO":"KO"):"AR");
       const cls = [done?'done':'', cert?'certified':''].filter(Boolean).join(' ');
-      const titleTxt = l.label + (cert ? " — vom Prüfer bestätigt" : (done ? " — selbst geübt" : ""));
+      const titleTxt = cert ? T("{lang} — vom Prüfer bestätigt", {lang:T(l.label)}) : (done ? T("{lang} — selbst geübt", {lang:T(l.label)}) : T(l.label));
       return `<div class="lang-chip ${cls}" title="${titleTxt}">${abbr}</div>`;
     }).join("");
-    const diffBadge = h.difficulty ? `<div class="diff-badge ${h.difficulty}">${h.difficulty}</div>` : "";
-    const voluntBadge = h.mandatory===false ? `<div class="volunt-badge">freiwillig</div>` : "";
+    const diffBadge = h.difficulty ? `<div class="diff-badge ${h.difficulty}">${T(h.difficulty)}</div>` : "";
+    const voluntBadge = h.mandatory===false ? `<div class="volunt-badge">${T("freiwillig")}</div>` : "";
     row.innerHTML = `
       <div class="hymn-title-group">
-        <span class="hymn-title">${h.title}</span>
+        <span class="hymn-title">${T(h.title)}</span>
         ${diffBadge}
         ${voluntBadge}
       </div>
@@ -2089,14 +2340,14 @@ function renderHymn(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "" + station.title;
+  crumb.textContent = "" + T(station.title);
   crumb.addEventListener("click", ()=>{ state.view="station"; render(); });
   wrap.appendChild(crumb);
 
   if(!hymnUnlocked(hymn, state.profile.stufe)){
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.innerHTML = `<h3>Noch gesperrt</h3><p>Diese Antwort gehört zu Stufe ${hymn.tier} — sie wird freigeschaltet, sobald du diese Stufe erreichst.</p>`;
+    empty.innerHTML = `<h3>${T("Noch gesperrt")}</h3><p>${T("Diese Antwort gehört zu Stufe {n} — sie wird freigeschaltet, sobald du diese Stufe erreichst.", {n:hymn.tier})}</p>`;
     wrap.appendChild(empty);
     return wrap;
   }
@@ -2106,18 +2357,18 @@ function renderHymn(){
   const title = document.createElement("h2");
   title.className = "serif";
   title.style.fontSize = "24px";
-  title.textContent = hymn.title;
+  title.textContent = T(hymn.title);
   titleRow.appendChild(title);
   if(hymn.difficulty){
     const diffSpan = document.createElement("span");
     diffSpan.className = "diff-badge " + hymn.difficulty;
-    diffSpan.textContent = hymn.difficulty;
+    diffSpan.textContent = T(hymn.difficulty);
     titleRow.appendChild(diffSpan);
   }
   if(hymn.mandatory===false){
     const voluntSpan = document.createElement("span");
     voluntSpan.className = "volunt-badge";
-    voluntSpan.textContent = "freiwillig";
+    voluntSpan.textContent = T("freiwillig");
     titleRow.appendChild(voluntSpan);
   }
   wrap.appendChild(titleRow);
@@ -2125,7 +2376,7 @@ function renderHymn(){
   const woText = hymnWo(hymn, station);
   const woBox = document.createElement("div");
   woBox.className = "info-box" + (woText ? "" : " leer");
-  woBox.innerHTML = `<span class="ib-title">Wo in der Liturgie?</span><span class="ib-body">${woText || "Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird."}</span>`;
+  woBox.innerHTML = `<span class="ib-title">${T("Wo in der Liturgie?")}</span><span class="ib-body">${woText ? T(woText) : T("Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird.")}</span>`;
   wrap.appendChild(woBox);
 
   const hymnLangs = LANGS.filter(l => hymn.content[l.code]);
@@ -2136,7 +2387,7 @@ function renderHymn(){
   hymnLangs.forEach(l=>{
     const b = document.createElement("button");
     b.className = "lang-tab" + (state.currentLang===l.code? " active":"");
-    b.textContent = l.label;
+    b.textContent = T(l.label);
     b.addEventListener("click", ()=>{ state.currentLang=l.code; render(); });
     tabs.appendChild(b);
   });
@@ -2144,7 +2395,7 @@ function renderHymn(){
   if(hymnLangs.length < LANGS.length){
     const note = document.createElement("p");
     note.style.cssText = "color:var(--muted); font-size:12px; margin-top:-14px; margin-bottom:18px;";
-    note.textContent = "Diese Antwort wird bei uns nur in " + hymnLangs.map(l=>l.label).join(" und ") + " gesungen.";
+    note.textContent = T("Diese Antwort wird bei uns nur in {langs} gesungen.", {langs: hymnLangs.map(l=>T(l.label)).join(T(" und "))});
     wrap.appendChild(note);
   }
 
@@ -2155,10 +2406,10 @@ function renderHymn(){
   player.innerHTML = `
     <div class="player-row">
       <button class="play-btn" id="playBtn"><span class="icon-play">▶</span><span class="icon-pause"><span></span><span></span></span></button>
-      <button class="stop-btn" id="stopBtn" title="Stopp">■</button>
+      <button class="stop-btn" id="stopBtn" title="${T("Stopp")}">■</button>
       <div>
-        <div style="font-weight:600;">Aufnahme anhören</div>
-        <div class="audio-note" id="audioStatus">Bereit</div>
+        <div style="font-weight:600;">${T("Aufnahme anhören")}</div>
+        <div class="audio-note" id="audioStatus">${T("Bereit")}</div>
       </div>
     </div>
     <div class="seek-row">
@@ -2181,11 +2432,11 @@ function renderHymn(){
   let userIsSeeking = false;
   const thisKey = hymn.id + "_" + state.currentLang;
   const setStatus = (s)=>{
-    if(s==="loading"){ statusEl.textContent = "Lädt …"; playBtn.classList.remove("show-pause"); }
-    else if(s==="playing"){ statusEl.textContent = "Spielt ab …"; playBtn.classList.add("show-pause"); }
-    else if(s==="paused"){ statusEl.textContent = "Pausiert"; playBtn.classList.remove("show-pause"); }
-    else if(s==="missing"){ statusEl.textContent = "Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)"; playBtn.classList.remove("show-pause"); }
-    else { statusEl.textContent = "Bereit"; playBtn.classList.remove("show-pause"); }
+    if(s==="loading"){ statusEl.textContent = T("Lädt …"); playBtn.classList.remove("show-pause"); }
+    else if(s==="playing"){ statusEl.textContent = T("Spielt ab …"); playBtn.classList.add("show-pause"); }
+    else if(s==="paused"){ statusEl.textContent = T("Pausiert"); playBtn.classList.remove("show-pause"); }
+    else if(s==="missing"){ statusEl.textContent = T("Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)"); playBtn.classList.remove("show-pause"); }
+    else { statusEl.textContent = T("Bereit"); playBtn.classList.remove("show-pause"); }
   };
   const setTime = (cur, dur)=>{
     if(userIsSeeking) return;
@@ -2231,12 +2482,12 @@ function renderHymn(){
 
   const selfRow = document.createElement("div");
   selfRow.className = "self-learn-row";
-  const currentLangLabel = LANGS.find(l=>l.code===state.currentLang).label;
+  const currentLangLabel = T(LANGS.find(l=>l.code===state.currentLang).label);
   const learned = !!(state.progress[hymn.id] && state.progress[hymn.id][state.currentLang]);
   selfRow.innerHTML = `
     <div>
-      <div style="font-weight:600; font-size:15px;">Ich habe das auf ${currentLangLabel} geübt</div>
-      <div style="font-size:12px; color:var(--muted); margin-top:2px;">Nur dein persönlicher Fortschritt für diese Sprache — die offizielle Bestätigung gibt der Prüfer.</div>
+      <div style="font-weight:600; font-size:15px;">${T("Ich habe das auf {lang} geübt", {lang: currentLangLabel})}</div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">${T("Nur dein persönlicher Fortschritt für diese Sprache — die offizielle Bestätigung gibt der Prüfer.")}</div>
     </div>
     <div class="toggle ${learned?'on':''}" id="selfToggle"><div class="knob"></div></div>
   `;
@@ -2251,10 +2502,10 @@ function renderHymn(){
   if(certForLang){
     const rec = state.certified[hymn.id][state.currentLang];
     certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:var(--tint-burg); border:1px solid var(--burgundy); border-radius:6px; font-size:13px; color:var(--burg-t); font-weight:600;";
-    certInfo.textContent = `✓ Auf ${currentLangLabel} vom Prüfer bestätigt (${rec.by}, ${rec.date}) — du kannst trotzdem jederzeit weiter üben.`;
+    certInfo.textContent = T("✓ Auf {lang} vom Prüfer bestätigt ({by}, {date}) — du kannst trotzdem jederzeit weiter üben.", {lang: currentLangLabel, by: rec.by, date: rec.date});
   } else {
     certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:var(--parchment-2); border:1px solid var(--line); border-radius:6px; font-size:13px; color:var(--muted);";
-    certInfo.textContent = `Auf ${currentLangLabel} noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort in dieser Sprache vorzusingen.`;
+    certInfo.textContent = T("Auf {lang} noch nicht vom Prüfer bestätigt. Geh zu einem Prüfer in der Kirche, um diese Antwort in dieser Sprache vorzusingen.", {lang: currentLangLabel});
   }
   wrap.appendChild(certInfo);
 
@@ -2266,7 +2517,7 @@ function renderStufenZertifikat(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "Zurück";
+  crumb.textContent = T("Zurück");
   crumb.addEventListener("click", ()=>{ state.view="home"; state.stufenZertifikatStufe=null; render(); });
   wrap.appendChild(crumb);
 
@@ -2287,25 +2538,25 @@ function renderStufenZertifikat(){
     .sort();
   const lastDate = dates.length? dates[dates.length-1] : new Date().toLocaleDateString("de-CH");
 
-  const stufeNamen = { 1: "Stufe 1", 2: "Stufe 2", 3: "Stufe 3" };
-  const stufeAlter = { 1: "unter 12 Jahren", 2: "zwischen 12 und 20 Jahren", 3: "ab 20 Jahren" };
+  const stufeNamen = { 1: T("Stufe 1"), 2: T("Stufe 2"), 3: T("Stufe 3") };
+  const stufeAlter = { 1: T("unter 12 Jahren"), 2: T("zwischen 12 und 20 Jahren"), 3: T("ab 20 Jahren") };
 
   const cert = document.createElement("div");
   cert.className = "certificate";
   cert.innerHTML = `
-    <div class="kicker">KOPTISCH-ORTHODOXE KIRCHE ZÜRICH</div>
-    <h2 class="serif">Diakonenzertifikat der Stufe ${stufe}</h2>
-    <div style="font-size:14px; color:var(--muted); margin-top:10px;">verliehen an</div>
+    <div class="kicker">${T("KOPTISCH-ORTHODOXE KIRCHE ZÜRICH")}</div>
+    <h2 class="serif">${T("Diakonenzertifikat der Stufe {n}", {n:stufe})}</h2>
+    <div style="font-size:14px; color:var(--muted); margin-top:10px;">${T("verliehen an")}</div>
     <div class="name">${state.profile.name}</div>
-    <div class="desc">hat alle Pflicht-Antworten der <strong>${stufeNamen[stufe] || ("Stufe " + stufe)}</strong> (Altersgruppe ${stufeAlter[stufe] || ""}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.</div>
-    <div class="date">Abgeschlossen am ${lastDate}</div>
+    <div class="desc">${T("hat alle Pflicht-Antworten der <strong>{stufe}</strong> (Altersgruppe {alter}) erfolgreich vor einem Verantwortlichen der Gemeinde vorgetragen und ist damit berechtigt, diese Antworten ab sofort in der Liturgie vorzutragen.", {stufe: (stufeNamen[stufe] || ("Stufe " + stufe)), alter: (stufeAlter[stufe] || "")})}</div>
+    <div class="date">${T("Abgeschlossen am {date}", {date:lastDate})}</div>
   `;
   wrap.appendChild(cert);
 
   const printBtn = document.createElement("button");
   printBtn.className = "btn secondary";
   printBtn.style.marginTop = "18px";
-  printBtn.textContent = "Drucken / als PDF speichern";
+  printBtn.textContent = T("Drucken / als PDF speichern");
   printBtn.addEventListener("click", ()=> window.print());
   wrap.appendChild(printBtn);
 
@@ -2520,11 +2771,11 @@ function maybeShowInstallBanner(){
   const btn = document.getElementById("installBannerBtn");
   if(!banner) return;
   if(deferredInstallPrompt){
-    text.textContent = "Diese App auf deinem Handy installieren, für schnelleren Zugriff?";
+    text.textContent = T("Diese App auf deinem Handy installieren, für schnelleren Zugriff?");
     btn.style.display = "";
-    btn.textContent = "Installieren";
+    btn.textContent = T("Installieren");
   } else if(isIosDevice()){
-    text.textContent = "App installieren: Tippe unten auf \"Teilen\" und dann auf \"Zum Home-Bildschirm\".";
+    text.textContent = T("App installieren: Tippe unten auf \"Teilen\" und dann auf \"Zum Home-Bildschirm\".");
     btn.style.display = "none";
   } else {
     return; // kein Installations-Weg verfügbar (z. B. Browser unterstützt es nicht)
@@ -2557,6 +2808,7 @@ document.addEventListener("touchstart", function(){}, {passive:true});
 
 /* ---------------- Start ---------------- */
 async function init(){
+  document.documentElement.lang = UI_LANG;
   root.innerHTML = "";
   const splashWeg = ()=>{
     const sp = document.getElementById("splash");
