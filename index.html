@@ -4,8 +4,32 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Pi-Eklom</title>
+<script>
+/* Gespeicherte Darstellung sofort anwenden (verhindert Aufblitzen): Dunkelmodus + Schriftgrösse */
+(function(){
+  var th = null, sc = null;
+  try{ th = localStorage.getItem("pe_theme"); sc = localStorage.getItem("pe_textscale"); }catch(e){}
+  if(!th && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) th = "dark";
+  if(th === "dark") document.documentElement.setAttribute("data-theme","dark");
+  var scales = [0.85,1,1.2,1.4,1.65];
+  var i = sc !== null && scales[+sc] ? +sc : 1;
+  document.documentElement.style.setProperty("--text-scale", scales[i]);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Eigene Startbilder für die installierte App auf dem iPhone (kein weisses Aufblitzen) -->
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1320x2868.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1206x2622.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1290x2796.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1179x2556.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1284x2778.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1170x2532.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1125x2436.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1242x2688.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="startup-828x1792.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="startup-1242x2208.png" />
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="startup-750x1334.png" />
 <!-- PWA: macht die Seite auf dem Handy als "App" installierbar -->
 <script>
 /* Der Prüfer-Zugang (…/#pruefer) bekommt eine eigene App-Identität: eigenes Icon, eigener Name, eigener Startlink. */
@@ -38,11 +62,31 @@
     --sage:#5E6E52;
     --line:#C9BC98;
     --muted:#6B6153;
+    --on-dark:#F3ECDA;     /* Schrift auf dunklen Flächen */
+    --burg-t:#7A2333;      /* Weinrot für Text */
+    --paper:#FFFFFF;
+    --tint-burg:#F3E4E4;
+    --tint-gold:#FBEBD9;
+    --tint-neutral:#EEE8DA;
+    --schluss:#8A6221;
+    --field:#E4D8B8;       /* Fläche neben der App auf grossen Bildschirmen */
+    --text-scale:1;
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .30 0 0 0 0 .13 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .40 0 0 0 0 .16 0 0 0 .17 -.04'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+  }
+  /* Dunkler Lesemodus */
+  html[data-theme="dark"]{
+    color-scheme:dark;
+    --ink:#EDE4D0; --parchment:#161B25; --parchment-2:#1F2634; --line:#394152; --muted:#A9A190;
+    --sage:#9DB48F; --gold:#C29445; --midnight:#2A3B5C; --midnight-2:#34486E;
+    --burgundy:#65202D; --burg-t:#E8939F; --paper:#222A39;
+    --tint-burg:#3A2229; --tint-gold:#393020; --tint-neutral:#262D3B; --schluss:#D9BD84;
+    --field:#0C1016;
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .95 0 0 0 0 .88 0 0 0 0 .70 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .70 0 0 0 0 .62 0 0 0 0 .45 0 0 0 .06 -.02'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:var(--parchment);
+    background:var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23AD7F35' stroke-opacity='.15' stroke-width='1.2'%3E%3Cpath d='M36 24v24M24 36h24'/%3E%3Ccircle cx='36' cy='36' r='11'/%3E%3C/g%3E%3C/svg%3E");
     color:var(--ink);
     font-family:"Source Sans 3", sans-serif;
     -webkit-font-smoothing:antialiased;
@@ -52,12 +96,32 @@
     font-weight:600;
     margin:0;
   }
-  .app{max-width:720px;margin:0 auto;min-height:100vh;background:var(--parchment);border-left:1px solid var(--line);border-right:1px solid var(--line);}
+  .app{max-width:720px;margin:0 auto;min-height:100vh;background-color:var(--parchment);background-image:var(--grain);background-size:260px 260px, 600px 600px;border-left:1px solid var(--line);border-right:1px solid var(--line);}
+  @media (min-width:760px){ .app{box-shadow:0 0 60px rgba(0,0,0,.22);} }
+  html[data-theme="dark"] input, html[data-theme="dark"] select{color:var(--ink);}
+  /* Ladebildschirm */
+  #splash{position:fixed; inset:0; z-index:5000; background:#7A2333; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:opacity .45s ease;}
+  #splash.hide{opacity:0; pointer-events:none;}
+  #splash img{width:min(170px, 46vw); height:min(170px, 46vw); border-radius:50%; border:2px solid #D9BD84; animation:splashPulse 1.8s ease-in-out infinite;}
+  #splash .splash-name{font-family:"Cormorant Garamond", Georgia, serif; font-size:30px; letter-spacing:.06em; color:#D9BD84; font-weight:600;}
+  @keyframes splashPulse{0%,100%{transform:scale(1); opacity:.92;} 50%{transform:scale(1.045); opacity:1;}}
+  @media (prefers-reduced-motion: reduce){ #splash img{animation:none;} }
+  /* Lese-Werkzeuge: Schriftgrösse und Hell/Dunkel */
+  .read-tools{display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:22px; margin-bottom:-10px; flex-wrap:wrap;}
+  .read-tools .rt-label{font-size:12px; color:var(--muted); margin-right:auto;}
+  .read-tools button{font-family:"Source Sans 3",sans-serif; border:1px solid var(--line); background:var(--paper); color:var(--ink); border-radius:999px; min-width:44px; height:34px; padding:0 12px; font-size:15px; cursor:pointer;}
+  .read-tools button:active{transform:scale(.95);}
+  .read-tools button[disabled]{opacity:.35; cursor:default;}
+  .read-tools .rt-small{font-size:13px;} .read-tools .rt-big{font-size:19px;}
+  /* Hinweiskästchen */
+  .info-box{margin-top:14px; padding:12px 14px; border-left:3px solid var(--gold); background:var(--tint-gold); border-radius:4px; font-size:14px; line-height:1.55;}
+  .info-box .ib-title{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; font-weight:600;}
+  .info-box.leer .ib-body{color:var(--muted); font-style:italic;}
 
   /* Header */
   header.top{
     background:var(--burgundy);
-    color:var(--parchment);
+    color:var(--on-dark);
     padding:22px 20px 18px;
     position:relative;
     border-bottom:3px solid var(--gold);
@@ -88,20 +152,20 @@
     font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-light); line-height:1.6;
   }
   header.top .titles{display:flex;align-items:flex-start;gap:14px;}
-  header.top h1{font-size:23px;letter-spacing:.2px;color:var(--parchment); line-height:1.15;}
+  header.top h1{font-size:23px;letter-spacing:.2px;color:var(--on-dark); line-height:1.15;}
   header.top h1.app-title{font-size:34px; letter-spacing:.3px; color:var(--gold-light); font-weight:700;}
   header.top .sub{font-size:12.5px;color:var(--gold-light);margin-top:5px; line-height:1.4;}
   .role-switch{
     display:flex; border:1px solid var(--gold); border-radius:999px; overflow:hidden; flex:none;
   }
   .role-switch button{
-    background:transparent;border:none;color:var(--parchment);
+    background:transparent;border:none;color:var(--on-dark);
     font-family:"Source Sans 3",sans-serif; font-size:13px; padding:6px 14px; cursor:pointer;
   }
   .role-switch button.active{background:var(--gold); color:var(--midnight); font-weight:600;}
   .info-btn{
     width:26px; height:26px; border-radius:50%; border:1px solid var(--gold);
-    background:transparent; color:var(--parchment); font-family:"Cormorant Garamond",serif;
+    background:transparent; color:var(--on-dark); font-family:"Cormorant Garamond",serif;
     font-style:italic; font-weight:700; font-size:15px; cursor:pointer;
     align-items:center; justify-content:center;
   }
@@ -121,11 +185,11 @@
   header.top.landing .book-title{font-size:30px; margin-top:12px;}
   header.top .welcome{margin-top:20px;}
   header.top .welcome h2{font-size:25px; line-height:1.15; color:var(--gold-light); text-wrap:balance;}
-  header.top .welcome p{font-size:17px; line-height:1.6; color:var(--parchment); margin:12px auto 0; max-width:42ch; opacity:.95;}
+  header.top .welcome p{font-size:17px; line-height:1.6; color:var(--on-dark); margin:12px auto 0; max-width:42ch; opacity:.95;}
   header.top .tiles{display:flex; flex-direction:column; gap:12px; margin-top:22px;}
   header.top .tile{
     display:flex; align-items:center; gap:16px; text-align:left; width:100%;
-    background:rgba(255,255,255,.06); border:1px solid var(--gold); color:var(--parchment);
+    background:rgba(255,255,255,.06); border:1px solid var(--gold); color:var(--on-dark);
     padding:16px 16px; cursor:pointer; font-family:"Source Sans 3",sans-serif;
     transition:background .12s ease, transform .12s ease, box-shadow .12s ease;
   }
@@ -138,7 +202,7 @@
   header.top .tile-icon svg{width:100%; height:100%;}
   header.top .tile-text{display:flex; flex-direction:column; gap:4px; min-width:0;}
   header.top .tile-title{font-size:23px; line-height:1.1; color:var(--gold-light); font-weight:600;}
-  header.top .tile-sub{font-size:13px; color:var(--parchment); opacity:.85; line-height:1.4;}
+  header.top .tile-sub{font-size:13px; color:var(--on-dark); opacity:.85; line-height:1.4;}
   header.top .ctrl-row{display:flex; align-items:center; gap:12px; justify-content:center;}
 
   /* Kopf innerhalb der Bereiche: Logo links, Text rechts, goldene Linie */
@@ -154,7 +218,7 @@
 
   /* Titel des Bereichs unter dem Kopf */
   .section-title{text-align:center; margin:2px 0 18px;}
-  .section-title h2{font-size:27px; line-height:1.15; color:var(--burgundy); text-wrap:balance; margin:2px 0;}
+  .section-title h2{font-size:27px; line-height:1.15; color:var(--burg-t); text-wrap:balance; margin:2px 0;}
   .orn-line.dark{display:flex; align-items:center; gap:10px; max-width:220px; margin:6px auto; color:var(--gold);}
   .orn-line.dark:before,.orn-line.dark:after{content:""; flex:1; height:1px; background:var(--gold);}
   .orn-line.dark svg{width:10px; height:10px;}
@@ -165,7 +229,7 @@
     display:inline-flex; align-items:center; gap:9px; max-width:100%;
     margin:3px 3px 20px; padding:7px 15px 7px 11px; cursor:pointer;
     border:1px solid var(--gold); outline:1px solid var(--gold); outline-offset:2px;
-    background:rgba(173,127,53,.07); color:var(--burgundy);
+    background:rgba(173,127,53,.07); color:var(--burg-t);
     font-family:"Cormorant Garamond",serif; font-weight:600; font-size:17px; line-height:1.2;
     transition:background .15s ease, color .15s ease;
   }
@@ -188,11 +252,11 @@
   .auth-tab.active{color:var(--ink); border-bottom-color:var(--burgundy); font-weight:600;}
   .field-row{display:flex; gap:12px;}
   .field-row .field{flex:1;}
-  .error-text{color:var(--burgundy); font-size:13px; margin-top:10px;}
+  .error-text{color:var(--burg-t); font-size:13px; margin-top:10px;}
   .field{margin-top:22px;}
   .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
   .field input, .field select{
-    width:100%; padding:11px 12px; border:1px solid var(--line); background:#fff;
+    width:100%; padding:11px 12px; border:1px solid var(--line); background:var(--paper);
     font-family:"Source Sans 3",sans-serif; font-size:15px; border-radius:4px; color:var(--ink);
   }
   .btn{
@@ -210,7 +274,7 @@
     display:flex; align-items:center; gap:16px;
     padding:18px 4px; border-bottom:1px solid var(--line); cursor:pointer;
   }
-  .station-row:hover .station-title{color:var(--burgundy);}
+  .station-row:hover .station-title{color:var(--burg-t);}
   .station-row.locked{cursor:default; opacity:.55;}
   .station-num{
     font-family:"Cormorant Garamond",serif; font-size:28px; color:var(--gold);
@@ -223,7 +287,7 @@
     font-size:11px; padding:3px 9px; border-radius:999px; border:1px solid var(--sage);
     color:var(--sage); white-space:nowrap;
   }
-  .badge.done{border-color:var(--burgundy); color:var(--burgundy); background:#F3E4E4;}
+  .badge.done{border-color:var(--burgundy); color:var(--burg-t); background:var(--tint-burg);}
   .badge.locked{border-color:var(--muted); color:var(--muted);}
 
   /* Hymn list */
@@ -231,7 +295,7 @@
     display:flex; align-items:center; gap:14px;
     padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer;
   }
-  .hymn-row:hover .hymn-title{color:var(--burgundy);}
+  .hymn-row:hover .hymn-title{color:var(--burg-t);}
   .check{
     width:22px;height:22px;border-radius:50%;border:1.5px solid var(--muted); flex:none;
     display:flex;align-items:center;justify-content:center; font-size:13px; color:#fff;
@@ -245,7 +309,7 @@
   .lang-chip{
     width:24px; height:22px; border-radius:5px; border:1px solid var(--line);
     font-size:10px; font-weight:700; color:var(--muted);
-    display:flex; align-items:center; justify-content:center; background:#fff;
+    display:flex; align-items:center; justify-content:center; background:var(--paper);
   }
   .lang-chip.done{background:var(--gold); color:var(--midnight); border-color:var(--gold);}
   .lang-chip.certified{box-shadow:0 0 0 2px var(--burgundy); border-color:var(--burgundy);}
@@ -255,19 +319,19 @@
     text-transform:uppercase; letter-spacing:.3px;
   }
   .diff-badge.leicht{background:#E4EFE2; color:#3C6B34; border:1px solid #A9CBA1;}
-  .diff-badge.mittel{background:#FBEBD9; color:#9A5B12; border:1px solid #E8BC85;}
+  .diff-badge.mittel{background:var(--tint-gold); color:#9A5B12; border:1px solid #E8BC85;}
   .diff-badge.schwer{background:#F5DEDF; color:#8E2A2E; border:1px solid #DDA0A2;}
 
   .volunt-badge{
     font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:999px; flex:none;
-    background:#EEE8DA; color:var(--muted); border:1px solid var(--line);
+    background:var(--tint-neutral); color:var(--muted); border:1px solid var(--line);
   }
   .hymn-row.locked{cursor:default;}
   .hymn-row.locked:hover .hymn-title{color:inherit;}
   .hymn-row.locked .hymn-title{color:var(--muted); opacity:.65;}
   .lock-badge{
     font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:999px; flex:none;
-    background:#EDEAE2; color:var(--muted); border:1px solid var(--line); white-space:nowrap;
+    background:var(--tint-neutral); color:var(--muted); border:1px solid var(--line); white-space:nowrap;
   }
   .cert-badge{
     font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:999px; flex:none;
@@ -278,12 +342,12 @@
   .lang-tabs{display:flex; gap:8px; margin:18px 0 20px;}
   .lang-tab{
     padding:7px 16px; border:1px solid var(--line); border-radius:999px;
-    font-size:14px; cursor:pointer; background:#fff;
+    font-size:14px; cursor:pointer; background:var(--paper);
   }
   .lang-tab.active{background:var(--midnight); color:#fff; border-color:var(--midnight);}
 
   .player{
-    background:var(--midnight); color:var(--parchment); border-radius:8px;
+    background:var(--midnight); color:var(--on-dark); border-radius:8px;
     padding:18px; display:flex; flex-direction:column; gap:14px;
   }
   .player-row{display:flex; align-items:center; gap:16px;}
@@ -298,7 +362,7 @@
   .play-btn.show-pause .icon-pause{display:flex;}
   .stop-btn{
     width:46px;height:46px;border-radius:50%;background:transparent; border:1px solid var(--gold-light);
-    color:var(--parchment); font-size:16px; cursor:pointer; flex:none;
+    color:var(--on-dark); font-size:16px; cursor:pointer; flex:none;
     display:flex;align-items:center;justify-content:center;
   }
   .audio-note{font-size:11px; color:var(--gold-light); margin-top:8px;}
@@ -309,8 +373,8 @@
 
   .text-block{
     margin-top:22px; background:var(--parchment-2); border:1px solid var(--line);
-    border-radius:6px; padding:20px; font-size:19px; line-height:1.7;
-    font-family:"Cormorant Garamond", serif;
+    border-radius:6px; padding:20px; font-size:calc(19px * var(--text-scale, 1)); line-height:1.7;
+    font-family:"Cormorant Garamond", serif; background-image:var(--grain); background-size:260px 260px, 600px 600px;
   }
   .translit-line{
     margin-top:12px; font-size:15px; color:var(--muted); font-style:italic; line-height:1.5;
@@ -338,7 +402,7 @@
     display:flex; align-items:center; justify-content:space-between;
     padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer;
   }
-  .diakon-pick:hover{color:var(--burgundy);}
+  .diakon-pick:hover{color:var(--burg-t);}
   .approve-row{
     display:flex; align-items:center; justify-content:space-between;
     padding:14px 4px; border-bottom:1px solid var(--line);
@@ -350,14 +414,14 @@
   /* Certificate */
   .certificate{
     border:2px solid var(--gold); border-radius:8px; padding:36px 28px; text-align:center;
-    background:#fff; margin-top:20px; position:relative;
+    background:var(--paper); margin-top:20px; position:relative;
   }
   .certificate:before{
     content:""; position:absolute; inset:8px; border:1px solid var(--gold-light); border-radius:4px; pointer-events:none;
   }
   .certificate .kicker{font-size:12px; letter-spacing:.5px; color:var(--muted);}
   .certificate h2{font-size:32px; color:var(--midnight); margin-top:8px;}
-  .certificate .name{font-size:24px; color:var(--burgundy); margin-top:16px; font-family:"Cormorant Garamond",serif;}
+  .certificate .name{font-size:24px; color:var(--burg-t); margin-top:16px; font-family:"Cormorant Garamond",serif;}
   .certificate .desc{font-size:14px; color:var(--muted); margin-top:14px; line-height:1.6;}
   .certificate .date{margin-top:20px; font-size:13px; color:var(--muted);}
 
@@ -380,7 +444,7 @@
 
   .install-banner{
     position:fixed; left:0; right:0; bottom:0; z-index:500;
-    background:var(--burgundy); color:var(--parchment);
+    background:var(--burgundy); color:var(--on-dark);
     display:flex; align-items:center; gap:12px;
     padding:14px 16px; padding-bottom:calc(14px + env(safe-area-inset-bottom));
     box-shadow:0 -4px 16px rgba(0,0,0,0.25);
@@ -389,7 +453,7 @@
   .install-banner-text{flex:1; font-size:13px; line-height:1.4;}
   .install-banner .btn{padding:10px 16px; font-size:13px;}
   .install-banner-close{
-    background:none; border:none; color:var(--parchment); opacity:0.7;
+    background:none; border:none; color:var(--on-dark); opacity:0.7;
     font-size:16px; cursor:pointer; flex:none; padding:4px;
   }
   @media (min-width:640px){
@@ -426,20 +490,21 @@
   .vers-brace{position:relative; height:16px; width:min(100%, 250px); margin:0 auto; color:var(--gold);}
   .vers-brace-line{display:block; width:100%; height:100%;}
   .vers-cross{position:absolute; left:50%; top:-4px; width:13px; height:13px; margin-left:-6.5px;}
-  .vers-text{font-family:"Cormorant Garamond", serif; font-style:italic; font-size:20px; line-height:1.45; margin-top:8px; color:var(--burgundy); text-wrap:balance;}
+  .vers-text{font-family:"Cormorant Garamond", serif; font-style:italic; font-size:20px; line-height:1.45; margin-top:8px; color:var(--burg-t); text-wrap:balance;}
   .vers-quelle{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; margin-top:10px; color:var(--muted);}
   .vers.on-dark .vers-brace{color:var(--gold);}
   .vers.on-dark .vers-text{color:var(--gold-light);}
-  .vers.on-dark .vers-quelle{color:var(--parchment); opacity:.75;}
+  .vers.on-dark .vers-quelle{color:var(--on-dark); opacity:.75;}
   .vers.klein{width:100%; max-width:none; margin-top:12px;}
   .vers.klein .vers-text{color:#fff; font-size:14.5px; line-height:1.5; margin-top:0;}
   .vers.klein .vers-quelle{font-size:10px; margin-top:8px;}
   header.top .title-frame .vers{margin-bottom:4px;}
   .text-block .vers{margin:26px auto;}
-  .text-block .schluss{font-style:italic; color:#8A6221; text-align:center; margin:26px 0 0;}
+  .text-block .schluss{font-style:italic; color:var(--schluss); text-align:center; margin:26px 0 0;}
 </style>
 </head>
 <body>
+<div id="splash"><img src="logo-round.png" alt="" /></div>
 <div class="app" id="app"></div>
 <div class="install-banner" id="installBanner" style="display:none;">
   <img class="install-banner-icon" id="installBannerIcon" src="icon-192.png" alt="" />
@@ -908,6 +973,48 @@ async function loadAllDiakone(){
   return (!error && data) ? data : [];
 }
 
+/* ---------------- Wo in der Liturgie? ----------------
+   Pro Antwort ein kurzer Satz, an welcher Stelle der Liturgie sie gesungen wird.
+   Einfach zwischen die Anführungszeichen schreiben. Leer = es erscheint ein Platzhalter. */
+const HYMN_WO = {
+  s1h1: "",   // Epi Eprosevki Estasite
+  s1h2: "",   // Epros Eveksaste
+  s1h3: "",   // Tob hina
+  s1h4: "",   // Evangeliumsgebet
+  s1h5: "",   // Stasite
+  s1h6: "",   // Taski falasimon
+  s1h7: "",   // Epros chomen
+  s2h1: "",   // Gebet für die Entschlafenen
+  s2h2: "",   // Gebet für die Kranken
+  s2h3: "",   // Gebet für die Reisenden
+  s2h4: "",   // Gebet für die Opferdarbringenden
+  s3h1: "",   // Gebet für die Gaben
+  s3h2: "",   // Ezpatir
+  s4h1: "",   // Gebet für den Frieden
+  s4h2: "",   // Aspazesti
+  s4h3: "",   // Wer sitzt, stehe auf
+  s4h4: "",   // Schauet nach Osten!
+  s4h5: "",   // Wir sind aufmerksam!
+  s4h6: "",   // Verbeugt euch vor Gott
+  s4h7: "",   // Seid aufmerksam, Amen!
+  s4h8: "",   // Gebet für den Kirchenfrieden
+  s4h9: "",   // Gebet für den Patriarchen
+  s4h10: "",   // Gebet für die Kirchenväter
+  s4h11: "",   // Gebet für den Ort
+  s4h12: "",   // Gebet für die Saaten und Gewässer
+  s4h13: "",   // Gebet für die Opferdarbringenden
+  s4h14: "",   // Die Leser
+  s4h15: "",   // Amen, Amen, Betet!
+  s4h16: "",   // Sotis Amin
+  s4h17: "",   // Amin Amin Amin
+  s5h1: "",   // Endung an Festtagen
+};
+function hymnWo(hymn, station){
+  const t = (HYMN_WO[hymn.id] || "").trim();
+  if(t) return t;
+  return station.id === "s1" ? "Wird an mehreren Stellen der Liturgie gesungen." : "";
+}
+
 /* ---------------- Theorie ----------------
    Die Texte sind noch Platzhalter. Zum Befüllen einfach bei "text" den echten Text eintragen
    (Absätze mit einer Leerzeile trennen). Die "id" nie ändern, sonst geht der Fortschritt verloren. */
@@ -945,6 +1052,7 @@ const THEORIE = [
   ]},
   { id: "theorie-liturgien", title: "Die verschiedenen Liturgien", text: "" },
   { id: "theorie-aufbau",    title: "Der Aufbau einer Liturgie",   text: "" },
+  { id: "theorie-altar",     title: "Die Zusammensetzung des Altars", text: "" },
   { id: "theorie-aufgaben",  title: "Die Aufgaben eines Diakons",  text: "" },
 ];
 const THEORIE_INFO_KEY = "_theorie_info"; // Merker "Hinweis schon gesehen", wird wie ein Fortschrittseintrag gespeichert
@@ -1442,6 +1550,39 @@ function sectionTitle(text){
   return d;
 }
 
+/* Schriftgrösse (nur für Texte der Antworten und der Theorie) und Hell/Dunkel */
+const TEXT_SCALES = [0.85, 1, 1.2, 1.4, 1.65];
+function getScaleIdx(){ try{ const raw = localStorage.getItem("pe_textscale"); if(raw !== null && TEXT_SCALES[+raw]) return +raw; }catch(e){} return 1; }
+function setScaleIdx(i){
+  i = Math.max(0, Math.min(TEXT_SCALES.length-1, i));
+  document.documentElement.style.setProperty("--text-scale", TEXT_SCALES[i]);
+  try{ localStorage.setItem("pe_textscale", String(i)); }catch(e){}
+}
+function isDark(){ return document.documentElement.getAttribute("data-theme") === "dark"; }
+function setDark(on){
+  if(on) document.documentElement.setAttribute("data-theme","dark"); else document.documentElement.removeAttribute("data-theme");
+  try{ localStorage.setItem("pe_theme", on ? "dark" : "light"); }catch(e){}
+}
+function readTools(){
+  const d = document.createElement("div");
+  d.className = "read-tools";
+  d.innerHTML = `<span class="rt-label">Lesen</span>
+    <button type="button" class="rt-small" id="rtMinus" aria-label="Schrift kleiner">A−</button>
+    <button type="button" class="rt-big" id="rtPlus" aria-label="Schrift grösser">A+</button>
+    <button type="button" id="rtTheme"></button>`;
+  const minus = d.querySelector("#rtMinus"), plus = d.querySelector("#rtPlus"), th = d.querySelector("#rtTheme");
+  const refresh = ()=>{
+    const i = getScaleIdx();
+    minus.disabled = i <= 0; plus.disabled = i >= TEXT_SCALES.length-1;
+    th.textContent = isDark() ? "☀ Hell" : "☾ Dunkel";
+  };
+  minus.addEventListener("click", ()=>{ setScaleIdx(getScaleIdx()-1); refresh(); });
+  plus.addEventListener("click", ()=>{ setScaleIdx(getScaleIdx()+1); refresh(); });
+  th.addEventListener("click", ()=>{ setDark(!isDark()); refresh(); });
+  refresh();
+  return d;
+}
+
 function renderTheorie(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
@@ -1485,6 +1626,7 @@ function renderTheorieKapitel(){
   title.innerHTML = k.title;
   wrap.appendChild(title);
 
+  wrap.appendChild(readTools());
   const textBlock = document.createElement("div");
   textBlock.className = "text-block";
   if(k.blocks){
@@ -1771,7 +1913,7 @@ function renderHome(){
 
   if(rewardDone){
     const banner = document.createElement("div");
-    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#FBEBD9; border:1px solid var(--gold); border-radius:6px;";
+    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:var(--tint-gold); border:1px solid var(--gold); border-radius:6px;";
     banner.innerHTML = `<span style="font-size:14px;">🏅 Du hast wirklich <strong>alle</strong> Antworten (Pflicht + freiwillig) bestätigt bekommen — besonders gut gemacht!</span>`;
     wrap.appendChild(banner);
   }
@@ -1780,7 +1922,7 @@ function renderHome(){
   const hoechsteAbgeschlosseneStufe = [3,2,1].find(t => tierFullyCertified(t));
   if(hoechsteAbgeschlosseneStufe){
     const banner = document.createElement("div");
-    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;";
+    banner.style.cssText = "margin-top:18px; padding:14px 16px; background:var(--tint-burg); border:1px solid var(--burgundy); border-radius:6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;";
     banner.innerHTML = `<span style="font-size:14px;">Alle Pflicht-Antworten der Stufe ${hoechsteAbgeschlosseneStufe} bestätigt — dein Zertifikat ist bereit.</span>`;
     const btn = document.createElement("button");
     btn.className = "btn"; btn.style.margin="0"; btn.textContent = `Stufe ${hoechsteAbgeschlosseneStufe}-Zertifikat ansehen`;
@@ -1863,6 +2005,13 @@ function renderStation(){
   hint.style.cssText = "color:var(--muted); font-size:13px; margin-top:4px;";
   hint.textContent = "Die Kürzel zeigen, in welcher Sprache du eine Antwort schon geübt hast.";
   wrap.appendChild(hint);
+
+  if(s.id === "s1"){
+    const erkl = document.createElement("div");
+    erkl.className = "info-box";
+    erkl.innerHTML = `<span class="ib-title">Was ist das hier?</span>Diese Antworten singst du in der koptischen Liturgie nicht nur an einer einzigen Stelle, sondern an mehreren Stellen und in verschiedenen Gottesdiensten. Damit du sie nicht immer wieder neu suchen musst, sind sie hier alle zusammen gesammelt. Übe sie zuerst gut: Du wirst sie danach fast überall brauchen.`;
+    wrap.appendChild(erkl);
+  }
 
   if(s.hymns.length===0){
     const empty = document.createElement("div");
@@ -1962,6 +2111,12 @@ function renderHymn(){
   }
   wrap.appendChild(titleRow);
 
+  const woText = hymnWo(hymn, station);
+  const woBox = document.createElement("div");
+  woBox.className = "info-box" + (woText ? "" : " leer");
+  woBox.innerHTML = `<span class="ib-title">Wo in der Liturgie?</span><span class="ib-body">${woText || "Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird."}</span>`;
+  wrap.appendChild(woBox);
+
   const hymnLangs = LANGS.filter(l => hymn.content[l.code]);
   if(!hymn.content[state.currentLang]) state.currentLang = hymnLangs[0].code;
 
@@ -2056,6 +2211,7 @@ function renderHymn(){
   });
   wrap.appendChild(player);
 
+  wrap.appendChild(readTools());
   const textBlock = document.createElement("div");
   textBlock.className = "text-block";
   const mainText = content.text || content.translit || "";
@@ -2083,7 +2239,7 @@ function renderHymn(){
   const certForLang = isHymnLangCertified(hymn.id, state.currentLang);
   if(certForLang){
     const rec = state.certified[hymn.id][state.currentLang];
-    certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:#F3E4E4; border:1px solid var(--burgundy); border-radius:6px; font-size:13px; color:var(--burgundy); font-weight:600;";
+    certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:var(--tint-burg); border:1px solid var(--burgundy); border-radius:6px; font-size:13px; color:var(--burg-t); font-weight:600;";
     certInfo.textContent = `✓ Auf ${currentLangLabel} vom Prüfer bestätigt (${rec.by}, ${rec.date}) — du kannst trotzdem jederzeit weiter üben.`;
   } else {
     certInfo.style.cssText = "margin-top:14px; padding:12px 14px; background:var(--parchment-2); border:1px solid var(--line); border-radius:6px; font-size:13px; color:var(--muted);";
@@ -2172,7 +2328,7 @@ function renderPrueferHome(){
       <span class="diakon-open" style="flex:1; cursor:pointer;">${fullName}</span>
       <span class="diakon-open" style="color:var(--muted); font-size:13px; cursor:pointer;">öffnen →</span>
       <span class="diakon-pw" style="flex-basis:100%; margin-top:8px; color:var(--midnight); font-size:13px; text-decoration:underline; cursor:pointer;">Passwort zurücksetzen</span>
-      <span class="diakon-delete" style="color:var(--burgundy); font-size:13px; text-decoration:underline; cursor:pointer; margin-left:14px; white-space:nowrap;">Löschen</span>
+      <span class="diakon-delete" style="color:var(--burg-t); font-size:13px; text-decoration:underline; cursor:pointer; margin-left:14px; white-space:nowrap;">Löschen</span>
     `;
     row.querySelectorAll(".diakon-open").forEach(el=>{
       el.addEventListener("click", async ()=>{
@@ -2232,7 +2388,7 @@ function renderPrueferStation(){
 
   if(u.stufe < 3 && tierFullyCertified(u.stufe)){
     const banner = document.createElement("div");
-    banner.style.cssText = "margin-top:14px; padding:12px 14px; background:#FBEBD9; border:1px solid var(--gold); border-radius:6px; font-size:13px;";
+    banner.style.cssText = "margin-top:14px; padding:12px 14px; background:var(--tint-gold); border:1px solid var(--gold); border-radius:6px; font-size:13px;";
     banner.textContent = `Stufe ${u.stufe} ist vollständig bestätigt. Beim nächsten Login von ${u.name} wird automatisch Stufe ${u.stufe+1} freigeschaltet.`;
     wrap.appendChild(banner);
   }
@@ -2390,7 +2546,14 @@ document.addEventListener("touchstart", function(){}, {passive:true});
 
 /* ---------------- Start ---------------- */
 async function init(){
-  root.innerHTML = `<div style="padding:60px 20px; text-align:center; color:var(--muted);">Lädt …</div>`;
+  root.innerHTML = "";
+  const splashWeg = ()=>{
+    const sp = document.getElementById("splash");
+    if(!sp) return;
+    sp.classList.add("hide");
+    setTimeout(()=>{ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 600);
+  };
+  setTimeout(splashWeg, 9000);   // Sicherheit: nie dauerhaft hängen bleiben
   await pruefeUrlHash();
   await loadProfile();
   if(state.profile){
@@ -2400,6 +2563,7 @@ async function init(){
   }
   render();
   updateOfflineBanner();
+  splashWeg();
   maybeShowInstallBanner();
 }
 init();
