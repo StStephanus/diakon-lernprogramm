@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Pi-Eklom</title>
 <script>
 /* Gespeicherte Darstellung sofort anwenden (verhindert Aufblitzen): Dunkelmodus + Schriftgrösse */
@@ -318,6 +318,18 @@
   .btn[disabled]{opacity:.4; cursor:not-allowed;}
 
   /* Station list */
+  .altar-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:22px 0 8px;}
+  .altar-tile{border:1px solid var(--gold); border-radius:12px; background:linear-gradient(180deg,var(--parchment-2),var(--parchment)); box-shadow:0 2px 0 rgba(90,60,20,.25), 0 4px 10px rgba(60,30,10,.12); overflow:hidden; transition:transform .12s ease;}
+  .altar-tile.open{grid-column:1 / -1; order:-1; border-color:var(--burgundy);}
+  .altar-btn{all:unset; box-sizing:border-box; width:100%; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 6px; text-align:center; color:var(--burgundy); -webkit-tap-highlight-color:transparent;}
+  .altar-tile.open .altar-btn{flex-direction:row; justify-content:flex-start; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line);}
+  .altar-tile:not(.open):active{transform:scale(.96);}
+  .altar-icon{width:34px; height:34px; display:block;} .altar-tile.open .altar-icon{width:40px; height:40px; flex:none;}
+  .altar-icon svg{width:100%; height:100%;}
+  .altar-name{font-family:"Source Sans 3",sans-serif; font-size:13px; font-weight:600; line-height:1.2; color:var(--ink);}
+  .altar-tile.open .altar-name{font-size:18px; font-family:"Playfair Display",Georgia,serif; color:var(--burgundy);}
+  .altar-text{padding:14px 16px 6px; font-size:calc(16px * var(--text-scale,1)); line-height:1.6;}
+  html, body{touch-action:manipulation; -webkit-text-size-adjust:100%;}
   .station-row{
     display:flex; align-items:center; gap:16px;
     padding:18px 4px; border-bottom:1px solid var(--line); cursor:pointer;
@@ -978,6 +990,8 @@ let state = {
   profile: null,  // {id, name, vorname, nachname, email}
   view: "menu",   // menu | home | station | hymn | theorie | theorie-kapitel | pruefer-home | pruefer-station | stufenzertifikat
   currentKapitelId: null,
+  currentSubId: null,   // Unterthema innerhalb eines Theorie-Kapitels
+  altarSel: null,       // aufgeklapptes Feld im Altar-Kapitel
   showTheorieInfo: false,
   currentStationId: null,
   currentHymnId: null,
@@ -2072,6 +2086,8 @@ function appendNavRow(wrap, crumb){
   wrap.appendChild(row);
 }
 
+/* Zoomen per Doppeltipp / Auseinanderziehen aus (die Textgrösse wird über + / − geregelt) */
+["gesturestart","gesturechange","gestureend"].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
 function sectionTitle(text){
   const d = document.createElement("div");
   d.className = "section-title";
@@ -2112,6 +2128,11 @@ function readTools(){
   return d;
 }
 
+/* Symbol für ein Altar-Feld: it.icon = eigener SVG-Inhalt (24x24), sonst ein schlichtes Kreuz */
+function altarIcon(it){
+  const inner = it.icon || '<path d="M12 3v18M6 9h12" stroke-width="2.2" stroke-linecap="round"/>';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">${inner}</svg>`;
+}
 function renderTheorie(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
@@ -2132,7 +2153,7 @@ function renderTheorie(){
       </div>
       ${done ? `<div class="badge done">${T("Gelernt")}</div>` : ""}
     `;
-    row.addEventListener("click", ()=>{ state.currentKapitelId = k.id; state.view="theorie-kapitel"; render(); window.scrollTo(0,0); });
+    row.addEventListener("click", ()=>{ state.currentKapitelId = k.id; state.currentSubId = null; state.altarSel = null; state.view="theorie-kapitel"; render(); window.scrollTo(0,0); });
     wrap.appendChild(row);
   });
   wrap.appendChild(versEl(VERSE.ps119_105, "on-light"));
@@ -2144,10 +2165,24 @@ function renderTheorieKapitel(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = T("Theorie");
-  crumb.addEventListener("click", ()=>{ state.view="theorie"; render(); });
+  const sub = k && k.subs ? k.subs.find(x => x.id === state.currentSubId) : null;
+  crumb.innerHTML = sub ? T(k.title) : T("Theorie");
+  crumb.addEventListener("click", ()=>{ if(sub){ state.currentSubId = null; render(); window.scrollTo(0,0); } else { state.view="theorie"; render(); } });
   appendNavRow(wrap, crumb);
   if(!k){ state.view = "theorie"; return renderTheorie(); }
+  if(sub){
+    const st = document.createElement("h2");
+    st.className = "serif"; st.style.fontSize = "24px"; st.innerHTML = T(sub.title);
+    wrap.appendChild(st);
+    wrap.appendChild(readTools());
+    const sb = document.createElement("div");
+    sb.className = "text-block";
+    sb.innerHTML = sub.text && sub.text.trim()
+      ? sub.text.trim().split(/\n\s*\n/).map(p => `<p>${p}</p>`).join("")
+      : `<p style="color:var(--muted); font-style:italic;">${T("Der Text zu diesem Thema folgt in Kürze.")}</p>`;
+    wrap.appendChild(sb);
+    return wrap;
+  }
 
   const title = document.createElement("h2");
   title.className = "serif";
@@ -2171,6 +2206,30 @@ function renderTheorieKapitel(){
     textBlock.innerHTML = `<p style="color:var(--muted); font-style:italic;">${T("Der Text zu diesem Thema folgt in Kürze.")}</p>`;
   }
   wrap.appendChild(textBlock);
+
+  if(k.subs && k.subs.length){
+    k.subs.forEach((sb, i)=>{
+      const row = document.createElement("div");
+      row.className = "station-row";
+      row.innerHTML = `<div class="station-num">${i+1}</div><div class="station-body"><div class="station-title">${T(sb.title)}</div></div>`;
+      row.addEventListener("click", ()=>{ state.currentSubId = sb.id; render(); window.scrollTo(0,0); });
+      wrap.appendChild(row);
+    });
+  }
+  if(k.altar && k.altar.length){
+    const grid = document.createElement("div");
+    grid.className = "altar-grid";
+    k.altar.forEach(it=>{
+      const open = state.altarSel === it.id;
+      const tile = document.createElement("div");
+      tile.className = "altar-tile" + (open ? " open" : "");
+      tile.innerHTML = `<button class="altar-btn" aria-expanded="${open}"><span class="altar-icon">${altarIcon(it)}</span><span class="altar-name">${T(it.name)}</span></button>` +
+        (open ? `<div class="altar-text">${it.text && it.text.trim() ? it.text.trim().split(/\n\s*\n/).map(p=>`<p>${p}</p>`).join("") : `<p style="color:var(--muted); font-style:italic;">${T("Der Text zu diesem Thema folgt in Kürze.")}</p>`}</div>` : "");
+      tile.querySelector(".altar-btn").addEventListener("click", ()=>{ state.altarSel = open ? null : it.id; render(); const el=document.querySelector(".altar-tile.open"); if(el) el.scrollIntoView({block:"nearest", behavior:"smooth"}); });
+      grid.appendChild(tile);
+    });
+    wrap.appendChild(grid);
+  }
 
   const gelernt = theorieGelernt(k.id);
   const selfRow = document.createElement("div");
