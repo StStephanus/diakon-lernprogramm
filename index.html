@@ -238,10 +238,10 @@
   .lit-item.open .lit-btn::after{transform:rotate(-135deg);}
   .lit-btn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(10,2,4,.55), 0 0 14px rgba(217,189,132,.35);}
   .lit-btn-title{font-family:"Cormorant Garamond", serif;}
-  .lit-panel{display:grid; grid-template-rows:0fr; visibility:hidden; transition:grid-template-rows .42s ease, visibility 0s linear .42s;}
-  .lit-item.open .lit-panel{grid-template-rows:1fr; visibility:visible; transition:grid-template-rows .42s ease, visibility 0s;}
-  .lit-panel-in{overflow:hidden; min-height:0;}
-  .lit-field{margin-top:-6px; padding:20px 16px 8px; background:rgba(255,255,255,.35); border:1px solid var(--gold); border-top:0; border-radius:0 0 12px 12px; opacity:0; transform:translateY(-8px); transition:opacity .35s ease .08s, transform .35s ease .08s;}
+  .lit-panel{height:0; overflow:hidden; visibility:hidden;}
+  .lit-item.open .lit-panel{height:auto; visibility:visible;}
+  .lit-panel-in{}
+  .lit-field{margin-top:-6px; padding:20px 16px 8px; background:rgba(255,255,255,.35); border:1px solid var(--gold); border-top:0; border-radius:0 0 12px 12px; opacity:0; transform:translateY(-8px); transition:opacity .45s ease .1s, transform .45s ease .1s;}
   html[data-theme="dark"] .lit-field{background:rgba(0,0,0,.22);}
   .lit-item.open .lit-field{opacity:1; transform:none;}
   .lit-item.open .lit-btn{border-bottom-left-radius:0; border-bottom-right-radius:0; position:relative; z-index:1;}
@@ -2350,14 +2350,34 @@ function renderTheorieKapitel(){
       const field = document.createElement("div"); field.className = "lit-field";
       field.innerHTML = (LIT_IMG[sb.id] ? `<div class="lit-img"><img src="${LIT_IMG[sb.id]}" alt="${T(sb.title)}" />${LIT_CAP[sb.id] ? `<div class="lit-cap">${T(LIT_CAP[sb.id])}</div>` : ""}</div>` : "") + theoTxt(sb.text || "");
       inner.appendChild(field); panel.appendChild(inner);
-      const closeAll = ()=>{ items.forEach(it=>{ it.btn.setAttribute("aria-expanded","false"); it.panel.setAttribute("aria-hidden","true"); it.item.classList.remove("open"); }); };
+      const DUR = 560, EASE = "cubic-bezier(.45,.05,.25,1)";
+      const setOpen = (it, open)=>{
+        const p = it.panel; if(p._anim){ p._anim.cancel(); p._anim = null; }
+        const cur = p.getBoundingClientRect().height;
+        it.btn.setAttribute("aria-expanded", open ? "true" : "false"); p.setAttribute("aria-hidden", open ? "false" : "true");
+        it.item.classList.toggle("open", open);
+        const target = open ? p.scrollHeight : 0;
+        if(Math.abs(target - cur) < 1) return;
+        const frames = open ? [{height:cur+"px"},{height:target+"px"}] : [{height:cur+"px", visibility:"visible"},{height:"0px", visibility:"visible"}];
+        const an = p.animate(frames, {duration:DUR, easing:EASE}); p._anim = an;
+        an.onfinish = an.oncancel = ()=>{ if(p._anim === an) p._anim = null; };
+      };
       btn.addEventListener("click", ()=>{
-        const open = btn.getAttribute("aria-expanded") === "true";
-        closeAll();
-        if(!open){
-          btn.setAttribute("aria-expanded","true"); panel.setAttribute("aria-hidden","false"); item.classList.add("open");
-          setTimeout(()=>{ const y = btn.getBoundingClientRect().top + window.scrollY - 70; window.scrollTo({top:y, behavior:"smooth"}); }, 440);
-        }
+        const wasOpen = btn.getAttribute("aria-expanded") === "true";
+        const topBefore = btn.getBoundingClientRect().top;
+        items.forEach(it=>{ if(it.btn !== btn && it.btn.getAttribute("aria-expanded") === "true") setOpen(it, false); });
+        setOpen({item, btn, panel}, !wasOpen);
+        // Position des Knopfes während der Animation festhalten (kein Springen)
+        const t0 = performance.now();
+        const follow = ()=>{
+          const d = btn.getBoundingClientRect().top - topBefore;
+          if(Math.abs(d) > 0.5) window.scrollBy(0, d);
+          if(performance.now() - t0 < DUR + 60) requestAnimationFrame(follow);
+          else if(!wasOpen && btn.getBoundingClientRect().top > window.innerHeight * 0.35){
+            window.scrollTo({top: btn.getBoundingClientRect().top + window.scrollY - 70, behavior:"smooth"});
+          }
+        };
+        requestAnimationFrame(follow);
       });
       item.appendChild(btn); item.appendChild(panel); acc.appendChild(item); items.push({item, btn, panel});
     });
