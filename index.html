@@ -226,9 +226,9 @@
   /* Startseite (Hauptmenü): der Rahmen füllt die ganze Seite */
   header.top.landing{min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:18px 16px 24px;}
   header.top.landing .title-frame{padding:26px 16px 22px;}
-  header.top .crest-row{display:flex; align-items:center; justify-content:center; gap:clamp(8px,3vw,18px);}
+  header.top .crest-row{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; justify-items:center; margin:0 -16px;}
   header.top .crest-row .crest{margin:0;}
-  header.top .kopt-kreuz{width:min(52px,13vw); height:auto; flex:none; opacity:.95;}
+  header.top .kopt-kreuz{width:min(68px,17vw); height:auto; opacity:.95;}
   header.top.landing .crest{width:min(150px, 44vw); height:min(150px, 44vw);}
   header.top.landing .book-title{font-size:30px; margin-top:12px;}
   header.top .welcome{margin-top:20px;}
