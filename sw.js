@@ -5,7 +5,7 @@
    WICHTIG beim nächsten Update von index.html: CACHE_NAME unten um 1 erhöhen
    (z. B. "diakon-lern-v2"), sonst behalten manche installierten Apps noch die
    alte, zwischengespeicherte Version der Seite. */
-const CACHE_NAME = "diakon-lern-v9";
+const CACHE_NAME = "diakon-lern-v10";
 /* Audios werden getrennt gespeichert und bleiben bei App-Updates erhalten. */
 const AUDIO_CACHE = "diakon-audio-v1";
 const PRECACHE_URLS = [
