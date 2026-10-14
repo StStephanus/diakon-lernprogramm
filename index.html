@@ -156,8 +156,17 @@
   #logoutSlot{display:block; width:100%;}
   .slot-row{display:flex; align-items:center; justify-content:center; margin-top:2px; width:100%;}
   .logout-link.klein{font-size:11px; opacity:.85; margin-top:4px;}
-  .page-logout{text-align:center; padding:6px 16px calc(34px + env(safe-area-inset-bottom, 0px));}
-  .page-logout .logout-link{font-size:11.5px; color:var(--muted);}
+  .abmelde-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+    font-family:"Source Sans 3",sans-serif; font-size:15px; font-weight:600; line-height:1.2; letter-spacing:.02em;
+    padding:11px 30px; border-radius:14px; border:1px solid var(--gold);
+    background:linear-gradient(180deg, #8A2A3C, #6F1E2E); color:var(--gold-light);
+    box-shadow:0 4px 0 rgba(10,2,4,.55), 0 8px 16px rgba(0,0,0,.2), inset 0 1px 0 rgba(217,189,132,.32);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .abmelde-btn:active{transform:translateY(3px); box-shadow:0 1px 0 rgba(10,2,4,.55), 0 0 14px rgba(217,189,132,.35);}
+  header.top .abmelde-btn{background:linear-gradient(180deg, rgba(20,4,8,.34), rgba(20,4,8,.52)); font-size:14px; padding:9px 26px; margin-top:10px;}
+  .page-logout{text-align:center; padding:22px 16px calc(34px + env(safe-area-inset-bottom, 0px));}
   /* Hinweiskästchen */
   .info-box{margin-top:14px; padding:12px 14px; border-left:3px solid var(--gold); background:var(--tint-gold); border-radius:4px; font-size:14px; line-height:1.55;}
   .info-box .ib-title{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; font-weight:600;}
@@ -1897,9 +1906,9 @@ function render(){
   if(!istLanding && state.role==="diakon" && state.profile){
     const fuss = document.createElement("div");
     fuss.className = "page-logout";
-    const out = document.createElement("span");
-    out.className = "logout-link";
-    out.textContent = T("Abmelden") + " (" + state.profile.name + ")";
+    const out = document.createElement("button");
+    out.type = "button"; out.className = "abmelde-btn";
+    out.textContent = T("Abmelden");
     out.addEventListener("click", async ()=>{ await logoutAccount(); render(); });
     fuss.appendChild(out);
     root.appendChild(fuss);
@@ -2130,11 +2139,11 @@ function renderHeader(){
 
   const logoutSlot = h.querySelector("#logoutSlot");
   if(state.role==="diakon" && state.profile){
-    const out = document.createElement("span");
-    out.className = "logout-link";
-    out.textContent = T("Abmelden") + " (" + state.profile.name + ")";
+    const out = document.createElement("button");
+    out.type = "button"; out.className = "abmelde-btn";
+    out.textContent = T("Abmelden");
     out.addEventListener("click", async ()=>{ await logoutAccount(); render(); });
-    if(landing){ out.classList.add("klein"); logoutSlot.appendChild(out); }
+    if(landing){ logoutSlot.appendChild(out); }
     else { /* der Sprachschalter steht in den Unterseiten neben dem Zurück-Knopf */ }
   }
   if(state.role==="diakon" && !state.profile){
@@ -2144,8 +2153,8 @@ function renderHeader(){
     logoutSlot.appendChild(row);
   }
   if(state.role==="pruefer" && state.prueferAuthenticated){
-    const out = document.createElement("span");
-    out.className = "logout-link";
+    const out = document.createElement("button");
+    out.type = "button"; out.className = "abmelde-btn";
     out.textContent = "Abmelden";
     out.addEventListener("click", ()=>{ prueferAbmelden(); });
     logoutSlot.appendChild(out);
