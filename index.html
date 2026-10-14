@@ -1637,6 +1637,8 @@ Object.assign(I18N.en, {"Abmelden?": "Log out?", "Bist du sicher, dass du dich a
 Object.assign(I18N.ar, {"Abmelden?": "تسجيل الخروج؟", "Bist du sicher, dass du dich abmelden willst?": "متأكّد إنك عايز تسجّل الخروج؟", "Ja, abmelden": "أيوه، سجّل الخروج"});
 Object.assign(I18N.en, {"Abbrechen":"Cancel"});
 Object.assign(I18N.ar, {"Abbrechen":"إلغاء"});
+Object.assign(I18N.en, {"Diese Lesung gibt es bei uns nur in {langs}.":"We only have this reading in {langs}."});
+Object.assign(I18N.ar, {"Diese Lesung gibt es bei uns nur in {langs}.":"القراءة دي موجودة عندنا بـ{langs} بس."});
 VERSE.ps84_5.ar = { text: "طوبى للساكنين في بيتك، أبداً يسبّحونك.", quelle: "مزمور 84:4 · فاندايك" };
 VERSE.ps122_1.ar = { text: "فرحت بالقائلين لي: «إلى بيت الرب نذهب».", quelle: "مزمور 122:1 · فاندايك" };
 VERSE.ps26_8.ar = { text: "يا رب، أحببت مسكن بيتك ومحل سكن مجدك.", quelle: "مزمور 26:8 · فاندايك" };
@@ -2808,10 +2810,11 @@ function renderEvangelium(){
   erkl.innerHTML = `<span class="ib-title">${T("Was ist das hier?")}</span>${T("Hier lernst du, wie du als Diakon das Heilige Evangelium in der entsprechenden Melodie lesen kannst.")}`;
   wrap.appendChild(erkl);
 
-  if(!LANGS.some(l=>l.code===state.currentLang)) state.currentLang = "de";
+  const evLangs = LANGS.filter(l=>l.code !== "cop");   // Die Lesung gibt es nur auf Deutsch und Arabisch
+  if(!evLangs.some(l=>l.code===state.currentLang)) state.currentLang = "de";
   const tabs = document.createElement("div");
   tabs.className = "lang-tabs";
-  LANGS.forEach(l=>{
+  evLangs.forEach(l=>{
     const b = document.createElement("button");
     b.className = "lang-tab" + (state.currentLang===l.code? " active":"");
     b.textContent = T(l.label);
@@ -2819,6 +2822,10 @@ function renderEvangelium(){
     tabs.appendChild(b);
   });
   wrap.appendChild(tabs);
+  const evNote = document.createElement("p");
+  evNote.style.cssText = "color:var(--muted); font-size:12px; margin-top:-14px; margin-bottom:18px;";
+  evNote.textContent = T("Diese Lesung gibt es bei uns nur in {langs}.", {langs: evLangs.map(l=>T(l.label)).join(T(" und "))});
+  wrap.appendChild(evNote);
 
   wrap.appendChild(buildPlayer("evangelium"));
   wrap.appendChild(readTools());
