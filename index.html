@@ -2797,7 +2797,7 @@ function renderEvangelium(){
   const crumb = document.createElement("div");
   crumb.className = "crumb";
   crumb.textContent = T("Alle Stationen");
-  crumb.addEventListener("click", ()=>{ state.view="home"; render(); });
+  crumb.addEventListener("click", ()=>{ stopHymnAudio(); state.view="home"; render(); });
   appendNavRow(wrap, crumb);
   const title = document.createElement("h2");
   title.className = "serif"; title.style.fontSize = "24px";
@@ -2807,10 +2807,25 @@ function renderEvangelium(){
   erkl.className = "info-box";
   erkl.innerHTML = `<span class="ib-title">${T("Was ist das hier?")}</span>${T("Hier lernst du, wie du als Diakon das Heilige Evangelium in der entsprechenden Melodie lesen kannst.")}`;
   wrap.appendChild(erkl);
-  const empty = document.createElement("div");
-  empty.className = "empty";
-  empty.innerHTML = `<h3>${T("Inhalte folgen bald")}</h3><p>${T("Der Text zu diesem Thema folgt in Kürze.")}</p>`;
-  wrap.appendChild(empty);
+
+  if(!LANGS.some(l=>l.code===state.currentLang)) state.currentLang = "de";
+  const tabs = document.createElement("div");
+  tabs.className = "lang-tabs";
+  LANGS.forEach(l=>{
+    const b = document.createElement("button");
+    b.className = "lang-tab" + (state.currentLang===l.code? " active":"");
+    b.textContent = T(l.label);
+    b.addEventListener("click", ()=>{ state.currentLang=l.code; render(); });
+    tabs.appendChild(b);
+  });
+  wrap.appendChild(tabs);
+
+  wrap.appendChild(buildPlayer("evangelium"));
+  wrap.appendChild(readTools());
+  const textBlock = document.createElement("div");
+  textBlock.className = "text-block";
+  textBlock.innerHTML = `<p style="color:var(--muted); font-style:italic;">${T("Der Text zu diesem Thema folgt in Kürze.")}</p>`;
+  wrap.appendChild(textBlock);
   return wrap;
 }
 function renderStation(){
@@ -2898,6 +2913,80 @@ function renderStation(){
   return wrap;
 }
 
+function buildPlayer(hymnId){
+  const player = document.createElement("div");
+  player.className = "player";
+  player.innerHTML = `
+    <div class="player-row">
+      <button class="play-btn" id="playBtn"><span class="icon-play">▶</span><span class="icon-pause"><span></span><span></span></span></button>
+      <button class="stop-btn" id="stopBtn" title="${T("Stopp")}">■</button>
+      <div>
+        <div style="font-weight:600;">${T("Aufnahme anhören")}</div>
+        <div class="audio-note" id="audioStatus">${T("Bereit")}</div>
+      </div>
+    </div>
+    <div class="seek-row">
+      <span class="seek-time" id="seekCurrent">0:00</span>
+      <input type="range" class="seek-bar" id="seekBar" min="0" max="1000" value="0" />
+      <span class="seek-time total" id="seekTotal">0:00</span>
+    </div>
+  `;
+  const statusEl = player.querySelector("#audioStatus");
+  const playBtn = player.querySelector("#playBtn");
+  const stopBtn = player.querySelector("#stopBtn");
+  const seekBar = player.querySelector("#seekBar");
+  const seekCurrentEl = player.querySelector("#seekCurrent");
+  const seekTotalEl = player.querySelector("#seekTotal");
+  const formatTime = (t)=>{
+    if(!isFinite(t) || t<0) t = 0;
+    const m = Math.floor(t/60), s = Math.floor(t%60);
+    return m + ":" + (s<10? "0":"") + s;
+  };
+  let userIsSeeking = false;
+  const thisKey = hymnId + "_" + state.currentLang;
+  const setStatus = (s)=>{
+    if(s==="loading"){ statusEl.textContent = T("Lädt …"); playBtn.classList.remove("show-pause"); }
+    else if(s==="playing"){ statusEl.textContent = T("Spielt ab …"); playBtn.classList.add("show-pause"); }
+    else if(s==="paused"){ statusEl.textContent = T("Pausiert"); playBtn.classList.remove("show-pause"); }
+    else if(s==="missing"){ statusEl.textContent = T("Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)"); playBtn.classList.remove("show-pause"); }
+    else { statusEl.textContent = T("Bereit"); playBtn.classList.remove("show-pause"); }
+  };
+  const setTime = (cur, dur)=>{
+    if(userIsSeeking) return;
+    seekCurrentEl.textContent = formatTime(cur);
+    seekTotalEl.textContent = formatTime(dur);
+    seekBar.value = dur>0 ? Math.round((cur/dur)*1000) : 0;
+  };
+  // Falls dieselbe Aufnahme (gleiche Antwort + Sprache) schon läuft/pausiert ist (z. B. weil
+  // der Nutzer zwischendurch nur den Selbst-geübt-Haken gesetzt hat und die Seite neu
+  // gezeichnet wurde), spiegelt die Anzeige direkt deren aktuellen Zustand statt "Bereit".
+  if(currentAudioKey === thisKey && currentAudioEl){
+    setStatus(currentAudioEl.paused ? "paused" : "playing");
+    setTime(currentAudioEl.currentTime, currentAudioEl.duration || 0);
+  }
+  playBtn.addEventListener("click", ()=>{
+    if(currentAudioKey === thisKey && currentAudioEl){
+      if(currentAudioEl.paused) currentAudioEl.play().catch(()=>{});
+      else currentAudioEl.pause();
+    } else {
+      playHymnAudio(hymnId, state.currentLang, { onStatus: setStatus, onTime: setTime });
+    }
+  });
+  stopBtn.addEventListener("click", ()=>{
+    stopHymnAudio();
+    setStatus("idle");
+    setTime(0, 0);
+  });
+  seekBar.addEventListener("input", ()=>{ userIsSeeking = true; });
+  seekBar.addEventListener("change", ()=>{
+    if(currentAudioKey === thisKey && currentAudioEl && isFinite(currentAudioEl.duration)){
+      currentAudioEl.currentTime = (seekBar.value/1000) * currentAudioEl.duration;
+    }
+    userIsSeeking = false;
+  });
+  return player;
+}
+
 function renderHymn(){
   const {hymn, station} = findHymn(state.currentHymnId);
   const wrap = document.createElement("div");
@@ -2958,77 +3047,7 @@ function renderHymn(){
 
   const content = hymn.content[state.currentLang];
 
-  const player = document.createElement("div");
-  player.className = "player";
-  player.innerHTML = `
-    <div class="player-row">
-      <button class="play-btn" id="playBtn"><span class="icon-play">▶</span><span class="icon-pause"><span></span><span></span></span></button>
-      <button class="stop-btn" id="stopBtn" title="${T("Stopp")}">■</button>
-      <div>
-        <div style="font-weight:600;">${T("Aufnahme anhören")}</div>
-        <div class="audio-note" id="audioStatus">${T("Bereit")}</div>
-      </div>
-    </div>
-    <div class="seek-row">
-      <span class="seek-time" id="seekCurrent">0:00</span>
-      <input type="range" class="seek-bar" id="seekBar" min="0" max="1000" value="0" />
-      <span class="seek-time total" id="seekTotal">0:00</span>
-    </div>
-  `;
-  const statusEl = player.querySelector("#audioStatus");
-  const playBtn = player.querySelector("#playBtn");
-  const stopBtn = player.querySelector("#stopBtn");
-  const seekBar = player.querySelector("#seekBar");
-  const seekCurrentEl = player.querySelector("#seekCurrent");
-  const seekTotalEl = player.querySelector("#seekTotal");
-  const formatTime = (t)=>{
-    if(!isFinite(t) || t<0) t = 0;
-    const m = Math.floor(t/60), s = Math.floor(t%60);
-    return m + ":" + (s<10? "0":"") + s;
-  };
-  let userIsSeeking = false;
-  const thisKey = hymn.id + "_" + state.currentLang;
-  const setStatus = (s)=>{
-    if(s==="loading"){ statusEl.textContent = T("Lädt …"); playBtn.classList.remove("show-pause"); }
-    else if(s==="playing"){ statusEl.textContent = T("Spielt ab …"); playBtn.classList.add("show-pause"); }
-    else if(s==="paused"){ statusEl.textContent = T("Pausiert"); playBtn.classList.remove("show-pause"); }
-    else if(s==="missing"){ statusEl.textContent = T("Keine Aufnahme für diese Sprache hinterlegt (Platzhalter-Ton)"); playBtn.classList.remove("show-pause"); }
-    else { statusEl.textContent = T("Bereit"); playBtn.classList.remove("show-pause"); }
-  };
-  const setTime = (cur, dur)=>{
-    if(userIsSeeking) return;
-    seekCurrentEl.textContent = formatTime(cur);
-    seekTotalEl.textContent = formatTime(dur);
-    seekBar.value = dur>0 ? Math.round((cur/dur)*1000) : 0;
-  };
-  // Falls dieselbe Aufnahme (gleiche Antwort + Sprache) schon läuft/pausiert ist (z. B. weil
-  // der Nutzer zwischendurch nur den Selbst-geübt-Haken gesetzt hat und die Seite neu
-  // gezeichnet wurde), spiegelt die Anzeige direkt deren aktuellen Zustand statt "Bereit".
-  if(currentAudioKey === thisKey && currentAudioEl){
-    setStatus(currentAudioEl.paused ? "paused" : "playing");
-    setTime(currentAudioEl.currentTime, currentAudioEl.duration || 0);
-  }
-  playBtn.addEventListener("click", ()=>{
-    if(currentAudioKey === thisKey && currentAudioEl){
-      if(currentAudioEl.paused) currentAudioEl.play().catch(()=>{});
-      else currentAudioEl.pause();
-    } else {
-      playHymnAudio(hymn.id, state.currentLang, { onStatus: setStatus, onTime: setTime });
-    }
-  });
-  stopBtn.addEventListener("click", ()=>{
-    stopHymnAudio();
-    setStatus("idle");
-    setTime(0, 0);
-  });
-  seekBar.addEventListener("input", ()=>{ userIsSeeking = true; });
-  seekBar.addEventListener("change", ()=>{
-    if(currentAudioKey === thisKey && currentAudioEl && isFinite(currentAudioEl.duration)){
-      currentAudioEl.currentTime = (seekBar.value/1000) * currentAudioEl.duration;
-    }
-    userIsSeeking = false;
-  });
-  wrap.appendChild(player);
+  wrap.appendChild(buildPlayer(hymn.id));
 
   wrap.appendChild(readTools());
   const textBlock = document.createElement("div");
