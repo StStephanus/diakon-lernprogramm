@@ -1013,6 +1013,15 @@ const STATIONS = [
       }},
     ]
   },
+  {
+    id:"s6", title:"Die Lesung des Hl. Evangelium", direct:true,
+    hymns:[
+      {id:"evangelium", title:"Die Lesung des Hl. Evangelium", titleAr:"قراءة الإنجيل المقدّس", titleEn:"The Reading of the Holy Gospel", tier:2, mandatory:false, mandatoryFrom:3, content:{
+        de:{text:"Der Text folgt in Kürze.", translit:null},
+        ar:{text:"Der Text folgt in Kürze.", translit:null, script:""},
+      }},
+    ]
+  },
 ];
 
 const TOTAL_HYMNS = STATIONS.reduce((n,s)=>n+s.hymns.length,0);
@@ -1639,6 +1648,8 @@ Object.assign(I18N.en, {"Abbrechen":"Cancel"});
 Object.assign(I18N.ar, {"Abbrechen":"إلغاء"});
 Object.assign(I18N.en, {"Diese Lesung gibt es bei uns nur in {langs}.":"We only have this reading in {langs}."});
 Object.assign(I18N.ar, {"Diese Lesung gibt es bei uns nur in {langs}.":"القراءة دي موجودة عندنا بـ{langs} بس."});
+Object.assign(I18N.en,{"Diese Station wird erst ab Stufe {n} freigeschaltet.":"This station will be unlocked from Level {n}.","Diese Station wurde dir schon bestätigt.":"This station has already been confirmed for you.","Diese Station ist für dich noch freiwillig.":"This station is still optional for you.","Diese Station wurde dir noch nicht bestätigt.":"This station has not yet been confirmed for you."});
+Object.assign(I18N.ar,{"Diese Station wird erst ab Stufe {n} freigeschaltet.":"المحطة دي هتتفتح من المستوى {n}.","Diese Station wurde dir schon bestätigt.":"المحطة دي اتأكّدت لك خلاص.","Diese Station ist für dich noch freiwillig.":"المحطة دي لسه اختيارية بالنسبة لك.","Diese Station wurde dir noch nicht bestätigt.":"المحطة دي لسه ما اتأكّدتش لك."});
 VERSE.ps84_5.ar = { text: "طوبى للساكنين في بيتك، أبداً يسبّحونك.", quelle: "مزمور 84:4 · فاندايك" };
 VERSE.ps122_1.ar = { text: "فرحت بالقائلين لي: «إلى بيت الرب نذهب».", quelle: "مزمور 122:1 · فاندايك" };
 VERSE.ps26_8.ar = { text: "يا رب، أحببت مسكن بيتك ومحل سكن مجدك.", quelle: "مزمور 26:8 · فاندايك" };
@@ -1670,8 +1681,10 @@ function langsLearnedFor(progressObj, hymnId){
    diese Person Pflicht ist oder freiwillig (freiwillige Antworten sind bei allen
    Stufen in der Liste vorhanden, aber erst ab ihrer Stufe anklickbar). */
 function hymnUnlocked(hymn, stufe){ return hymn.tier <= stufe; }
-function mandatoryHymns(station, stufe){ return station.hymns.filter(h => hymnUnlocked(h, stufe) && h.mandatory!==false); }
-function voluntaryHymns(station, stufe){ return station.hymns.filter(h => hymnUnlocked(h, stufe) && h.mandatory===false); }
+/* freiwillig = "mandatory:false", außer ab der Stufe "mandatoryFrom" (dann Pflicht) */
+function isFreiwillig(h, stufe){ return h.mandatory===false && !(h.mandatoryFrom && stufe >= h.mandatoryFrom); }
+function mandatoryHymns(station, stufe){ return station.hymns.filter(h => hymnUnlocked(h, stufe) && !isFreiwillig(h, stufe)); }
+function voluntaryHymns(station, stufe){ return station.hymns.filter(h => hymnUnlocked(h, stufe) && isFreiwillig(h, stufe)); }
 function lockedHymns(station, stufe){ return station.hymns.filter(h => !hymnUnlocked(h, stufe)); }
 function stationSelfDoneCount(station, stufe){
   // Anzahl Pflicht-Antworten, die in mindestens einer Sprache als geübt markiert sind
@@ -1880,7 +1893,7 @@ const root = document.getElementById("app");
 /* ---------------- Übergänge ----------------
    Tiefe der Seiten: tiefer hinein = von rechts hereinschieben, zurück = von links.
    Der Kopf bleibt stehen, nur der Inhalt bewegt sich. */
-const VIEW_TIEFE = { "menu":0, "home":1, "evangelium":2, "theorie":1, "pruefer-home":1, "station":2, "theorie-kapitel":2, "stufenzertifikat":2, "pruefer-station":2, "hymn":3 };
+const VIEW_TIEFE = { "menu":0, "home":1, "theorie":1, "pruefer-home":1, "station":2, "theorie-kapitel":2, "stufenzertifikat":2, "pruefer-station":2, "hymn":3 };
 let zuletztGezeigteView = null;
 function staffeln(liste){
   Array.from(liste).forEach((el, i)=>{
@@ -2062,7 +2075,7 @@ function frageAbmelden(onYes){
   document.body.appendChild(overlay);
   box.querySelector("#abmNein").focus();
 }
-function isDiakonSection(){ return ["home","station","hymn","evangelium","stufenzertifikat"].includes(state.view); }
+function isDiakonSection(){ return ["home","station","hymn","stufenzertifikat"].includes(state.view); }
 function isTheorieSection(){ return ["theorie","theorie-kapitel"].includes(state.view); }
 
 /* Prüfer melden sich nur ab (zurück zum Passwort). Einen Wechsel zur Diakon-Ansicht gibt es nicht: dafür gibt es die zwei getrennten Apps/Links. */
@@ -2485,7 +2498,6 @@ function renderBody(){
   if(state.view==="theorie-kapitel") return renderTheorieKapitel();
   if(state.view==="hymn") return renderHymn();
   if(state.view==="station") return renderStation();
-  if(state.view==="evangelium") return renderEvangelium();
   if(state.view==="stufenzertifikat") return renderStufenZertifikat();
   return renderHome();
 }
@@ -2751,7 +2763,9 @@ function renderHome(){
       const totalCert = certCount + voluntCertCount;
       const totalDone = done + voluntDone;
       if(totalCount>0){
-        metaText = T("{c}/{t} Antworten bestätigt ({d} selbst geübt)", {c:totalCert, t:totalCount, d:totalDone});
+        metaText = (mandCount===0 && voluntCount>0)
+          ? T("{c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)", {c:totalCert, t:totalCount, d:totalDone})
+          : T("{c}/{t} Antworten bestätigt ({d} selbst geübt)", {c:totalCert, t:totalCount, d:totalDone});
       } else if(s.hymns.length>0){
         const minTier = Math.min(...s.hymns.map(h=>h.tier));
         metaText = T("Diese Antworten werden erst ab Stufe {n} freigeschaltet.", {n:minTier});
@@ -2765,6 +2779,14 @@ function renderHome(){
         : (voluntCount>0 ? T("{c}/{t} freiwillige Antworten bestätigt ({d} selbst geübt)", {c:voluntCertCount, t:voluntCount, d:voluntDone}) : "");
       stationDone = mandCount>0 ? certCount===mandCount : (voluntCount>0 && voluntCertCount===voluntCount);
     }
+    if(s.direct){
+      const minTier = Math.min(...s.hymns.map(h=>h.tier));
+      const cert = certCount + voluntCertCount;
+      if(mandCount + voluntCount === 0) metaText = T("Diese Station wird erst ab Stufe {n} freigeschaltet.", {n:minTier});
+      else if(cert > 0) metaText = T("Diese Station wurde dir schon bestätigt.");
+      else if(mandCount === 0) metaText = T("Diese Station ist für dich noch freiwillig.");
+      else metaText = T("Diese Station wurde dir noch nicht bestätigt.");
+    }
     const row = document.createElement("div");
     row.className = "station-row";
     row.innerHTML = `
@@ -2775,18 +2797,9 @@ function renderHome(){
       </div>
       ${stationDone ? `<div class="badge done">${T("Fertig")}</div>` : ""}
     `;
-    row.addEventListener("click", ()=>{ state.currentStationId = s.id; state.view="station"; render(); });
+    row.addEventListener("click", ()=>{ state.currentStationId = s.id; if(s.direct){ state.currentHymnId = s.hymns[0].id; state.view="hymn"; } else { state.view="station"; } render(); window.scrollTo(0,0); });
     list.appendChild(row);
   });
-  const evRow = document.createElement("div");
-  evRow.className = "station-row";
-  evRow.innerHTML = `
-      <div class="station-num">${STATIONS.length+1}</div>
-      <div class="station-body">
-        <div class="station-title">${T("Die Lesung des Hl. Evangelium")}</div>
-      </div>`;
-  evRow.addEventListener("click", ()=>{ state.view="evangelium"; render(); window.scrollTo(0,0); });
-  list.appendChild(evRow);
   wrap.appendChild(list);
   wrap.appendChild(versEl(VERSE.ps47_7, "on-light"));
 
@@ -2794,47 +2807,6 @@ function renderHome(){
   return wrap;
 }
 
-function renderEvangelium(){
-  const wrap = document.createElement("div");
-  const crumb = document.createElement("div");
-  crumb.className = "crumb";
-  crumb.textContent = T("Alle Stationen");
-  crumb.addEventListener("click", ()=>{ stopHymnAudio(); state.view="home"; render(); });
-  appendNavRow(wrap, crumb);
-  const title = document.createElement("h2");
-  title.className = "serif"; title.style.fontSize = "24px";
-  title.textContent = T("Die Lesung des Hl. Evangelium");
-  wrap.appendChild(title);
-  const erkl = document.createElement("div");
-  erkl.className = "info-box";
-  erkl.innerHTML = `<span class="ib-title">${T("Was ist das hier?")}</span>${T("Hier lernst du, wie du als Diakon das Heilige Evangelium in der entsprechenden Melodie lesen kannst.")}`;
-  wrap.appendChild(erkl);
-
-  const evLangs = LANGS.filter(l=>l.code !== "cop");   // Die Lesung gibt es nur auf Deutsch und Arabisch
-  if(!evLangs.some(l=>l.code===state.currentLang)) state.currentLang = "de";
-  const tabs = document.createElement("div");
-  tabs.className = "lang-tabs";
-  evLangs.forEach(l=>{
-    const b = document.createElement("button");
-    b.className = "lang-tab" + (state.currentLang===l.code? " active":"");
-    b.textContent = T(l.label);
-    b.addEventListener("click", ()=>{ state.currentLang=l.code; render(); });
-    tabs.appendChild(b);
-  });
-  wrap.appendChild(tabs);
-  const evNote = document.createElement("p");
-  evNote.style.cssText = "color:var(--muted); font-size:12px; margin-top:-14px; margin-bottom:18px;";
-  evNote.textContent = T("Diese Lesung gibt es bei uns nur in {langs}.", {langs: evLangs.map(l=>T(l.label)).join(T(" und "))});
-  wrap.appendChild(evNote);
-
-  wrap.appendChild(buildPlayer("evangelium"));
-  wrap.appendChild(readTools());
-  const textBlock = document.createElement("div");
-  textBlock.className = "text-block";
-  textBlock.innerHTML = `<p style="color:var(--muted); font-style:italic;">${T("Der Text zu diesem Thema folgt in Kürze.")}</p>`;
-  wrap.appendChild(textBlock);
-  return wrap;
-}
 function renderStation(){
   const s = findStation(state.currentStationId);
   const wrap = document.createElement("div");
@@ -2900,7 +2872,7 @@ function renderStation(){
       const titleTxt = cert ? T("{lang} — vom Prüfer bestätigt", {lang:T(l.label)}) : (done ? T("{lang} — selbst geübt", {lang:T(l.label)}) : T(l.label));
       return `<div class="lang-chip ${cls}" title="${titleTxt}">${abbr}</div>`;
     }).join("");
-    const voluntBadge = h.mandatory===false ? `<div class="volunt-badge">${T("freiwillig")}</div>` : "";
+    const voluntBadge = isFreiwillig(h, stufe) ? `<div class="volunt-badge">${T("freiwillig")}</div>` : "";
     row.innerHTML = `
       <div class="hymn-title-group">
         <span class="hymn-title">${hymnTitle(h)}</span>
@@ -2999,8 +2971,8 @@ function renderHymn(){
   const wrap = document.createElement("div");
   const crumb = document.createElement("div");
   crumb.className = "crumb";
-  crumb.textContent = "" + T(station.title);
-  crumb.addEventListener("click", ()=>{ state.view="station"; render(); });
+  crumb.textContent = station.direct ? T("Alle Stationen") : T(station.title);
+  crumb.addEventListener("click", ()=>{ stopHymnAudio(); state.view = station.direct ? "home" : "station"; render(); });
   appendNavRow(wrap, crumb);
 
   if(!hymnUnlocked(hymn, state.profile.stufe)){
@@ -3018,7 +2990,7 @@ function renderHymn(){
   title.style.fontSize = "24px";
   title.textContent = hymnTitle(hymn);
   titleRow.appendChild(title);
-  if(hymn.mandatory===false){
+  if(isFreiwillig(hymn, state.profile.stufe)){
     const voluntSpan = document.createElement("span");
     voluntSpan.className = "volunt-badge";
     voluntSpan.textContent = T("freiwillig");
@@ -3029,6 +3001,10 @@ function renderHymn(){
   const woText = hymnWo(hymn, station);
   const woBox = document.createElement("div");
   woBox.className = "info-box" + (woText ? "" : " leer");
+  if(station.direct){
+    woBox.className = "info-box";
+    woBox.innerHTML = `<span class="ib-title">${T("Was ist das hier?")}</span><span class="ib-body">${T("Hier lernst du, wie du als Diakon das Heilige Evangelium in der entsprechenden Melodie lesen kannst.")}</span>`;
+  } else
   woBox.innerHTML = `<span class="ib-title">${T("Wo in der Liturgie?")}</span><span class="ib-body">${woText ? T(woText) : T("Hier steht bald, an welcher Stelle der Liturgie diese Antwort gesungen wird.")}</span>`;
   wrap.appendChild(woBox);
 
@@ -3048,7 +3024,7 @@ function renderHymn(){
   if(hymnLangs.length < LANGS.length){
     const note = document.createElement("p");
     note.style.cssText = "color:var(--muted); font-size:12px; margin-top:-14px; margin-bottom:18px;";
-    note.textContent = T("Diese Antwort wird bei uns nur in {langs} gesungen.", {langs: hymnLangs.map(l=>T(l.label)).join(T(" und "))});
+    note.textContent = T(station.direct ? "Diese Lesung gibt es bei uns nur in {langs}." : "Diese Antwort wird bei uns nur in {langs} gesungen.", {langs: hymnLangs.map(l=>T(l.label)).join(T(" und "))});
     wrap.appendChild(note);
   }
 
@@ -3278,7 +3254,7 @@ function renderPrueferStation(){
 
       const hymnLangs = LANGS.filter(l => h.content[l.code]);
       const learnedLangCodes = LANGS.filter(l => (state.pruefer_progress[h.id]||{})[l.code]).map(l=>l.code);
-      const voluntTag = h.mandatory===false ? ` <span class="volunt-badge">freiwillig</span>` : "";
+      const voluntTag = isFreiwillig(h, u.stufe) ? ` <span class="volunt-badge">freiwillig</span>` : "";
 
       const info = document.createElement("div");
       info.className = "info";
